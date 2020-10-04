@@ -123,9 +123,24 @@ print_text(BitmapFont *f,const char*text, i32 x,i32 y, i32 size)
 }
 
 static void 
-cleanup_text(BitmapFont *f)
+print_debug_info(BitmapFont *bmf)
 {
-
+    f32 frequency = 1.f;
+//NOTE(ilias): make frequency stuff for all platforms!
+#if (_WIN32)
+    LARGE_INTEGER freq;
+    QueryPerformanceFrequency(&freq);
+    frequency = (f32)freq.QuadPart;
+#endif
+    char string[9];
+    sprintf(string, "%iX%i", global_platform.window_width, global_platform.window_height);
+    print_text(bmf,string, 0,50, 20);
+    sprintf(string, "time: %.2f", global_platform.current_time);
+    print_text(bmf,string, 0,100, 20);
+    sprintf(string, "fps: %.2f",frequency/ (10000000.f*global_platform.dt));
+    print_text(bmf,string, 0,150, 20);
+    sprintf(string, "GL: %.5s",glGetString(GL_VERSION)); 
+    print_text(bmf,string, 0,200, 20);
 }
 
 #endif

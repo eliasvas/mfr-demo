@@ -2037,8 +2037,8 @@ ppm_write01(PPMInfo* info, const char *filename)
     return PPM_OK;
 }
 
-//TODO: put this whole thing on a thread on its own
-static i32 ppm_save_current_framebuffer(i32 width, i32 height, f32* pixels)
+//TODO: put this whole thing on a thread of its own
+static i32 ppm_save_pixels(i32 width, i32 height, f32* pixels)
 {
     PPMInfo *info = ppm_init(width,height);
     i32 i;
@@ -2051,7 +2051,7 @@ static i32 ppm_save_current_framebuffer(i32 width, i32 height, f32* pixels)
     {
         f32 *pixels = (f32*)ALLOC(sizeof(f32) * 3 * global_platform.window_width* global_platform.window_height); 
         glReadPixels(0, 0, global_platform.window_width,global_platform.window_height,GL_RGB, GL_FLOAT, pixels);
-        ppm_save_current_framebuffer( global_platform.window_width, global_platform.window_height, pixels);
+        ppm_save_pixels( global_platform.window_width, global_platform.window_height, pixels);
         free(pixels);
     }
 */

@@ -19,8 +19,19 @@ static f32 quad_vertices[] = {
      0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
 };
+
+static f32 whole_screen_quad_verts[] = { //this boi fills the entire screen 
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+};
+
 static void 
-init_quad(Quad* q, char *tex_name)
+init_quad(Quad *q, char *tex_name)
 {
     GLuint VBO;
     shader_load(&q->shader,"../assets/shaders/quad.vert", "../assets/shaders/quad.frag");
@@ -36,6 +47,12 @@ init_quad(Quad* q, char *tex_name)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,5 * sizeof(f32),(void*)(3 * sizeof(f32)));
     glEnableVertexAttribArray(1);
     glBindVertexArray(0);
+}
+
+static void 
+init_screen_quad(Quad *q)
+{
+    GLuint VBO;
 }
 
 static void 

@@ -56,7 +56,7 @@ static GLuint load_shader_from_strings (const char * vertex_str, const char * fr
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if(!success)
     {
-        glGetProgramInfoLog(ID, 512, NULL, infoLog);
+        //glGetProgramInfoLog(ID, 512, NULL, infoLog);
     }
       
     // delete the shaders as they're linked into our program now and no longer necessery

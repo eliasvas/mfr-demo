@@ -62,5 +62,13 @@ load_image_bytes(const char *filename)
     return res;
 }
 
+static void
+write_texture2D_to_disk(Texture *tex)
+{
+   GLfloat *pixels = (GLfloat*)ALLOC(sizeof(f32) * 3 * tex->width* tex->height);   
+   glBindTexture(GL_TEXTURE_2D,tex->id);
+   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, pixels);
+   ppm_save_pixels(tex->width, tex->height,pixels);
+}
 
 #endif

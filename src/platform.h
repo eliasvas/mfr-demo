@@ -196,5 +196,8 @@ extern PFNGLBINDRENDERBUFFERPROC glBindRenderbuffer;
 extern PFNGLRENDERBUFFERSTORAGEPROC glRenderbufferStorage;
 extern PFNGLGENRENDERBUFFERSPROC glGenRenderbuffers;
 extern PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
+extern PFNGLTEXIMAGE3DPROC glTexImage3D;
+extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
+extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
 
 #endif
