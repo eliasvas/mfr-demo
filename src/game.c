@@ -10,7 +10,8 @@
 /*          TODO 
  *  -Model abstraction
  *  -Work on the NEW renderer!
- *  -Implement A-Buffer stuff (wow)
+ *  -cleanup abuffer and figure
+ *  out the math stuff 
  *  -Scene Graph
  *  -----------------------------
  *  -Make good strings!!
@@ -61,7 +62,7 @@ render_scene(void)
 
     clear_abuffer();
     render_abuffer(&m);
-    //display_abuffer();
+    display_abuffer();
 
     render_model_textured_basic(&m,&proj, &view);
     render_quad_mvp(&q, mul_mat4(proj,view));

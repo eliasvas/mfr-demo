@@ -125,6 +125,7 @@ print_text(BitmapFont *f,const char*text, i32 x,i32 y, i32 size)
 static void 
 print_debug_info(BitmapFont *bmf)
 {
+    glDepthFunc(GL_ALWAYS);
     f32 frequency = 1.f;
 //NOTE(ilias): make frequency stuff for all platforms!
 #if (_WIN32)
@@ -141,6 +142,7 @@ print_debug_info(BitmapFont *bmf)
     print_text(bmf,string, 0,150, 20);
     sprintf(string, "GL: %.5s",glGetString(GL_VERSION)); 
     print_text(bmf,string, 0,200, 20);
+    glDepthFunc(GL_LESS);
 }
 
 #endif
