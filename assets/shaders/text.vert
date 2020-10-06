@@ -3,7 +3,7 @@ layout(location = 0) in vec2 vertexPosition_screenspace;
 layout(location = 1) in vec2 vertexUV;
 
 out vec2 UV;
-
+//should add real coords  (w, h)
 void main(){
 	vec2 vertexPosition_homoneneousspace = vertexPosition_screenspace - vec2(400,300); // [0..800][0..600] -> [-400..400][-300..300]
 	vertexPosition_homoneneousspace /= vec2(400,300);

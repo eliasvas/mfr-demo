@@ -1,22 +1,28 @@
-#version 400
+#version 420
 
-#define SCREEN_WIDTH 512
-#define SCREEN_HEIGHT 512
+uniform int screen_width;
+uniform int screen_height;
+
 
 coherent uniform layout(size1x32) uimage2D counter_img;
 coherent uniform layout(size4x32) image2DArray abuf_img;
+
+//built-in
+//in vec4 gl_FragCoord;
+layout(pixel_center_integer) in vec4 gl_FragCoord;
 
 void main(void)
 {
     ivec2 coords = ivec2(gl_FragCoord.xy);
 
-    if (coords.x >= 0 && coords.y >=0 && coords.x<SCREEN_HEIGHT && coords.y<SCREEN_WIDTH && coords.y<SCREEN_HEIGHT)
+    if (coords.x >= 0 && coords.y >=0 && coords.x<screen_width && coords.y<screen_height)
     {
         //set counter to 0
         imageStore(counter_img, coords, ivec4(0));
         
         //put black in first layer
-        imageStore(abuf_img, ivec3(coords, 0), vec4(0.0f));
+        //imageStore(abuf_img, ivec3(coords, 0), vec4(0.0f));
+		imageStore(abuf_img, ivec3(coords, 0), vec4(0));
     }
 
     //discard fragment so that it isn't written in framebuffer

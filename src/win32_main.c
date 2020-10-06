@@ -13,7 +13,8 @@ static HWND WND;
 
 static LARGE_INTEGER last_frame, end_frame, frequency;
 
-static LRESULT Win32WindowProc(HWND hWnd, UINT message, WPARAM w_param, LPARAM l_param) {
+static LRESULT 
+Win32WindowProc(HWND hWnd, UINT message, WPARAM w_param, LPARAM l_param) {
 
     LRESULT result = {0};
     if (message == WM_SIZE)

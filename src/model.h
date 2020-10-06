@@ -107,6 +107,32 @@ render_model_textured_basic(Model* m,mat4 *proj,mat4 *view)
     glBindVertexArray(0);
 }
 
+//this is just for a test, REMOVE when finished
+static void 
+render_model_textured_basic_shader(Model* m,mat4 *proj,mat4 *view, Shader *shader)
+{
+    use_shader(&shader);
+    
+    setInt(&shader, "sampler", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m->diff.id);
+    setInt(&shader, "m.specular", 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m->spec.id);
+    //mat4 mvp = mul_mat4(mv,translate_mat4(m->position));
+    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
+    //setMat4fv(&shader, "model", (GLfloat*)model.elements);
+    model = m4d(1.f);
+    setMat4fv(&shader, "model", (GLfloat*)model.elements);
+    setMat4fv(&shader, "view", (GLfloat*)view->elements);
+    setMat4fv(&shader, "proj", (GLfloat*)proj->elements);
+
+    glBindVertexArray(m->vao);
+    glDrawArrays(GL_TRIANGLES,0, m->mesh->vertices_count);
+    glBindVertexArray(0);
+}
+
+
 
 /*
 static void 
