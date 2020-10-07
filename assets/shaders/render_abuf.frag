@@ -11,8 +11,8 @@ smooth in vec3 f_normal;
 uniform int screen_width;
 uniform int screen_height;
 
-coherent uniform layout (size4x32) image2DArray abuf_img;
-coherent uniform layout(size1x32) uimage2D counter_img;
+coherent uniform layout (rgba32f) image2DArray abuf_img;
+coherent uniform layout(r32ui) uimage2D counter_img;
 
 //shade using green=white strips
 vec3 shade_strips(vec3 texcoord){

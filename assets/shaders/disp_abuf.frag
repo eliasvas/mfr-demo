@@ -9,8 +9,8 @@ smooth in vec4 f_pos;
 
 out vec4 out_frag_color;
 
-uniform layout(size1x32) uimage2D counter_img;
-uniform layout(size4x32) uimage2DArray abuf_img;
+uniform layout(r32ui) uimage2D counter_img;
+uniform layout(rgba32f) image2DArray abuf_img;
 
 const float fragmentAlpha=0.5f;
 const vec4 backgroundColor = vec4(1,1,1,0);
@@ -63,10 +63,13 @@ void main(void)
         if (ab_num_frag > ABUFFER_SIZE)
             ab_num_frag = ABUFFER_SIZE;
         */
-        if (ab_num_frag > 0)
+        if (ab_num_frag > 0){
 		    out_frag_color = resolve_closest(coords,ab_num_frag);
-			//out_frag_color = resolve_alpha_blend(coords, ab_num_frag);
-    }else{discard;}
+			//out_frag_color = vec4(2 *coords / ivec2(screen_width, screen_height), 0,1);
+			//if ( out_frag_color.r + out_frag_color.g < 0.5)
+			//	out_frag_color = vec4(0,0,1,1);
+		}else{discard;}
+    }
 
 }
 
