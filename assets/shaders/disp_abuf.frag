@@ -12,7 +12,7 @@ out vec4 out_frag_color;
 uniform layout(r32ui) uimage2D counter_img;
 uniform layout(rgba32f) image2DArray abuf_img;
 
-const float fragmentAlpha=0.5f;
+const float fragment_alpha=0.5f;
 const vec4 backgroundColor = vec4(1,1,1,0);
 //local memory array
 vec4 fragment_list[ABUFFER_SIZE];
@@ -29,19 +29,19 @@ void bubble_sort(int array_size) {
   }
 }
 //fill the array with fragments from the 3D image (2D array)
-void fill_frag_array(ivec2 coords, int abNumFrag){
+void fill_frag_array(ivec2 coords, int ab_num_frag){
 	//Load fragments into a local memory array for sorting
-	for(int i=0; i<abNumFrag; i++){
+	for(int i=0; i<ab_num_frag; i++){
 		fragment_list[i]=imageLoad(abuf_img, ivec3(coords.x,coords.y, i));
 
 	}
 }
 //keep only the closest fragments
-vec4 resolve_closest(ivec2 coords, int abNumFrag){
+vec4 resolve_closest(ivec2 coords, int ab_num_frag){
 
 	//Search smallest z
 	vec4 minFrag=vec4(0.0f, 0.0f, 0.0f, 1000000.0f);
-	for(int i=0; i<abNumFrag; i++){
+	for(int i=0; i<ab_num_frag; i++){
 		vec4 val=imageLoad(abuf_img, ivec3(coords, i));
 		if(val.w<minFrag.w){
 			minFrag=val;
@@ -49,6 +49,39 @@ vec4 resolve_closest(ivec2 coords, int abNumFrag){
 	}
 	//Output final color for the frame buffer
 	return minFrag;
+}
+
+vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
+	
+	//Copy fragments in local array
+	fill_frag_array(coords, ab_num_frag);
+
+	//Sort fragments in local memory array
+	bubble_sort(ab_num_frag);
+		
+	vec4 finalColor=vec4(0.0f);
+
+
+	const float sigma = 30.0f;
+	float thickness=fragment_list[0].w/2.0f;
+
+	finalColor=vec4(0.0f);
+	for(int i=0; i<ab_num_frag; i++){
+		vec4 frag=fragment_list[i];
+		
+		vec4 col;
+		col.rgb=frag.rgb;
+		col.w=fragment_alpha;	//uses constant alpha
+
+		col.rgb=col.rgb*col.w;
+
+		finalColor=finalColor+col*(1.0f-finalColor.a);
+	}
+
+	finalColor=finalColor+backgroundColor*(1.0f-finalColor.a);
+
+	return finalColor;
+
 }
 
 void main(void)
@@ -64,7 +97,8 @@ void main(void)
             ab_num_frag = ABUFFER_SIZE;
         */
         if (ab_num_frag > 0){
-		    out_frag_color = resolve_closest(coords,ab_num_frag);
+		    //out_frag_color = resolve_closest(coords,ab_num_frag);
+			out_frag_color = resolve_alpha_blend(coords, ab_num_frag);
 			//out_frag_color = vec4(2 *coords / ivec2(screen_width, screen_height), 0,1);
 			//if ( out_frag_color.r + out_frag_color.g < 0.5)
 			//	out_frag_color = vec4(0,0,1,1);

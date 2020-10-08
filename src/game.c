@@ -65,8 +65,8 @@ render(void)
     render_abuffer(&m);
     display_abuffer();
 
-    render_model_textured_basic(&m,&proj, &view);
-    render_quad_mvp(&q, mul_mat4(proj,view));
+    //render_model_textured_basic(&m,&proj, &view);
+    //render_quad_mvp(&q, mul_mat4(proj,view));
 
 
 
