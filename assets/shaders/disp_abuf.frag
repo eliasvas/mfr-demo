@@ -13,7 +13,8 @@ uniform layout(r32ui) uimage2D counter_img;
 uniform layout(rgba32f) image2DArray abuf_img;
 
 const float fragment_alpha=0.5f;
-const vec4 backgroundColor = vec4(1,1,1,0);
+//const vec4 background_color = vec4(0.5,0.5,0.9,1);
+const vec4 background_color = vec4(1,1,1,1);
 //local memory array
 vec4 fragment_list[ABUFFER_SIZE];
 
@@ -53,19 +54,15 @@ vec4 resolve_closest(ivec2 coords, int ab_num_frag){
 
 vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 	
-	//Copy fragments in local array
+	//Copy fragments in local array from image
 	fill_frag_array(coords, ab_num_frag);
 
 	//Sort fragments in local memory array
 	bubble_sort(ab_num_frag);
 		
-	vec4 finalColor=vec4(0.0f);
+	vec4 final_color=vec4(0.0f);
 
-
-	const float sigma = 30.0f;
-	float thickness=fragment_list[0].w/2.0f;
-
-	finalColor=vec4(0.0f);
+	final_color=vec4(0.0f);
 	for(int i=0; i<ab_num_frag; i++){
 		vec4 frag=fragment_list[i];
 		
@@ -75,12 +72,12 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 
 		col.rgb=col.rgb*col.w;
 
-		finalColor=finalColor+col*(1.0f-finalColor.a);
+		final_color=final_color+col*(1.0f-final_color.a);
 	}
 
-	finalColor=finalColor+backgroundColor*(1.0f-finalColor.a);
+	final_color=final_color+background_color*(1.0f-final_color.a);
 
-	return finalColor;
+	return final_color;
 
 }
 
@@ -90,18 +87,15 @@ void main(void)
     if (coords.x >= 0 && coords.y >= 0 && coords.x < screen_width && coords.y < screen_height)
     {
         int ab_num_frag = int(imageLoad(counter_img, coords).r);
-        /*
+
         if (ab_num_frag < 0)
             ab_num_frag = 0;
         if (ab_num_frag > ABUFFER_SIZE)
             ab_num_frag = ABUFFER_SIZE;
-        */
+
         if (ab_num_frag > 0){
 		    //out_frag_color = resolve_closest(coords,ab_num_frag);
 			out_frag_color = resolve_alpha_blend(coords, ab_num_frag);
-			//out_frag_color = vec4(2 *coords / ivec2(screen_width, screen_height), 0,1);
-			//if ( out_frag_color.r + out_frag_color.g < 0.5)
-			//	out_frag_color = vec4(0,0,1,1);
 		}else{discard;}
     }
 

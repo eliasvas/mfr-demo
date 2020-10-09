@@ -102,6 +102,16 @@ draw_quad(Shader *shader)
 static void 
 clear_abuffer(void)
 {
+    //TODO FIIIIX this is very slow, every frame 
+    //it generates new textures, it should only be done on resizes
+    if (1){
+        glBindTexture(GL_TEXTURE_2D_ARRAY, abuf_tex_id);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA32F, global_platform.window_width, global_platform.window_height, ABUFFER_SIZE, 0,  GL_RGBA, GL_FLOAT, 0);
+        glBindImageTexture(0, abuf_tex_id, 0, TRUE, 0,  GL_READ_WRITE, GL_RGBA32F);
+        glBindTexture(GL_TEXTURE_2D, abuf_counter_tex_id);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
+    }
+
     //these have to be loaded somewhere via glBindImageTexture?????
     setInt(&clear_abuffer_shader, "counter_img", 1);
     setInt(&clear_abuffer_shader, "abuf_img", 0);
@@ -115,7 +125,8 @@ static void render_abuffer(Model *m)
 {
     //setup render ing a buffer shader
     use_shader(&render_abuffer_shader);
-    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
+    //mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
+    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(0.1,0.1,0.1)));
     mat4 view_IT = transpose_mat4(inv_mat4(view));
     setMat4fv(&render_abuffer_shader, "model", (GLfloat*)model.elements);
     setMat4fv(&render_abuffer_shader, "view", (GLfloat*)view.elements);
@@ -146,5 +157,21 @@ static void display_abuffer(void)
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
 
     draw_quad(&display_abuffer_shader); 
+
+#if 1
+    //takes a screenshot of the first layer of the 3d texture
+    if (global_platform.key_pressed[KEY_K])
+    {
+        u32 id;
+        glGenTextures(1, &id);
+        glBindTexture(GL_TEXTURE_2D, id);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glCopyImageSubData(id, GL_TEXTURE_2D, 0, 0, 0, 0, abuf_tex_id, GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0,global_platform.window_width, global_platform.window_height, 1);
+        Texture tex = {id, global_platform.window_width, global_platform.window_height};
+
+        write_texture2D_to_disk(&tex);
+    }
+#endif
 }
 #endif

@@ -146,58 +146,61 @@ enum keyboard_keys
     KEY_F12,
 };
 
-//these are the available MODERN openGL functions you can use.
-//to load more make the declaration extern, and implement in win32_main.c
-extern PFNWGLCHOOSEPIXELFORMATARBPROC     wglChoosePixelFormatARB;
-extern PFNWGLCREATECONTEXTATTRIBSARBPROC  wglCreateContextAttribsARB;
-extern PFNWGLMAKECONTEXTCURRENTARBPROC    wglMakeContextCurrentARB;
-extern PFNWGLSWAPINTERVALEXTPROC          wglSwapIntervalEXT;
-extern PFNGLGENBUFFERSPROC glGenBuffers;
-extern PFNGLBINDBUFFERPROC glBindBuffer;
-extern PFNGLDRAWBUFFERSPROC glDrawBuffers;
-extern PFNGLUSEPROGRAMPROC glUseProgram;
-extern PFNGLSHADERSOURCEPROC glShaderSource;
-extern PFNGLCOMPILESHADERPROC glCompileShader;
-extern PFNGLGETSHADERIVPROC glGetShaderiv;
-extern PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
-extern PFNGLMAPBUFFERPROC glMapBuffer;
-extern PFNGLCREATESHADERPROC glCreateShader;
-extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
-extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
-extern PFNGLCREATEPROGRAMPROC glCreateProgram;
-extern PFNGLATTACHSHADERPROC glAttachShader;
-extern PFNGLDELETESHADERPROC glDeleteShader;
-extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
-extern PFNGLLINKPROGRAMPROC glLinkProgram;
-extern PFNGLGETPROGRAMIVPROC glGetProgramiv;
-extern PFNGLUNIFORM1IPROC glUniform1i;
-extern PFNGLUNIFORM3FPROC glUniform3f;
-extern PFNGLUNIFORM1IVPROC glUniform1iv;
-extern PFNGLUNIFORM2FVPROC glUniform2fv;
-extern PFNGLUNIFORM1FPROC glUniform1f;
-extern PFNGLACTIVETEXTUREPROC glActiveTexture;
-extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
-extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
-extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
-extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
-extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
-extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
-extern PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
-extern PFNGLBUFFERDATAPROC glBufferData;
-extern PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
-extern PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer;
-extern PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-extern PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
-extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
-extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
-extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
-extern PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
-extern PFNGLBINDRENDERBUFFERPROC glBindRenderbuffer;
-extern PFNGLRENDERBUFFERSTORAGEPROC glRenderbufferStorage;
-extern PFNGLGENRENDERBUFFERSPROC glGenRenderbuffers;
-extern PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
-extern PFNGLTEXIMAGE3DPROC glTexImage3D;
-extern PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
-extern PFNGLMEMORYBARRIERPROC glMemoryBarrier;
+#if _WIN32
+    #define GLProc(type, name) PFNGL##type##PROC name;
+#endif
 
+//these are the available MODERN openGL functions you can use.
+//to load more make the declaration extern GLProc(, and implement in win32_main.c
+//extern GLProc( GLProc(GENBUFFERS, glGenBuffers);
+
+
+extern GLProc( GENBUFFERS, glGenBuffers);
+extern GLProc( BINDBUFFER, glBindBuffer);
+extern GLProc( DRAWBUFFERS, glDrawBuffers);
+extern GLProc( USEPROGRAM, glUseProgram);
+extern GLProc( SHADERSOURCE, glShaderSource);
+extern GLProc( COMPILESHADER, glCompileShader);
+extern GLProc( GETSHADERIV, glGetShaderiv);
+extern GLProc( MAPBUFFERRANGE, glMapBufferRange);
+extern GLProc( MAPBUFFER, glMapBuffer);
+extern GLProc( CREATESHADER, glCreateShader);
+extern GLProc( GETSHADERINFOLOG, glGetShaderInfoLog);
+extern GLProc( GETPROGRAMINFOLOG, glGetProgramInfoLog);
+extern GLProc( CREATEPROGRAM, glCreateProgram);
+extern GLProc( ATTACHSHADER, glAttachShader);
+extern GLProc( DELETESHADER, glDeleteShader);
+extern GLProc( DELETEPROGRAM, glDeleteProgram);
+extern GLProc( LINKPROGRAM, glLinkProgram);
+extern GLProc( GETPROGRAMIV, glGetProgramiv);
+extern GLProc( UNIFORM1I, glUniform1i);
+extern GLProc( UNIFORM3F, glUniform3f);
+extern GLProc( UNIFORM1IV, glUniform1iv);
+extern GLProc( UNIFORM2FV, glUniform2fv);
+extern GLProc( UNIFORM1F, glUniform1f);
+extern GLProc( ACTIVETEXTURE, glActiveTexture);
+extern GLProc( VERTEXATTRIBDIVISOR, glVertexAttribDivisor);
+extern GLProc( GETUNIFORMLOCATION, glGetUniformLocation);
+extern GLProc( GENVERTEXARRAYS, glGenVertexArrays);
+extern GLProc( DRAWELEMENTSINSTANCED, glDrawElementsInstanced);
+extern GLProc( DRAWARRAYSINSTANCED, glDrawArraysInstanced);
+extern GLProc( BINDVERTEXARRAY, glBindVertexArray);
+extern GLProc( UNIFORMMATRIX4FV, glUniformMatrix4fv);
+extern GLProc( BUFFERDATA, glBufferData);
+extern GLProc( VERTEXATTRIBPOINTER, glVertexAttribPointer);
+extern GLProc( VERTEXATTRIBIPOINTER, glVertexAttribIPointer);
+extern GLProc( ENABLEVERTEXATTRIBARRAY, glEnableVertexAttribArray);
+extern GLProc( GENERATEMIPMAP, glGenerateMipmap);
+extern GLProc( GENFRAMEBUFFERS, glGenFramebuffers);
+extern GLProc( FRAMEBUFFERTEXTURE2D, glFramebufferTexture2D);
+extern GLProc( BINDFRAMEBUFFER, glBindFramebuffer);
+extern GLProc( CHECKFRAMEBUFFERSTATUS, glCheckFramebufferStatus);
+extern GLProc( BINDRENDERBUFFER, glBindRenderbuffer);
+extern GLProc( RENDERBUFFERSTORAGE, glRenderbufferStorage);
+extern GLProc( GENRENDERBUFFERS, glGenRenderbuffers);
+extern GLProc( FRAMEBUFFERRENDERBUFFER, glFramebufferRenderbuffer);
+extern GLProc( TEXIMAGE3D, glTexImage3D);
+extern GLProc( BINDIMAGETEXTURE, glBindImageTexture);
+extern GLProc( MEMORYBARRIER, glMemoryBarrier);
+extern GLProc( COPYIMAGESUBDATA, glCopyImageSubData);
 #endif

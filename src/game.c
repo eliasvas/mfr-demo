@@ -22,7 +22,7 @@
 
 static Quad q;
 static Model m;
-static MeshInfo teapot_mesh;
+static MeshInfo mesh;
 static Camera cam;
 static BitmapFont bmf;
 
@@ -36,8 +36,9 @@ init(void)
     init_camera(&cam);
     init_abuffer();
     {
-        teapot_mesh = load_obj("../assets/bunny/stanford_bunny.obj");
-        init_model_textured_basic(&m, &teapot_mesh);
+        //mesh = load_obj("../assets/bunny/stanford_bunny.obj");
+        mesh = load_obj("../assets/utah_teapot.obj");
+        init_model_textured_basic(&m, &mesh);
         load_texture(&(m.diff),"../assets/bunny/stanford_bunny.jpg");
     }
     m.position = v3(0,0,-7);
@@ -59,7 +60,7 @@ static void
 render(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.4f,0.5f,0.9f,1.f);
+    glClearColor(0.5f,0.5f,0.9f,1.f);
 
     clear_abuffer();
     render_abuffer(&m);

@@ -27,58 +27,62 @@
 
 static HGLRC win32_opengl_context;
 
-//TODO(ilias): automate the whole process..
 PFNWGLCHOOSEPIXELFORMATARBPROC     wglChoosePixelFormatARB;
 PFNWGLCREATECONTEXTATTRIBSARBPROC  wglCreateContextAttribsARB;
 PFNWGLMAKECONTEXTCURRENTARBPROC    wglMakeContextCurrentARB;
 PFNWGLSWAPINTERVALEXTPROC          wglSwapIntervalEXT;
-PFNGLGENBUFFERSPROC glGenBuffers;
-PFNGLBINDBUFFERPROC glBindBuffer;
-PFNGLDRAWBUFFERSPROC glDrawBuffers;
-PFNGLUSEPROGRAMPROC glUseProgram;
-PFNGLSHADERSOURCEPROC glShaderSource;
-PFNGLCOMPILESHADERPROC glCompileShader;
-PFNGLGETSHADERIVPROC glGetShaderiv;
-PFNGLMAPBUFFERRANGEPROC glMapBufferRange;
-PFNGLMAPBUFFERPROC glMapBuffer;
-PFNGLCREATESHADERPROC glCreateShader;
-PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
-PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
-PFNGLCREATEPROGRAMPROC glCreateProgram;
-PFNGLATTACHSHADERPROC glAttachShader;
-PFNGLDELETESHADERPROC glDeleteShader;
-PFNGLDELETEPROGRAMPROC glDeleteProgram;
-PFNGLLINKPROGRAMPROC glLinkProgram;
-PFNGLGETPROGRAMIVPROC glGetProgramiv;
-PFNGLUNIFORM1IPROC glUniform1i;
-PFNGLUNIFORM3FPROC glUniform3f;
-PFNGLUNIFORM1IVPROC glUniform1iv;
-PFNGLUNIFORM2FVPROC glUniform2fv;
-PFNGLUNIFORM1FPROC glUniform1f;
-PFNGLACTIVETEXTUREPROC glActiveTexture;
-PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor;
-PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
-PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
-PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced;
-PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced;
-PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
-PFNGLUNIFORMMATRIX4FVPROC glUniformMatrix4fv;
-PFNGLBUFFERDATAPROC glBufferData;
-PFNGLVERTEXATTRIBPOINTERPROC glVertexAttribPointer;
-PFNGLVERTEXATTRIBIPOINTERPROC glVertexAttribIPointer;
-PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
-PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
-PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
-PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
-PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
-PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
-PFNGLBINDRENDERBUFFERPROC glBindRenderbuffer;
-PFNGLRENDERBUFFERSTORAGEPROC glRenderbufferStorage;
-PFNGLGENRENDERBUFFERSPROC glGenRenderbuffers;
-PFNGLFRAMEBUFFERRENDERBUFFERPROC glFramebufferRenderbuffer;
-PFNGLTEXIMAGE3DPROC glTexImage3D;
-PFNGLBINDIMAGETEXTUREPROC glBindImageTexture;
-PFNGLMEMORYBARRIERPROC glMemoryBarrier;
+
+#define GLProc(type, name) PFNGL##type##PROC name;
+
+GLProc( GENBUFFERS, glGenBuffers);
+GLProc( BINDBUFFER, glBindBuffer);
+GLProc( DRAWBUFFERS, glDrawBuffers);
+GLProc( USEPROGRAM, glUseProgram);
+GLProc( SHADERSOURCE, glShaderSource);
+GLProc( COMPILESHADER, glCompileShader);
+GLProc( GETSHADERIV, glGetShaderiv);
+GLProc( MAPBUFFERRANGE, glMapBufferRange);
+GLProc( MAPBUFFER, glMapBuffer);
+GLProc( CREATESHADER, glCreateShader);
+GLProc( GETSHADERINFOLOG, glGetShaderInfoLog);
+GLProc( GETPROGRAMINFOLOG, glGetProgramInfoLog);
+GLProc( CREATEPROGRAM, glCreateProgram);
+GLProc( ATTACHSHADER, glAttachShader);
+GLProc( DELETESHADER, glDeleteShader);
+GLProc( DELETEPROGRAM, glDeleteProgram);
+GLProc( LINKPROGRAM, glLinkProgram);
+GLProc( GETPROGRAMIV, glGetProgramiv);
+GLProc( UNIFORM1I, glUniform1i);
+GLProc( UNIFORM3F, glUniform3f);
+GLProc( UNIFORM1IV, glUniform1iv);
+GLProc( UNIFORM2FV, glUniform2fv);
+GLProc( UNIFORM1F, glUniform1f);
+GLProc( ACTIVETEXTURE, glActiveTexture);
+GLProc( VERTEXATTRIBDIVISOR, glVertexAttribDivisor);
+GLProc( GETUNIFORMLOCATION, glGetUniformLocation);
+GLProc( GENVERTEXARRAYS, glGenVertexArrays);
+GLProc( DRAWELEMENTSINSTANCED, glDrawElementsInstanced);
+GLProc( DRAWARRAYSINSTANCED, glDrawArraysInstanced);
+GLProc( BINDVERTEXARRAY, glBindVertexArray);
+GLProc( UNIFORMMATRIX4FV, glUniformMatrix4fv);
+GLProc( BUFFERDATA, glBufferData);
+GLProc( VERTEXATTRIBPOINTER, glVertexAttribPointer);
+GLProc( VERTEXATTRIBIPOINTER, glVertexAttribIPointer);
+GLProc( ENABLEVERTEXATTRIBARRAY, glEnableVertexAttribArray);
+GLProc( GENERATEMIPMAP, glGenerateMipmap);
+GLProc( GENFRAMEBUFFERS, glGenFramebuffers);
+GLProc( FRAMEBUFFERTEXTURE2D, glFramebufferTexture2D);
+GLProc( BINDFRAMEBUFFER, glBindFramebuffer);
+GLProc( CHECKFRAMEBUFFERSTATUS, glCheckFramebufferStatus);
+GLProc( BINDRENDERBUFFER, glBindRenderbuffer);
+GLProc( RENDERBUFFERSTORAGE, glRenderbufferStorage);
+GLProc( GENRENDERBUFFERS, glGenRenderbuffers);
+GLProc( FRAMEBUFFERRENDERBUFFER, glFramebufferRenderbuffer);
+GLProc( TEXIMAGE3D, glTexImage3D);
+GLProc( BINDIMAGETEXTURE, glBindImageTexture);
+GLProc( MEMORYBARRIER, glMemoryBarrier);
+GLProc( COPYIMAGESUBDATA, glCopyImageSubData);
+
 
 
 static void *GetGLFuncAddress(const char *name)
@@ -146,6 +150,7 @@ LoadAllOpenGLProcedures()
    glTexImage3D = (PFNGLTEXIMAGE3DPROC)GetGLFuncAddress("glTexImage3D");
    glBindImageTexture = (PFNGLBINDIMAGETEXTUREPROC)GetGLFuncAddress("glBindImageTexture");
    glMemoryBarrier = (PFNGLMEMORYBARRIERPROC)GetGLFuncAddress("glMemoryBarrier");
+   glCopyImageSubData = (PFNGLCOPYIMAGESUBDATAPROC)GetGLFuncAddress("glCopyImageSubData");
 
 
 
