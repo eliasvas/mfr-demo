@@ -14,7 +14,7 @@ uniform layout(rgba32f) image2DArray abuf_img;
 
 const float fragment_alpha=0.5f;
 //const vec4 background_color = vec4(0.5,0.5,0.9,1);
-const vec4 background_color = vec4(1,1,1,1);
+uniform vec4 background_color;
 //local memory array
 vec4 fragment_list[ABUFFER_SIZE];
 
@@ -75,7 +75,7 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 		final_color=final_color+col*(1.0f-final_color.a);
 	}
 
-	final_color=final_color+background_color*(1.0f-final_color.a);
+	//final_color=final_color+background_color*(1.0f-final_color.a);
 
 	return final_color;
 

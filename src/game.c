@@ -7,6 +7,7 @@
 #include "entity.h"
 #include "text.h"
 #include "abuffer.h"
+#include "skybox.h"
 /*          TODO 
  *  -Model abstraction
  *  -Work on the NEW renderer!
@@ -25,9 +26,11 @@ static Model m;
 static MeshInfo mesh;
 static Camera cam;
 static BitmapFont bmf;
+static Skybox skybox;
 
 static mat4 view;
 static mat4 proj;
+static vec4 background_color;
 //Here goes any startup code you have.
 static void 
 init(void)
@@ -43,6 +46,10 @@ init(void)
     }
     m.position = v3(0,0,-7);
     init_text(&bmf, "../assets/BMF.png");
+    char *skybox_faces[6] = {"../assets/nebula/neb_rt.tga", "../assets/nebula/neb_lf.tga", "../assets/nebula/neb_up.tga",
+        "../assets/nebula/neb_dn.tga", "../assets/nebula/neb_bk.tga", "../assets/nebula/neb_ft.tga" };
+    //char *skybox_faces[6] = {"../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png" };
+    init_skybox(&skybox, skybox_faces);
 
 }
 
@@ -54,13 +61,16 @@ update(void) {
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
     if (cam.pos.z < 0.f) cam.pos = v3(0,1,4);
+    //background_color = v4(0.5f, 0.5f, 0.9f, 1.f); 
+    background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
 }
 
 
 static void 
 render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.5f,0.5f,0.9f,1.f);
+    glClearColor(background_color.x, background_color.y, background_color.z,background_color.w);
+    render_skybox(&skybox);
 
     clear_abuffer();
     render_abuffer_quad(&q);

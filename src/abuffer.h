@@ -30,6 +30,7 @@ static GLfloat quad_verts[] = {
 };
 
 extern mat4 view, proj;
+extern vec4 background_color;
 static void 
 init_abuffer_shaders(void)
 {
@@ -138,6 +139,7 @@ static void render_abuffer(Model *m)
     setInt(&render_abuffer_shader, "abuf_img", 0);
     setInt(&render_abuffer_shader, "screen_width", global_platform.window_width);
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
+    setVec4(&render_abuffer_shader, "background_color", background_color);
 
     //render the model (here we draw all the models one by one, 
     //we just happen to have only one model rn)

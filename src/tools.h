@@ -41,7 +41,7 @@ typedef char      b8;
 
 #define PI 3.1415926535897f
 
-#ifdef CRTLESS 
+#ifdef CRTLESS | 1 
 #define offsetof2(type, member) ((unsigned int)((unsigned char*)&((type*)0)->member - (unsigned char*)0)) 
 INLINE i32 abs2(i32 x)
 {
@@ -91,6 +91,8 @@ INLINE f32 sin_32(f32 x)
 {
     return cos_32(PI/2.f - x);
 }
+#define sinf(x) sin_32(x)
+#define cosf(x) cos_32(x)
 #endif
 INLINE f32 fmodf(f32 a, f32 b)
 {
