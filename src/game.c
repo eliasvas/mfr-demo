@@ -53,17 +53,17 @@ update(void) {
     update_cam(&cam);
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
+    if (cam.pos.z < 0.f) cam.pos = v3(0,1,4);
 }
 
 
 static void 
-render(void)
-{
+render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.5f,0.5f,0.9f,1.f);
 
     clear_abuffer();
-    render_abuffer(&m);
+    render_abuffer_quad(&q);
     display_abuffer();
 
     //render_model_textured_basic(&m,&proj, &view);
@@ -76,6 +76,5 @@ render(void)
         print_debug_info(&bmf);
     if (global_platform.key_pressed[KEY_P])
         write_texture2D_to_disk(&q.texture.id);
-
 }
 

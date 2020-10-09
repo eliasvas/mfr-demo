@@ -12,6 +12,7 @@ static Shader clear_abuffer_shader;
 static GLuint quad_vao, quad_vbo;
 
 static Shader render_abuffer_shader;
+static Shader render_abuffer_quad_shader;
 //the quad way
 static Shader display_abuffer_shader;
 static GLuint abuf_tex_id, abuf_counter_tex_id;
@@ -34,6 +35,7 @@ init_abuffer_shaders(void)
 {
     shader_load(&clear_abuffer_shader,"../assets/shaders/pass_through.vert","../assets/shaders/clear_abuf.frag");
     shader_load(&render_abuffer_shader,"../assets/shaders/render_abuf.vert","../assets/shaders/render_abuf.frag");
+    shader_load(&render_abuffer_quad_shader,"../assets/shaders/render_abuf_quad.vert","../assets/shaders/render_abuf_quad.frag");
     shader_load(&display_abuffer_shader,"../assets/shaders/pass_through.vert","../assets/shaders/disp_abuf.frag");
 }
 
@@ -137,12 +139,51 @@ static void render_abuffer(Model *m)
     setInt(&render_abuffer_shader, "screen_width", global_platform.window_width);
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
 
-    //render the model
+    //render the model (here we draw all the models one by one, 
+    //we just happen to have only one model rn)
     glBindVertexArray(m->vao);
     glDrawArrays(GL_TRIANGLES,0, m->mesh->vertices_count);
     glBindVertexArray(0);
 
+
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+}
+
+static void render_abuffer_quad(Quad *q)
+{
+    //setup render ing a buffer shader
+    use_shader(&render_abuffer_quad_shader);
+    //mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
+    mat4 model = mul_mat4(translate_mat4(v3(0,1,3)),scale_mat4(v3(1,1,1)));
+    mat4 view_IT = transpose_mat4(inv_mat4(view));
+    setMat4fv(&render_abuffer_quad_shader, "model", (GLfloat*)model.elements);
+    setMat4fv(&render_abuffer_quad_shader, "view", (GLfloat*)view.elements);
+    setMat4fv(&render_abuffer_quad_shader, "proj", (GLfloat*)proj.elements);
+    setMat4fv(&render_abuffer_quad_shader, "view_IT", (GLfloat*)view_IT.elements);
+    setInt(&render_abuffer_quad_shader, "counter_img", 1);
+    setInt(&render_abuffer_quad_shader, "abuf_img", 0);
+    setInt(&render_abuffer_quad_shader, "screen_width", global_platform.window_width);
+    setInt(&render_abuffer_quad_shader, "screen_height", global_platform.window_height);
+
+    //render the quad (here we draw all the quad one by one, 
+    //we just happen to have only one model rn)
+
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, q->texture.id);
+    vec3 colors[4] = {v3(1,0,0), v3(0,1,0), v3(0,0,1), v3(1,1,1)};
+    for (int i = 0; i < 4; ++i)
+    {
+        model = translate_mat4(v3(0,1,i));
+        setMat4fv(&render_abuffer_quad_shader, "model", (GLfloat*)model.elements);
+        setVec3(&render_abuffer_quad_shader, "color", colors[i]);
+        glBindVertexArray(q->VAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
+
+
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
 }
 
 static void display_abuffer(void)
@@ -164,11 +205,15 @@ static void display_abuffer(void)
     {
         u32 id;
         glGenTextures(1, &id);
-        glBindTexture(GL_TEXTURE_2D, id);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glCopyImageSubData(id, GL_TEXTURE_2D, 0, 0, 0, 0, abuf_tex_id, GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0,global_platform.window_width, global_platform.window_height, 1);
-        Texture tex = {id, global_platform.window_width, global_platform.window_height};
+        glBindTexture(GL_TEXTURE_2D, id);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, abuf_tex_id);
+        glCopyImageSubData(abuf_tex_id, GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, id, GL_TEXTURE_2D,0, 0, 0, 0, global_platform.window_width, global_platform.window_height, 0);
+        Texture tex;
+        tex.id = id;
+        tex.width = global_platform.window_width;
+        tex.height = global_platform.window_height;
 
         write_texture2D_to_disk(&tex);
     }
