@@ -60,7 +60,7 @@ update(void) {
     update_cam(&cam);
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
-    if (cam.pos.z < 0.f) cam.pos = v3(0,1,4);
+    //if (cam.pos.z < 0.f) cam.pos = v3(0,1,4);
     //background_color = v4(0.5f, 0.5f, 0.9f, 1.f); 
     background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
 }
@@ -74,6 +74,7 @@ render(void) {
 
     clear_abuffer();
     render_abuffer_quad(&q);
+    render_abuffer(&m);
     display_abuffer();
 
     //render_model_textured_basic(&m,&proj, &view);

@@ -37,11 +37,13 @@ void main()
 		//this should only apply in ABUFFER_SIZE
 		int abidx=imageAtomicAdd(counter_img, coords, 1);
 		
-		//color=shade_strips(f_tex_coord);
+		
+		color=shade_strips(f_tex_coord);
+		/*
 		vec3 N = normalize(f_normal);
 		vec3 L = normalize(vec3(0.0f,1.0f,1.0f));
 		color = vec3(dot(N,L));
-		
+		*/
 		abuffval.rgb=color;
 		abuffval.w=f_pos.z;	//Will be used for sorting
 		
