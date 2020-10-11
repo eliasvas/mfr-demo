@@ -84,6 +84,7 @@ GLProc( MEMORYBARRIER, glMemoryBarrier);
 GLProc( COPYIMAGESUBDATA, glCopyImageSubData);
 GLProc( BLENDFUNCSEPARATE, glBlendFuncSeparate);
 GLProc( DELETEFRAMEBUFFERS, glDeleteFramebuffers);
+GLProc( BLITFRAMEBUFFER, glBlitFramebuffer);
 
 
 static void *GetGLFuncAddress(const char *name)
@@ -155,6 +156,7 @@ LoadAllOpenGLProcedures()
    glBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)GetGLFuncAddress("glBlendFuncSeparate");
 
    glDeleteFramebuffers =  (PFNGLDELETEFRAMEBUFFERSPROC)GetGLFuncAddress("glDeleteFramebuffers");
+   glBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)GetGLFuncAddress("glBlitFramebuffer");
 
    //and on and on and on......
 }

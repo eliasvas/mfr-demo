@@ -1,6 +1,7 @@
 #ifndef DEPTHPEEL_H
 #define DEPTHPEEL_H
 #include "tools.h"
+#include "platform.h"
 
 //NOTE: used in initialization to
 //figure out which components we want
@@ -170,10 +171,17 @@ clear_fbo(OpenGLFBO *fbo)
     }
     bind_fbo(last_fbo_bound);
 }
-static void 
-copy_fbo_contents(OpenGLFBO *src, OpenGLFBO *dest)
-{
 
+//please make sure the framebuffers are of the same size
+//I did it this way so you can copy to framebuffer 0 
+static void 
+copy_fbo_contents(GLuint src_fbo,GLuint dest_fbo)
+{
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, src_fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
+    
+glBlitFramebuffer(0, 0, global_platform.window_width, global_platform.window_height, 0, 0, 
+        global_platform.window_width, global_platform.window_height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 }
 
 
@@ -181,6 +189,9 @@ extern void  render_scene(void);
 
 OpenGLFBO front;
 OpenGLFBO back;
+//whether we are CURRENTLY drwing
+//in front or back buffer
+b32 rendering_front;
 
 static void 
 init_depth_peel(void)
@@ -192,12 +203,21 @@ init_depth_peel(void)
 static void 
 render_depth_peel(void)
 {
+    GLuint last_fbo_bound;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo_bound);
+
+
     //i dont clear the framebuffers after i draw em
+    rendering_front = TRUE; 
     bind_fbo(&front);
     render_scene();
+    rendering_front = FALSE;
     bind_fbo(&back);
     render_scene();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+    copy_fbo_contents(front.fbo,0);
+    bind_fbo(last_fbo_bound);
 }
 
 //TODO(ilias): resize should happen only when it is needed!
@@ -205,12 +225,20 @@ render_depth_peel(void)
 static void 
 clear_depth_peel_fbos(void)
 {
+    GLuint last_fbo_bound;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo_bound);
+
+
     //resize and clear the front fbo
+    rendering_front = TRUE;
     resize_fbo(&front, global_platform.window_width, global_platform.window_height, FBO_COLOR_0 | FBO_DEPTH);
     clear_fbo(&front);
 
     //resize and clear the back fbo
+    rendering_front = FALSE;
     resize_fbo(&back, global_platform.window_width, global_platform.window_height, FBO_COLOR_0 | FBO_DEPTH);
     clear_fbo(&back);
+
+    bind_fbo(last_fbo_bound);
 }
 #endif
