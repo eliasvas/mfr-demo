@@ -97,7 +97,7 @@ render_model_textured_basic(Model* m,mat4 *proj,mat4 *view)
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m->spec.id);
     //mat4 mvp = mul_mat4(mv,translate_mat4(m->position));
-    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
+    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(0.10,0.10,0.10)));
     setMat4fv(&m->s, "model", (GLfloat*)model.elements);
     setMat4fv(&m->s, "view", (GLfloat*)view->elements);
     setMat4fv(&m->s, "proj", (GLfloat*)proj->elements);

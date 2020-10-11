@@ -200,25 +200,5 @@ static void display_abuffer(void)
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
 
     draw_quad(&display_abuffer_shader); 
-
-#if 1
-    //takes a screenshot of the first layer of the 3d texture
-    if (global_platform.key_pressed[KEY_K])
-    {
-        u32 id;
-        glGenTextures(1, &id);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glBindTexture(GL_TEXTURE_2D, id);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, abuf_tex_id);
-        glCopyImageSubData(abuf_tex_id, GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, id, GL_TEXTURE_2D,0, 0, 0, 0, global_platform.window_width, global_platform.window_height, 0);
-        Texture tex;
-        tex.id = id;
-        tex.width = global_platform.window_width;
-        tex.height = global_platform.window_height;
-
-        write_texture2D_to_disk(&tex);
-    }
-#endif
 }
 #endif

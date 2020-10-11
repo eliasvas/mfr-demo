@@ -203,4 +203,6 @@ extern GLProc( TEXIMAGE3D, glTexImage3D);
 extern GLProc( BINDIMAGETEXTURE, glBindImageTexture);
 extern GLProc( MEMORYBARRIER, glMemoryBarrier);
 extern GLProc( COPYIMAGESUBDATA, glCopyImageSubData);
+extern GLProc( BLENDFUNCSEPARATE, glBlendFuncSeparate);
+extern GLProc( DELETEFRAMEBUFFERS, glDeleteFramebuffers);
 #endif

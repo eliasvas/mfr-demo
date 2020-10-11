@@ -8,12 +8,12 @@
 #include "text.h"
 #include "abuffer.h"
 #include "skybox.h"
+#include "depthpeel.h"
 /*          TODO 
  *  -Model abstraction
  *  -Work on the NEW renderer!
- *  -cleanup abuffer and figure
- *  out the math stuff 
  *  -Scene Graph
+ *  -Make a depth-peeling demo?
  *  -----------------------------
  *  -Make good strings!!
  *  -IMGUI layer?
@@ -50,7 +50,7 @@ init(void)
         "../assets/nebula/neb_dn.tga", "../assets/nebula/neb_bk.tga", "../assets/nebula/neb_ft.tga" };
     //char *skybox_faces[6] = {"../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png", "../assets/dirt.png" };
     init_skybox(&skybox, skybox_faces);
-
+    init_depth_peel();
 }
 
 
@@ -60,26 +60,32 @@ update(void) {
     update_cam(&cam);
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
-    //if (cam.pos.z < 0.f) cam.pos = v3(0,1,4);
-    //background_color = v4(0.5f, 0.5f, 0.9f, 1.f); 
     background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
 }
 
+
+void
+render_scene(void)
+{
+    render_quad_mvp(&q, mul_mat4(proj,view));
+    render_model_textured_basic(&m,&proj, &view);
+}
 
 static void 
 render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(background_color.x, background_color.y, background_color.z,background_color.w);
+    clear_depth_peel_fbos();
     render_skybox(&skybox);
 
-    clear_abuffer();
-    render_abuffer_quad(&q);
-    render_abuffer(&m);
-    display_abuffer();
+    //clear_abuffer();
+    //render_abuffer_quad(&q);
+    //render_abuffer(&m);
+    //display_abuffer();
 
-    //render_model_textured_basic(&m,&proj, &view);
     //render_quad_mvp(&q, mul_mat4(proj,view));
-
+    //render_model_textured_basic(&m,&proj, &view);
+    render_depth_peel();
 
 
 
