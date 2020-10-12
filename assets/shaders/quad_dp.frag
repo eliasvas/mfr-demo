@@ -11,5 +11,7 @@ void main()
 	FragColor = texture(sampler,f_tex_coord);
 	FragColor.a = 0.5;
 	
-	//this means that there is something behind the quad
+	//this means that there is something behind the quad (the depth is 0)
+	if (texture(depth_buffer,gl_FragCoord.xy).x < 0.01)
+		discard;
 } 

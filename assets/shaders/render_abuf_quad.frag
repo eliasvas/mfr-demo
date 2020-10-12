@@ -1,5 +1,5 @@
 #version 420
-#define ABUFFER_SIZE 16
+#define ABUFFER_SIZE 8
 
 layout(pixel_center_integer) in vec4 gl_FragCoord;
 
@@ -12,6 +12,9 @@ uniform int screen_height;
 
 coherent uniform layout (rgba32f) image2DArray abuf_img;
 coherent uniform layout(r32ui) uimage2D counter_img;
+
+const vec3 cool = vec3(0.1,0.1,0.9);
+const vec3 warm = vec3(0.9,0.2,0.1);
 
 //shade using green=white strips
 vec3 shade_strips(vec3 texcoord){
@@ -38,6 +41,10 @@ void main()
 		
 		//color=shade_strips(f_tex_coord);
 		color = f_color;
+		//color = vec3(((float)counter_img.r)/(float)ABUFFER_SIZE, 0.0,0.0);
+		
+		//int ab_num_frag = int(imageLoad(counter_img, coords).r);
+		//color = (float(ab_num_frag)/ABUFFER_SIZE) * warm + (1.f - float(ab_num_frag)/ABUFFER_SIZE) * cool;
 		
 		abuffval.rgb=color;
 		abuffval.w=f_pos.z;	//Will be used for sorting

@@ -220,7 +220,7 @@ render_depth_peel(void)
     bind_fbo(last_fbo_bound);
 }
 
-//TODO(ilias): resize should happen only when it is needed!
+//TODO: resize should happen only when it is needed!
 //this is very very slow.
 static void 
 clear_depth_peel_fbos(void)
@@ -241,4 +241,5 @@ clear_depth_peel_fbos(void)
 
     bind_fbo(last_fbo_bound);
 }
+
 #endif

@@ -22,7 +22,7 @@ void main()
    vec3 normal_eye = normalize((view_IT*vec4(vec3(0.0,0.0,1.0), 1.0f)).xyz);
 
    f_tex_coord.xy = vertex_pos.xy;
-   f_tex_coord.z = vertex_pos.z;//abs(normal_eye.z);
+   f_tex_coord.z = abs(normal_eye.z);
 
    f_pos = pos;
    f_color = color;

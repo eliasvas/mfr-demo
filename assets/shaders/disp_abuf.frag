@@ -1,5 +1,5 @@
 #version 420
-#define ABUFFER_SIZE 16
+#define ABUFFER_SIZE 8
 uniform int screen_width;
 uniform int screen_height;
 
@@ -11,6 +11,9 @@ out vec4 out_frag_color;
 
 uniform layout(r32ui) uimage2D counter_img;
 uniform layout(rgba32f) image2DArray abuf_img;
+
+const vec3 cool = vec3(0.1,0.1,0.9);
+const vec3 warm = vec3(0.9,0.2,0.1);
 
 const float fragment_alpha=0.5f;
 //const vec4 background_color = vec4(0.5,0.5,0.9,1);
@@ -68,6 +71,7 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 		
 		vec4 col;
 		col.rgb=frag.rgb;
+		col.rgb = (float(ab_num_frag)/ABUFFER_SIZE) * warm + (1.f - float(ab_num_frag)/ABUFFER_SIZE) * cool;
 		col.w=fragment_alpha;	//uses constant alpha
 
 		col.rgb=col.rgb*col.w;

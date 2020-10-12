@@ -20,6 +20,7 @@ static f32 quad_vertices[] = {
     -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
 };
 
+
 //vertices of a full screen quad
 static f32 fs_quad_verts[] = { 
         -1.0f,  1.0f,  0.0f, 1.0f,
@@ -35,7 +36,7 @@ static void
 init_quad(Quad *q, char *tex_name)
 {
     GLuint VBO;
-    shader_load(&q->shader,"../assets/shaders/quad.vert", "../assets/shaders/quad.frag");
+    shader_load(&q->shader,"../assets/shaders/quad_dp.vert", "../assets/shaders/quad_dp.frag");
     if (!load_texture(&q->texture,tex_name))
         memcpy(infoLog, "texture not found", 18); //see? this is how we stop the program because of a fatal error
     glGenVertexArrays(1, &q->VAO);
