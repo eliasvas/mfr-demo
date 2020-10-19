@@ -79,7 +79,6 @@ render(void) {
 
     //NOTE: a-buffer rendering
     clear_abuffer();
-    render_abuffer_quad(&q);
     render_abuffer(&m);
     display_abuffer();
 

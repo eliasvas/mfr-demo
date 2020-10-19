@@ -206,4 +206,7 @@ extern GLProc( COPYIMAGESUBDATA, glCopyImageSubData);
 extern GLProc( BLENDFUNCSEPARATE, glBlendFuncSeparate);
 extern GLProc( DELETEFRAMEBUFFERS, glDeleteFramebuffers);
 extern GLProc( BLITFRAMEBUFFER, glBlitFramebuffer);
+extern GLProc( BINDBUFFERBASE, glBindBufferBase);
+extern GLProc( UNMAPBUFFER, glUnmapBuffer);
+extern GLProc( GETBUFFERSUBDATA, glGetBufferSubData);
 #endif

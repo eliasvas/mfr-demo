@@ -85,6 +85,9 @@ GLProc( COPYIMAGESUBDATA, glCopyImageSubData);
 GLProc( BLENDFUNCSEPARATE, glBlendFuncSeparate);
 GLProc( DELETEFRAMEBUFFERS, glDeleteFramebuffers);
 GLProc( BLITFRAMEBUFFER, glBlitFramebuffer);
+GLProc( BINDBUFFERBASE, glBindBufferBase);
+GLProc( UNMAPBUFFER, glUnmapBuffer);
+GLProc( GETBUFFERSUBDATA, glGetBufferSubData);
 
 
 static void *GetGLFuncAddress(const char *name)
@@ -157,8 +160,9 @@ LoadAllOpenGLProcedures()
 
    glDeleteFramebuffers =  (PFNGLDELETEFRAMEBUFFERSPROC)GetGLFuncAddress("glDeleteFramebuffers");
    glBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)GetGLFuncAddress("glBlitFramebuffer");
-
-   //and on and on and on......
+   glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)GetGLFuncAddress("glBindBufferBase");
+   glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)GetGLFuncAddress("glUnmapBuffer");
+   glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)GetGLFuncAddress("glGetBufferSubData");
 }
 
 

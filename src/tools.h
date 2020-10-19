@@ -160,6 +160,14 @@ str_size(char* str)
     return i;
 }
 
+static u32
+find_char_in_string(char *string,i32 start_index, char tofind)
+{
+    i32 iter = start_index;
+    while (string[iter] != '\0' && string[iter] != tofind) iter++;
+    return iter;
+}
+
 static void
 seed_random()
 {
@@ -213,6 +221,15 @@ read_whole_file(const char *filename)
     string[fsize] = 0; 
 
     return (char*)string;
+}
+INLINE u32
+get_file_size(const char *filename)
+{
+    FILE *f = fopen(filename, "rb");
+    if (!f)return 0;
+    fseek(f, 0, SEEK_END);
+    u32 fsize = ftell(f);
+    return fsize;
 }
 
 INLINE b32 

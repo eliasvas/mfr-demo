@@ -1,6 +1,7 @@
 #ifndef QUAD_H
 #define QUAD_H
 #include "platform.h"
+#define SHADER_INCLUDE
 #include "shader.h"
 #include "texture.h"
 
