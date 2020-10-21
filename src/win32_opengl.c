@@ -88,6 +88,8 @@ GLProc( BLITFRAMEBUFFER, glBlitFramebuffer);
 GLProc( BINDBUFFERBASE, glBindBufferBase);
 GLProc( UNMAPBUFFER, glUnmapBuffer);
 GLProc( GETBUFFERSUBDATA, glGetBufferSubData);
+GLProc( CLEARBUFFERDATA, glClearBufferData);
+GLProc( TEXSTORAGE2D, glTexStorage2D);
 
 
 static void *GetGLFuncAddress(const char *name)
@@ -163,6 +165,8 @@ LoadAllOpenGLProcedures()
    glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)GetGLFuncAddress("glBindBufferBase");
    glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)GetGLFuncAddress("glUnmapBuffer");
    glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)GetGLFuncAddress("glGetBufferSubData");
+   glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)GetGLFuncAddress("glClearbufferData");
+   glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)GetGLFuncAddress("glTexStorage2D");
 }
 
 

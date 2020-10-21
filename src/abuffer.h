@@ -16,11 +16,11 @@ static Shader render_abuffer_shader;
 //static Shader render_abuffer_quad_shader;
 //the quad way
 static Shader display_abuffer_shader;
-static GLuint head_list, head_list;
+//static GLuint head_list, head_list;
 
-static GLuint head_list;
-static GLuint next_address;
-static GLuint global_node_buffer;
+GLuint head_list;
+GLuint next_address;
+GLuint global_node_buffer;
 //Full screen quad vertices definition
 static GLfloat quad_verts[] = {
    -1.0f, -1.0f, 0.0f, 1.0f,
@@ -43,14 +43,14 @@ static void check_gl_errors()
     GLenum err;
     while((err = glGetError()) != GL_NO_ERROR)
     {
-       sprintf(infoLog, "%i", err);
+       sprintf(infoLog, "GL error: %i", err);
     }
 
 }
 
 extern mat4 view, proj;
 extern vec4 background_color;
-static void 
+void 
 init_abuffer_shaders(void)
 {
     shader_load(&clear_abuffer_shader,"../assets/shaders/pass_through.vert","../assets/shaders/clear_abuf.frag");
@@ -60,7 +60,7 @@ init_abuffer_shaders(void)
 }
 
 
-static void 
+void 
 init_abuffer(void)
 {
     init_abuffer_shaders();
@@ -73,10 +73,10 @@ init_abuffer(void)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, global_node_buffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
+    //we initialize the atomic counter
     glGenBuffers(1, &next_address);
     glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
     glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, next_address);
     glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 
@@ -85,7 +85,7 @@ init_abuffer(void)
 
     if(!head_list)
         glGenTextures(1, &head_list);
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, head_list);
 
     //Set filters
@@ -93,13 +93,13 @@ init_abuffer(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     //Texture creation
-    //Uses GL_R32F instead of GL_R32I that is not working in R257.15
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
+    //glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32UI, global_platform.window_width, global_platform.window_height);
     glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
 
 
 }
-static void 
+void 
 draw_quad(Shader *shader) 
 {
 
@@ -117,8 +117,12 @@ draw_quad(Shader *shader)
 	glVertexAttribPointer (0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, 0);
     setInt(shader, "screen_width", global_platform.window_width);
     setInt(shader, "screen_height", global_platform.window_height);
-    //glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
+    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, next_address);
 
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, global_node_buffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, global_node_buffer);
 
 	glDrawArrays(GL_TRIANGLES, 0, 24);
     glBindVertexArray(0);
@@ -127,35 +131,49 @@ draw_quad(Shader *shader)
 #include "text.h"
 extern BitmapFont bmf;
 
-static void 
+void 
 clear_abuffer(void)
 {
-     //clear the data on the global buffer
-    //glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 3, NULL, GL_DYNAMIC_DRAW);
 
-#if 0
-    //set the counter to 0
-    GLuint *counter_val;
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
-    counter_val =(GLuint*)glMapBufferRange(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), 
-            GL_MAP_READ_BIT | GL_MAP_WRITE_BIT); 
-    //glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), 0, GL_DYNAMIC_DRAW);
-    check_gl_errors();
-    #if DEBUGINFO | 1
-        char string[11];
-        sprintf(string, "%i", counter_val[0]);
-        print_text(&bmf,string, 0,250, 20);
-    #endif
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
-#endif
-
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT | GL_TEXTURE_UPDATE_BARRIER_BIT);
+#if 1
+    //clear Image 
+    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
     glBindTexture(GL_TEXTURE_2D, head_list);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
+    glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
+#endif
+  
+#if 1 
+    //clear ssbo
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, global_node_buffer);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 5, NULL, GL_STATIC_DRAW);
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+#endif
 
-    //glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+
+#if 0 
+
+
+    GLuint zero = 0;
+    //clear atomic counter NEVER BOUND TO AN INDEX
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
+    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_DRAW);
+    void *counter = glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_READ_WRITE);
+    memcpy(counter, &zero, sizeof(GLuint));
+    glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+    check_gl_errors();
+    glMemoryBarrier(GL_ATOMIC_COUNTER_BARRIER_BIT);
+
+
+#endif
+
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-static void 
+void 
 render_abuffer(Model *m)
 {
  
@@ -169,6 +187,10 @@ render_abuffer(Model *m)
     setMat4fv(&render_abuffer_shader, "proj", (GLfloat*)proj.elements);
     setMat4fv(&render_abuffer_shader, "view_IT", (GLfloat*)view_IT.elements);
     glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, next_address);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, global_node_buffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, global_node_buffer);
     setInt(&render_abuffer_shader, "screen_width", global_platform.window_width);
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
     //setVec4(&render_abuffer_shader, "background_color", background_color);
@@ -178,15 +200,13 @@ render_abuffer(Model *m)
     glBindVertexArray(m->vao);
     glDrawArrays(GL_TRIANGLES,0, m->mesh->vertices_count);
     glBindVertexArray(0);
-
-
     glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 }
 
-static void display_abuffer(void)
+void display_abuffer(void)
 {
     //Ensure that all global memory write from render_abuffer() are done before resolving
-    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT | GL_TEXTURE_UPDATE_BARRIER_BIT);
 
     //these are not really needed, draw_quad sets these alright
     setInt(&render_abuffer_shader, "screen_width", global_platform.window_width);
@@ -194,5 +214,6 @@ static void display_abuffer(void)
 
 
     draw_quad(&display_abuffer_shader); 
+    glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT | GL_SHADER_STORAGE_BARRIER_BIT | GL_TEXTURE_UPDATE_BARRIER_BIT);
 }
 #endif

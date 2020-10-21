@@ -87,4 +87,5 @@ void main(void)
 
 	// Return the color value of the selected fragment
    	out_frag_color = unpackUnorm4x8(floatBitsToUint(fragments[layer].r));
+	out_frag_color.a = 1.0;
 }

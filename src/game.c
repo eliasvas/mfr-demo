@@ -44,7 +44,7 @@ init(void)
         init_model_textured_basic(&m, &mesh);
         load_texture(&(m.diff),"../assets/red.png");
     }
-    m.position = v3(0,0,-7);
+    m.position = v3(0,0,-2);
     init_text(&bmf, "../assets/BMF.png");
     char *skybox_faces[6] = {"../assets/nebula/neb_rt.tga", "../assets/nebula/neb_lf.tga", "../assets/nebula/neb_up.tga",
         "../assets/nebula/neb_dn.tga", "../assets/nebula/neb_bk.tga", "../assets/nebula/neb_ft.tga" };
@@ -60,7 +60,8 @@ update(void) {
     update_cam(&cam);
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
-    background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
+    //background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
+    background_color = v4(0.2,0.2,0.2,1.f);
 }
 
 
@@ -75,7 +76,7 @@ static void
 render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(background_color.x, background_color.y, background_color.z,background_color.w);
-    render_skybox(&skybox);
+    //render_skybox(&skybox);
 
     //NOTE: a-buffer rendering
     clear_abuffer();
