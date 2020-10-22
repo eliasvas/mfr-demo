@@ -32,7 +32,7 @@ void main(void)
 {
 	imageStore(in_image_head,ivec2(gl_FragCoord.xy), uvec4(0));
 
-	atomicCounterAnd(in_next_address,0);
+	atomicCounterExchange(in_next_address,0);
 	
 
 	discard;

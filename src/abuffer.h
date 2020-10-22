@@ -18,11 +18,15 @@ static Shader render_abuffer_shader;
 static Shader display_abuffer_shader;
 //static GLuint head_list, head_list;
 
-GLuint head_list;
-GLuint next_address;
-GLuint global_node_buffer;
-GLuint zero = 0;
-static times_clear_invoked = 0;
+static GLuint head_list;
+static GLuint next_address;
+static GLuint global_node_buffer;
+static GLuint zero = 0;
+
+#if !defined(ABUF_SOFTWARE_CLEAR)
+#define ABUF_SOFTWARE_CLEAR 0
+#endif
+
 //Full screen quad vertices definition
 static GLfloat quad_verts[] = {
    -1.0f, -1.0f, 0.0f, 1.0f,
@@ -134,24 +138,29 @@ draw_quad(Shader *shader)
     glBindVertexArray(0);
 }
 
-#include "text.h"
-extern BitmapFont bmf;
-
 void 
 clear_abuffer(void)
 {
-    times_clear_invoked++;
-
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    //resize image
+    if (global_platform.window_resized){
+        glBindTexture(GL_TEXTURE_2D, head_list);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, global_node_buffer);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height *4 , NULL, GL_STATIC_DRAW);
+        glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-#if 0 
+    }
+
+#if ABUF_SOFTWARE_CLEAR 
+#if 1 
     glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
     glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0 , sizeof(GLuint), &zero);
     glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 #endif
 
-#if 1
+#if 0
     //clear Image 
     glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
     glBindTexture(GL_TEXTURE_2D, head_list);
@@ -170,33 +179,65 @@ clear_abuffer(void)
     glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height *4 , NULL, GL_STATIC_DRAW);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 #endif
+#endif
 
+   //this clearing is done via a shader..
+   draw_quad(&clear_abuffer_shader); 
+   glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-    //check_gl_errors();
+}
+void 
+clear_abuffer2(void)
+{
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+#if ABUF_SOFTWARE_CLEAR | 1
 #if 0 
-    //glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
-    //glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), &zero, GL_DYNAMIC_DRAW);
-    void *counter = (void *)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_READ_WRITE);
-    //memset(counter, &zero, sizeof(GLuint));
-    ((GLuint*)counter)[0] = 0;
-    glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
-    ///glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
-    check_gl_errors();
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
+    glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0 , sizeof(GLuint), &zero);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 #endif
+
+#if 0
+    //clear Image 
+    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
+    glBindTexture(GL_TEXTURE_2D, head_list);
+
+    //GLuint *pixels = arena_alloc(&global_platform.frame_storage, sizeof(GLuint)*global_platform.window_width * global_platform.window_height);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_INT, pixels);
+    glClearTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, source_data);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+#endif
+    //resize image
+#if 1
+    glBindTexture(GL_TEXTURE_2D, head_list);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
+
+#endif
+  
+#if 1
+    //clear ssbo
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, global_node_buffer);
+    void * data = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height *2 , NULL, GL_STATIC_DRAW);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+#endif
+#endif
+
+   //this clearing is done via a shader..
    draw_quad(&clear_abuffer_shader); 
    glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 }
 
+
 void 
 render_abuffer(Model *m)
 {
  
-    //setup render ing a buffer shader
     use_shader(&render_abuffer_shader);
-    //mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
-    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(0.1,0.1,0.1)));
+    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
     mat4 view_IT = transpose_mat4(inv_mat4(view));
     setMat4fv(&render_abuffer_shader, "model", (GLfloat*)model.elements);
     setMat4fv(&render_abuffer_shader, "view", (GLfloat*)view.elements);

@@ -39,8 +39,8 @@ init(void)
     init_camera(&cam);
     init_abuffer();
     {
-        //mesh = load_obj("../assets/bunny/stanford_bunny.obj");
-        mesh = load_obj("../assets/utah_teapot.obj");
+        mesh = load_obj("../assets/bunny/stanford_bunny.obj");
+        //mesh = load_obj("../assets/utah_teapot.obj");
         init_model_textured_basic(&m, &mesh);
         load_texture(&(m.diff),"../assets/red.png");
     }
@@ -76,10 +76,15 @@ static void
 render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(background_color.x, background_color.y, background_color.z,background_color.w);
-    //render_skybox(&skybox);
+    render_skybox(&skybox);
 
     //NOTE: a-buffer rendering
     clear_abuffer();
+    m.position = v3(0,0,-2);
+    render_abuffer(&m);
+    m.position = v3(0,0,-5);
+    render_abuffer(&m);
+    m.position = v3(0,0,-8);
     render_abuffer(&m);
     display_abuffer();
 

@@ -9,7 +9,31 @@ struct NodeTypeLL
 	uint next;
 };
 #define LOCAL_SIZE 32
+
 vec2 fragments [LOCAL_SIZE];
+const vec3 cool = vec3(0.1,0.1,0.9);
+const vec3 warm = vec3(0.9,0.2,0.1);
+
+
+// Input Variables
+uniform int	layer;
+float fragment_alpha = 0.5;
+
+//layout(binding = 0, r32ui)	
+//coherent uniform uimage2DRect in_image_head;
+
+layout(binding = 0, r32ui)		
+coherent uniform uimage2D  in_image_head;
+
+layout(binding = 1, std430)		
+coherent buffer  LinkedLists   
+{ 
+NodeTypeLL nodes[]; 
+};
+
+// Output Variables
+layout(location = 0, index = 0) out vec4 out_frag_color;
+
 
 void sort_insert(const int num)
 {
@@ -31,23 +55,32 @@ void sort(const int num)
 {
 	sort_insert(num);
 }
-// Input Variables
-uniform int	layer;
+vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
+		
+	vec4 final_color=vec4(0.0f);
 
-//layout(binding = 0, r32ui)	
-//coherent uniform uimage2DRect in_image_head;
+	final_color=vec4(0.0f);
+	for(int i=0; i<ab_num_frag; i++){
+		vec4 frag= unpackUnorm4x8(floatBitsToUint(fragments[i].r));
+		
+		vec4 col;
+		col.rgb=frag.rgb;
+		col.rgb = (float(ab_num_frag)/8) * warm + (1.f - float(ab_num_frag)/8) * cool;
+		col.w=fragment_alpha;	//uses constant alpha
 
-layout(binding = 0, r32ui)		
-coherent uniform uimage2D  in_image_head;
+		col.rgb=col.rgb*col.w;
 
-layout(binding = 1, std430)		
-coherent buffer  LinkedLists   
-{ 
-NodeTypeLL nodes[]; 
-};
+		final_color=final_color+col*(1.0f-final_color.a);
+	}
 
-// Output Variables
-layout(location = 0, index = 0) out vec4 out_frag_color;
+	//final_color=final_color+background_color*(1.0f-final_color.a);
+
+	return final_color;
+
+}
+
+
+
 
 layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main(void)
@@ -70,7 +103,7 @@ void main(void)
 	}
 	
 	// Sort fragments by their depth
-    //sort(count);
+    sort(count);
 
 /*
 	// Use optionally if you want to perform subsequent operations in a following pass
@@ -87,7 +120,8 @@ void main(void)
 
 	if (count == 0)discard;
 	// Return the color value of the selected fragment
-   	out_frag_color = unpackUnorm4x8(floatBitsToUint(fragments[layer].r));
+   	//out_frag_color = unpackUnorm4x8(floatBitsToUint(fragments[layer].r));
+	out_frag_color = resolve_alpha_blend(ivec2(gl_FragCoord.xy), count);
 	//if (out_frag_color.x < 0.1)discard;
-	out_frag_color.a = 1.0;
+	//out_frag_color.a = 1.0;
 }

@@ -25,6 +25,7 @@ Win32WindowProc(HWND hWnd, UINT message, WPARAM w_param, LPARAM l_param) {
            glViewport(0, 0, (GLsizei)rect.right, (GLsizei)rect.bottom); //for some reason this is useless 
            global_platform.window_width = rect.right;
            global_platform.window_height = rect.bottom;
+           global_platform.window_resized = 1;
     }else if (message == WM_CLOSE || message == WM_DESTROY || message == WM_QUIT){
         global_platform.exit = 1;
     }else if (message == WM_SYSKEYDOWN || message == WM_SYSKEYUP || message == WM_KEYDOWN || message == WM_KEYUP){
@@ -241,7 +242,7 @@ WinMain(HINSTANCE Instance,
         f32 dt = (end_frame.QuadPart - last_frame.QuadPart)/ (float)frequency.QuadPart;
         global_platform.dt = dt;
         global_platform.current_time += dt;
-
+        global_platform.window_resized = 0;
 
         if (strlen(infoLog) != 0){
             MessageBox(WND, infoLog, "FATAL ERROR", MB_OK);

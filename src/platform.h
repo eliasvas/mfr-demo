@@ -22,6 +22,7 @@ typedef struct Platform
     b32 vsync; //whether the app has vsync (capped FPS.. kinda)
     b32 fullscreen; //whether the app is in fullscreen
     b32 initialized; //whether the app is initialized
+    b32 window_resized; //whether the window was resize last frame
     f32 target_fps; //in how many frames should the app run
     f32 current_time; //current time in milliseconds
 
