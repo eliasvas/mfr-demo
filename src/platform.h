@@ -211,4 +211,6 @@ extern GLProc( UNMAPBUFFER, glUnmapBuffer);
 extern GLProc( GETBUFFERSUBDATA, glGetBufferSubData);
 extern GLProc( CLEARBUFFERDATA, glClearBufferData);
 extern GLProc( TEXSTORAGE2D, glTexStorage2D);
+extern GLProc( BUFFERSUBDATA, glBufferSubData);
+extern GLProc( CLEARTEXIMAGE, glClearTexImage);
 #endif

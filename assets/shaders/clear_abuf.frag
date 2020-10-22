@@ -30,13 +30,10 @@ layout(location = 0, index = 0) out vec4 out_frag_color;
 layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main(void)
 {
-	// Get head pixel pointer
-	//uint index = imageLoad(in_image_head, ivec2(gl_FragCoord.xy)).x;
-	//if(index == 0u)
-		//discard;
+	imageStore(in_image_head,ivec2(gl_FragCoord.xy), uvec4(0));
 
-	atomicCounterSubtract(in_next_address,atomicCounter(in_next_address));
-
+	atomicCounterAnd(in_next_address,0);
+	
 
 	discard;
 }

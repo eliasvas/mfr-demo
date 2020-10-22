@@ -1,4 +1,4 @@
-#version 430
+#version 460
 //#include "define.h"
 //#include "data_structs.h"
 //#include "sort.h"
@@ -70,7 +70,7 @@ void main(void)
 	}
 	
 	// Sort fragments by their depth
-    sort(count);
+    //sort(count);
 
 /*
 	// Use optionally if you want to perform subsequent operations in a following pass
@@ -85,7 +85,9 @@ void main(void)
 	}
 */
 
+	if (count == 0)discard;
 	// Return the color value of the selected fragment
    	out_frag_color = unpackUnorm4x8(floatBitsToUint(fragments[layer].r));
+	//if (out_frag_color.x < 0.1)discard;
 	out_frag_color.a = 1.0;
 }

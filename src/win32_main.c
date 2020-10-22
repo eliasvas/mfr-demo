@@ -216,7 +216,7 @@ WinMain(HINSTANCE Instance,
         update();
         render();
         SwapBuffers(GetDC(WND));
-        //NOTE(ilias): clear the volatile arena (per-frame)
+
         arena_clear(&global_platform.frame_storage);
         QueryPerformanceCounter(&end_frame);
 

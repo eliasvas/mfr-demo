@@ -52,6 +52,7 @@ void main(void)
 		// Connect fragment with head of the fragment list and then set it as the new head
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		// Used for memory counting of overflowed fragments
-		discard;
+		
 	}
+	discard;
 }
