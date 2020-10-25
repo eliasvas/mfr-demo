@@ -35,7 +35,7 @@ static vec4 background_color;
 static void 
 init(void)
 {
-    init_quad(&q, "../assets/white.png");
+    init_quad(&q, "../assets/dirt.png");
     init_camera(&cam);
     init_abuffer();
     {
@@ -68,8 +68,9 @@ update(void) {
 void
 render_scene(void)
 {
-    render_quad_mvp(&q, mul_mat4(proj,view));
-    render_model_textured_basic(&m,&proj, &view);
+    render_quad_mvp_dp(&q, mul_mat4(proj,view));
+    render_quad_mvp_dp(&q, mul_mat4(mul_mat4(proj,view), translate_mat4(v3(0,0,-2))));
+    //render_model_textured_basic(&m,&proj, &view);
 }
 
 static void 
@@ -79,6 +80,7 @@ render(void) {
     render_skybox(&skybox);
 
     //NOTE: a-buffer rendering
+#if 0
     clear_abuffer();
     m.position = v3(0,0,-2);
     render_abuffer(&m);
@@ -86,6 +88,10 @@ render(void) {
     render_abuffer(&m);
     m.position = v3(0,0,-8);
     render_abuffer(&m);
+    m.position = v3(0,0,-11);
+    render_abuffer(&m);
+#endif
+
     display_abuffer();
 
     //NOTE: normal rendering
@@ -94,8 +100,8 @@ render(void) {
 
 
     //NOTE: depth-peeling rendering
-    //clear_depth_peel_fbos();
-    //render_depth_peel();
+    clear_depth_peel_fbos();
+    render_depth_peel();
 
 
 

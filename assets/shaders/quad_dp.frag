@@ -6,12 +6,23 @@ in vec2 f_tex_coord;
 uniform sampler2D sampler;
 uniform sampler2D depth_buffer;
 
+uniform int window_width;
+uniform int window_height;
+uniform int peel;
+
+//layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main()
 {
+
+	vec2 pos_in_tex = gl_FragCoord.xy / vec2(window_width,window_height);
 	FragColor = texture(sampler,f_tex_coord);
 	FragColor.a = 0.5;
 	
 	//this means that there is something behind the quad (the depth is 0)
-	if (texture(depth_buffer,gl_FragCoord.xy).x < 0.01)
+	if (texture(depth_buffer,pos_in_tex).x < 0.01)
 		discard;
+
+	if (peel)
+		if (gl_FragCoord.z <= texture(depth_buffer,pos_in_tex).x)
+			discard;
 } 

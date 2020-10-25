@@ -811,32 +811,6 @@ INLINE __m128 linear_combine_sse(__m128 l, mat4 r)
     return (res);
 }
 #endif
-/*
- TODO add this to matrix to matrix multiplication
-if USE_SSE
-HMM_INLINE __m128 linear_combine_sse(__m128 Left, hmm_mat4 Right)
-{
-    ASSERT_COVERED(linear_combine_sse);
-
-    __m128 Result;
-    Result = _mm_mul_ps(_mm_shuffle_ps(Left, Left, 0x00), Right.Columns[0]);
-    Result = _mm_add_ps(Result, _mm_mul_ps(_mm_shuffle_ps(Left, Left, 0x55), Right.Columns[1]));
-    Result = _mm_add_ps(Result, _mm_mul_ps(_mm_shuffle_ps(Left, Left, 0xaa), Right.Columns[2]));
-    Result = _mm_add_ps(Result, _mm_mul_ps(_mm_shuffle_ps(Left, Left, 0xff), Right.Columns[3]));
-
-    return (Result);
-}
-endif
-
-
-
-if USE_SSE
-Result.Columns[0] = linear_combine_sse(Right.Columns[0], Left);
-Result.Columns[1] = linear_combine_sse(Right.Columns[1], Left);
-Result.Columns[2] = linear_combine_sse(Right.Columns[2], Left);
-Result.Columns[3] = linear_combine_sse(Right.Columns[3], Left);
-endif
-*/
 
 INLINE mat4 div_mat4f(mat4 m, f32 s)
 {

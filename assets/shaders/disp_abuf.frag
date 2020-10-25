@@ -11,7 +11,7 @@ struct NodeTypeLL
 #define LOCAL_SIZE 32
 
 vec2 fragments [LOCAL_SIZE];
-const vec3 cool = vec3(0.1,0.1,0.9);
+const vec3 cool = vec3(0.2,0.1,0.5);
 const vec3 warm = vec3(0.9,0.2,0.1);
 
 

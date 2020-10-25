@@ -26,7 +26,9 @@
  * fake one first and obtain the function pointers [and then destroy it and make a proper one!]*/
 
 static HGLRC win32_opengl_context;
+const int major_min = 4, minor_min = 6;     
 
+//windows specific wgl function we won't need outside here1
 PFNWGLCHOOSEPIXELFORMATARBPROC     wglChoosePixelFormatARB;
 PFNWGLCREATECONTEXTATTRIBSARBPROC  wglCreateContextAttribsARB;
 PFNWGLMAKECONTEXTCURRENTARBPROC    wglMakeContextCurrentARB;
@@ -34,6 +36,7 @@ PFNWGLSWAPINTERVALEXTPROC          wglSwapIntervalEXT;
 
 #define GLProc(type, name) PFNGL##type##PROC name;
 
+//the actual GL functions we are loading are here
 GLProc( GENBUFFERS, glGenBuffers);
 GLProc( BINDBUFFER, glBindBuffer);
 GLProc( DRAWBUFFERS, glDrawBuffers);
@@ -161,35 +164,40 @@ LoadAllOpenGLProcedures()
    glMemoryBarrier = (PFNGLMEMORYBARRIERPROC)GetGLFuncAddress("glMemoryBarrier");
    glCopyImageSubData = (PFNGLCOPYIMAGESUBDATAPROC)GetGLFuncAddress("glCopyImageSubData");
    glBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)GetGLFuncAddress("glBlendFuncSeparate");
-
    glDeleteFramebuffers =  (PFNGLDELETEFRAMEBUFFERSPROC)GetGLFuncAddress("glDeleteFramebuffers");
    glBlitFramebuffer = (PFNGLBLITFRAMEBUFFERPROC)GetGLFuncAddress("glBlitFramebuffer");
    glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)GetGLFuncAddress("glBindBufferBase");
    glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)GetGLFuncAddress("glUnmapBuffer");
    glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)GetGLFuncAddress("glGetBufferSubData");
-   glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)GetGLFuncAddress("glClearbufferData");
-   glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)GetGLFuncAddress("glTexStorage2D");
    glBufferSubData = (PFNGLBUFFERSUBDATAPROC)GetGLFuncAddress("glBufferSubData");
-   glClearTexImage = (PFNGLCLEARTEXIMAGEPROC)GetGLFuncAddress("glClearTexImage");
+
+   //these are functions only implemented in newer versions of OpenGL (>4.x)
+   //depending on your desired context (major_min.minor_min), they might be loaded
+   if (major_min >3)
+   {
+       glClearBufferData = (PFNGLCLEARBUFFERDATAPROC)GetGLFuncAddress("glClearbufferData");
+       glClearTexImage = (PFNGLCLEARTEXIMAGEPROC)GetGLFuncAddress("glClearTexImage");
+       glTexStorage2D = (PFNGLTEXSTORAGE2DPROC)GetGLFuncAddress("glTexStorage2D");
+   }
 }
 
 
 
-static b32 Win32InitOpenGL(HDC* device_context, HINSTANCE Instance){
+static b32 win32_init_opengl(HDC* device_context, HINSTANCE Instance){
    
-    PIXELFORMATDESCRIPTOR fakePFD;
-    ZeroMemory(&fakePFD, sizeof(fakePFD));
-    fakePFD.nSize = sizeof(fakePFD);
-    fakePFD.nVersion = 1;
-    fakePFD.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    fakePFD.iPixelType = PFD_TYPE_RGBA;
-    fakePFD.cColorBits = 32;
-    fakePFD.cAlphaBits = 8;
-    fakePFD.cDepthBits = 24;
+    PIXELFORMATDESCRIPTOR pfd;
+    ZeroMemory(&pfd, sizeof(pfd));
+    pfd.nSize = sizeof(pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 32;
+    pfd.cAlphaBits = 8;
+    pfd.cDepthBits = 24;
      
-    int fakePFDID = ChoosePixelFormat(*device_context, &fakePFD);
+    int pfdID = ChoosePixelFormat(*device_context, &pfd);
     //NOTE(ilias): we can assign a PIXELFORMAT ONCE for every window!!
-    SetPixelFormat(*device_context, fakePFDID, &fakePFD);
+    SetPixelFormat(*device_context, pfdID, &pfd);
 
 
     //we create a temporary rendering context and set it as current
@@ -229,7 +237,6 @@ static b32 Win32InitOpenGL(HDC* device_context, HINSTANCE Instance){
     //SetPixelFormat(*device_context, pixelFormatID, &PFD); //maybe not needed
 
 
-    const int major_min = 4, minor_min = 6;     
     int  contextAttribs[] = {
         WGL_CONTEXT_MAJOR_VERSION_ARB, major_min,
         WGL_CONTEXT_MINOR_VERSION_ARB, minor_min,
@@ -237,6 +244,7 @@ static b32 Win32InitOpenGL(HDC* device_context, HINSTANCE Instance){
         0
     };
      
+    //VV this is the real MODERN OpenGL context
     win32_opengl_context = wglCreateContextAttribsARB(*device_context, 0, contextAttribs);
     if (win32_opengl_context) {
         //NOTE(ilias): we make the new Rendering Context the current one!

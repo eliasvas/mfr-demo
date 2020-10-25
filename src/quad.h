@@ -102,14 +102,40 @@ render_quad(Quad *q)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
-
 static void 
 render_quad_mvp(Quad* q, mat4 mvp)
 {
     use_shader(&q->shader);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, q->texture.id);
+    setInt(&q->shader, "sampler", 0);
     setMat4fv(&q->shader, "MVP", (float*)mvp.elements);
+    glBindVertexArray(q->VAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
+
+#include "fbo.h"
+extern OpenGLFBO front;
+extern b32 rendering_front;
+static void 
+render_quad_mvp_dp(Quad* q, mat4 mvp)
+{
+    use_shader(&q->shader);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, q->texture.id);
+    setInt(&q->shader, "sampler", 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, front.depth_attachment);
+    setInt(&q->shader, "depth_buffer", 1);
+    setMat4fv(&q->shader, "MVP", (float*)mvp.elements);
+    if (rendering_front)
+        setInt(&q->shader, "peel", 0);
+    else
+        setInt(&q->shader, "peel",1);
+    setInt(&q->shader, "window_width", global_platform.window_width);
+    setInt(&q->shader, "window_height", global_platform.window_height);
     glBindVertexArray(q->VAO);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);

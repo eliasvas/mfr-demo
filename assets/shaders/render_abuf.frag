@@ -22,16 +22,15 @@ NodeTypeLL nodes[];
 layout(binding = 2, offset = 0)
 uniform atomic_uint   in_next_address;
 
-vec4 computePixelColor()
-{
-	return vec4(1.0,0.5,0.3,0.3);
-}
 
 
 smooth in vec4 f_pos;
 smooth in vec3 f_tex_coord;
 smooth in vec3 f_normal;
-
+vec4 computePixelColor()
+{
+	return vec4(1.0,0.5,0.3,0.3);
+}
 //layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main(void)
 {

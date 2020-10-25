@@ -165,8 +165,12 @@ WinMain(HINSTANCE Instance,
         global_platform.current_time = 0.f;
     }
 
-    Win32InitOpenGL(&DC, Instance); 
+    //implemented in win32_opengl.c
+    win32_init_opengl(&DC, Instance); 
+
+    //uncomment this if you want your OGL version as wintext
     //SetWindowText(WND, (LPCSTR)glGetString(GL_VERSION));
+
     ShowWindow(WND, ShowCode);
 
     MSG msg;
@@ -222,7 +226,7 @@ WinMain(HINSTANCE Instance,
         QueryPerformanceCounter(&end_frame);
 
 #if 1
-        //NOTE(ilias): wait remaining time for targeted fps!
+        //NOTE(ilias): wait remaining time for targeted fps! (if you want max speed do #if 0, not recommended)
         i64 frame_count = end_frame.QuadPart - last_frame.QuadPart;
         i64 desired_frame_count = (f32)frequency.QuadPart / global_platform.target_fps;
         i64 counts_to_wait = desired_frame_count - frame_count;
