@@ -36,6 +36,7 @@ static void
 init(void)
 {
     init_quad(&q, "../assets/dirt.png");
+    init_fullscreen_quad(&screen_quad, "../assets/red.png");
     init_camera(&cam);
     init_abuffer();
     {
@@ -90,9 +91,9 @@ render(void) {
     render_abuffer(&m);
     m.position = v3(0,0,-11);
     render_abuffer(&m);
+    display_abuffer();
 #endif
 
-    display_abuffer();
 
     //NOTE: normal rendering
     //render_quad_mvp(&q, mul_mat4(proj,view));
@@ -102,6 +103,7 @@ render(void) {
     //NOTE: depth-peeling rendering
     clear_depth_peel_fbos();
     render_depth_peel();
+    //render_fullscreen_quad(&screen_quad);
 
 
 

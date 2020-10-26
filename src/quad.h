@@ -32,6 +32,7 @@ static f32 fs_quad_verts[] = {
          1.0f, -1.0f,  1.0f, 0.0f,
          1.0f,  1.0f,  1.0f, 1.0f
 };
+static Quad screen_quad;
 
 static void 
 init_quad(Quad *q, char *tex_name)
@@ -77,7 +78,7 @@ init_fullscreen_quad(Quad *q, char *tex_name)
 static void 
 render_fullscreen_quad(Quad *q)
 {
-    //glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
     glDepthFunc(GL_ALWAYS);
     glBindVertexArray(q->VAO);
     use_shader(&q->shader);
@@ -85,7 +86,7 @@ render_fullscreen_quad(Quad *q)
     glBindTexture(GL_TEXTURE_2D, q->texture.id);
     setInt(&q->shader, "sampler", 0);
     glDrawArrays(GL_TRIANGLES,0, 6); 
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glBindVertexArray(0);
 }

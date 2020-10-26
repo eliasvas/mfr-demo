@@ -3,6 +3,7 @@
 #include "tools.h"
 #include "platform.h"
 #include "fbo.h"
+#include "quad.h"
 
 
 
@@ -40,7 +41,9 @@ render_depth_peel(void)
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 
     copy_fbo_contents(back.fbo,0);
-    blend_fbo_contents(front.fbo,0);
+    //blend_fbo_contents(front.fbo,0);
+    screen_quad.texture = (Texture){front.color_attachments[0], front.w, front.h};
+    render_fullscreen_quad(&screen_quad);
     bind_fbo(last_fbo_bound);
 }
 

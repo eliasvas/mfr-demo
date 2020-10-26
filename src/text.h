@@ -107,6 +107,8 @@ print_text(BitmapFont *f,const char*text, i32 x,i32 y, i32 size)
     
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, f->tex.id); 
+    setInt(&f->s, "window_width", global_platform.window_width);
+    setInt(&f->s, "window_height", global_platform.window_height);
 
     glBindVertexArray(f->VAO);
 
@@ -135,13 +137,13 @@ print_debug_info(BitmapFont *bmf)
 #endif
     char string[9];
     sprintf(string, "%iX%i", global_platform.window_width, global_platform.window_height);
-    print_text(bmf,string, 0,50, 20);
+    print_text(bmf,string, 0,50, 40);
     sprintf(string, "time: %.2f", global_platform.current_time);
-    print_text(bmf,string, 0,100, 20);
+    print_text(bmf,string, 0,100, 40);
     sprintf(string, "fps: %.2f",frequency/ (10000000.f*global_platform.dt));
-    print_text(bmf,string, 0,150, 20);
+    print_text(bmf,string, 0,150, 40);
     sprintf(string, "GL: %.5s",glGetString(GL_VERSION)); 
-    print_text(bmf,string, 0,200, 20);
+    print_text(bmf,string, 0,200, 40);
     glDepthFunc(GL_LESS);
 }
 
