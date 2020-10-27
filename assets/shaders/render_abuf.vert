@@ -18,14 +18,14 @@ void main()
 {
    vec4 pos = proj * view * model * vec4(vertex_pos.xyz,1.0); 
 
-   //investigate 0-0
+
    vec3 normal_eye = normalize((view_IT*vec4(vertex_normal, 1.0f)).xyz);
 
    f_tex_coord.xy = vertex_pos.xy;
    f_tex_coord.z = abs(normal_eye.z);
 
    f_normal = normal_eye;
-
    f_pos = pos;
+   
    gl_Position = pos;
 }

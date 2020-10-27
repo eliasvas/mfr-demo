@@ -15,8 +15,7 @@ const vec3 cool = vec3(0.2,0.1,0.5);
 const vec3 warm = vec3(0.9,0.2,0.1);
 
 
-// Input Variables
-uniform int	layer;
+
 float fragment_alpha = 0.5;
 
 //layout(binding = 0, r32ui)	
@@ -31,7 +30,7 @@ coherent buffer  LinkedLists
 NodeTypeLL nodes[]; 
 };
 
-// Output Variables
+
 layout(location = 0, index = 0) out vec4 out_frag_color;
 
 
@@ -102,21 +101,7 @@ void main(void)
 		index			    = nodes[index].next;
 	}
 	
-	// Sort fragments by their depth
     sort(count);
-
-/*
-	// Use optionally if you want to perform subsequent operations in a following pass
-	{
-		// Set head pixel pointer
-		imageStore(in_image_head, ivec2(gl_FragCoord.xy), uvec4(fragments[0].g, 0.0u, 0.0u, 0.0u));
-			
-		// Correct fragment connection pointers
-		for(int i=0; i<count-1; i++)
-			nodes[fragments_id[i]].next = fragments_id[i+1];
-		nodes[fragments_id[counter-1]].next = 0U;
-	}
-*/
 
 	if (count == 0)discard;
 	// Return the color value of the selected fragment

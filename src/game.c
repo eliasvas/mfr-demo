@@ -10,10 +10,8 @@
 #include "skybox.h"
 #include "depthpeel.h"
 /*          TODO 
- *  -Model abstraction
  *  -Work on the NEW renderer!
  *  -Scene Graph
- *  -Make a depth-peeling demo?
  *  -----------------------------
  *  -Make good strings!!
  *  -IMGUI layer?
@@ -81,15 +79,15 @@ render(void) {
     render_skybox(&skybox);
 
     //NOTE: a-buffer rendering
-#if 0
+#if 1
     clear_abuffer();
-    m.position = v3(0,0,-2);
-    render_abuffer(&m);
     m.position = v3(0,0,-5);
     render_abuffer(&m);
-    m.position = v3(0,0,-8);
+    m.position = v3(0,0,-2);
     render_abuffer(&m);
     m.position = v3(0,0,-11);
+    render_abuffer(&m);
+    m.position = v3(0,0,-8);
     render_abuffer(&m);
     display_abuffer();
 #endif
@@ -101,9 +99,8 @@ render(void) {
 
 
     //NOTE: depth-peeling rendering
-    clear_depth_peel_fbos();
-    render_depth_peel();
-    //render_fullscreen_quad(&screen_quad);
+    //clear_depth_peel_fbos();
+    //render_depth_peel();
 
 
 

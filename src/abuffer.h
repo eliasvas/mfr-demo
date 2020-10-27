@@ -56,7 +56,8 @@ static void check_gl_errors()
 
 extern mat4 view, proj;
 extern vec4 background_color;
-void 
+
+static void 
 init_abuffer_shaders(void)
 {
     shader_load(&clear_abuffer_shader,"../assets/shaders/pass_through.vert","../assets/shaders/clear_abuf.frag");
@@ -67,7 +68,7 @@ init_abuffer_shaders(void)
 
 
 GLuint *source_data;
-void 
+static void 
 init_abuffer(void)
 {
     init_abuffer_shaders();
@@ -109,7 +110,7 @@ init_abuffer(void)
 
 
 }
-void 
+static void 
 draw_quad(Shader *shader) 
 {
 
@@ -138,7 +139,7 @@ draw_quad(Shader *shader)
     glBindVertexArray(0);
 }
 
-void 
+static void 
 clear_abuffer(void)
 {
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -186,7 +187,7 @@ clear_abuffer(void)
    glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 }
-void 
+static void 
 clear_abuffer2(void)
 {
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -232,7 +233,7 @@ clear_abuffer2(void)
 }
 
 
-void 
+static void 
 render_abuffer(Model *m)
 {
  
@@ -260,7 +261,7 @@ render_abuffer(Model *m)
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
 
-void display_abuffer(void)
+static void display_abuffer(void)
 {
     //Ensure that all global memory write from render_abuffer() are done before resolving
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
@@ -272,5 +273,6 @@ void display_abuffer(void)
 
     draw_quad(&display_abuffer_shader); 
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
 }
 #endif

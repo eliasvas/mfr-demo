@@ -36,21 +36,18 @@ void main(void)
 {
     ivec2 coords = ivec2(gl_FragCoord.xy);
 
-	// Get the next available location in the global buffer
+	// get next available location in global buffer
 	uint index = atomicCounterIncrement(in_next_address) + 1U;
 	
-	// Check for memory overflow
+
 	if(index < nodes.length())
 	{
-		// Compute the shading color of each incoming fragment
+		//its not used rn
 		vec4 color = computePixelColor();
 		
-		// Store fragment data into the global buffer
 		nodes[index].color = packUnorm4x8(color);
 		nodes[index].depth = gl_FragCoord.z;
-		// Connect fragment with head of the fragment list and then set it as the new head
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
-		// Used for memory counting of overflowed fragments
 		
 	}
 	discard;
