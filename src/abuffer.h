@@ -257,28 +257,23 @@ static void display_abuffer(void)
         GLint *image_head= (GLint*)ALLOC(sizeof(u32) *global_platform.window_width * global_platform.window_height * 4);   
         for (int i = 0; i < global_platform.window_width * global_platform.window_height; ++i)
             image_head[i] = 0;
-        //glBindImageTexture(0, 0, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
-        //glMemoryBarrier(GL_ALL_BARRIER_BITS);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, head_list);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, image_head);
-
-        //glReadPixels(0, 0, global_platform.window_width,global_platform.window_height,GL_RGB, GL_FLOAT, image_head);
-        Texture tex = {head_list, global_platform.window_width, global_platform.window_height};
-        ppm_save_pixels(tex.width, tex.height,image_head);
-
-        //glReadPixels(0, 0, global_platform.window_width,global_platform.window_height,GL_RED, GL_FLOAT, head_list);
+        //we must convert to only red component later @TODO
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA_INTEGER, GL_UNSIGNED_INT, image_head);
         glBindTexture(GL_TEXTURE_2D, 0);
+
+
         //get the atomic counter data (size of ssbo)
         glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
         int counter_val = 0; 
-        //GLuint *counter_data = (GLuint*)glMapBufferRange(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), GL_MAP_READ_BIT); 
         GLuint *counter_data = (GLuint*)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_READ_ONLY); 
         memcpy(&counter_val, counter_data, sizeof(int));
         glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
         glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+
+
         //get the ssbo (NodeTypeLL data)
-        
         NodeTypeLL *nodes = (NodeTypeLL*)ALLOC(sizeof(NodeTypeLL) * counter_val); 
         void *node_data= glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
         memcpy(nodes, node_data, sizeof(NodeTypeLL) * counter_val);
@@ -288,50 +283,6 @@ static void display_abuffer(void)
 
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 }
-/*
-Texture t = {head_list, global_platform.window_width, global_platform.window_height};
-    glBindTexture(GL_TEXTURE_2D, head_list);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, head_list);
-    write_texture2D_to_disk(&t);
-    */
-
-
-
-
-
-
-
-
-
-
-
-/*
-    use_shader(&shader);
-    glBindBuffer (GL_ARRAY_BUFFER, quad_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verts), quad_verts, GL_STATIC_DRAW);
-    setInt(shader, "screen_width", global_platform.window_width);
-    setInt(shader, "screen_height", global_platform.window_height);
-    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //head list is the opengl texture id
-
-    glDrawArrays(GL_TRIANGLES, 0, 24);
-    glBindVertexArray(0);
-
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
-
-
-    //the image is just a GL_RED so one component
-     GLint *image_head= (GLint*)malloc(sizeof(u32) *window_width *window_height);   
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, head_list);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, image_head);
-*/
-
-
-
-
-
-
 
 
 #endif
