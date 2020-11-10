@@ -3,7 +3,7 @@
 uniform int	layer;
 
 //layout(binding = 0, r32ui)	
-//coherent uniform uimage2DRect in_image_head;
+//coherent uniform uimage2DRect in_image_head
 struct NodeTypeLL
 {
 	float depth;
@@ -31,6 +31,7 @@ layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main(void)
 {
 	imageStore(in_image_head,ivec2(gl_FragCoord.xy), uvec4(0));
+	//if (glFragCoord.x < 0.1)imageStore(in_image_head,ivec2(gl_FragCoord.xy), uvec4(1));
 
 	atomicCounterExchange(in_next_address,0);
 	

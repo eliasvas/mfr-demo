@@ -98,15 +98,19 @@ init_abuffer(void)
     glBindTexture(GL_TEXTURE_2D, head_list);
 
     //Set filters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //TODO FIX
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glGenerateMipmap(GL_TEXTURE_2D);
 
     //Texture creation
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
-    vec4 data = v4(0.0,0.0,0.0,0.0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, global_platform.window_width, global_platform.window_height, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_UNSIGNED_INT, 0); //THISISCORRECT
+    //vec4 data = v4(0.0,0.0,0.0,0.0);
     //glClearTexImage(GL_TEXTURE_2D, 0, GL_R32F, GL_FLOAT, &data);
     //glTexStorage2D(GL_TEXTURE_2D, 1, GL_R32UI, global_platform.window_width, global_platform.window_height);
-    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
+    glBindImageTexture(0, head_list, 0, GL_FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
 
 
 }
@@ -137,13 +141,26 @@ draw_quad(Shader *shader)
 
 	glDrawArrays(GL_TRIANGLES, 0, 24);
     glBindVertexArray(0);
-}
 
+
+}
+#include "stdio.h"
 static void 
 clear_abuffer(void)
 {
+ 
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    if (global_platform.key_pressed[KEY_M])
+    {
+        void *data = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+        FILE *file = fopen("data.txt", "w");
+        fwrite(&data, sizeof(f32), 100,file);
+        fclose(file);
+        sprintf(&infoLog, "Data Written to Disk");
+    }
+
     //resize image
+    /*
     if (global_platform.window_resized){
         glBindTexture(GL_TEXTURE_2D, head_list);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
@@ -152,6 +169,7 @@ clear_abuffer(void)
         glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
     }
+    */
 
 #if ABUF_SOFTWARE_CLEAR 
 #if 1 
@@ -188,55 +206,9 @@ clear_abuffer(void)
 
 }
 static void 
-clear_abuffer2(void)
-{
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
-#if ABUF_SOFTWARE_CLEAR | 1
-#if 0 
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
-    glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0 , sizeof(GLuint), &zero);
-    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
-#endif
-
-#if 0
-    //clear Image 
-    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
-    glBindTexture(GL_TEXTURE_2D, head_list);
-
-    //GLuint *pixels = arena_alloc(&global_platform.frame_storage, sizeof(GLuint)*global_platform.window_width * global_platform.window_height);
-    //glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_UNSIGNED_INT, pixels);
-    glClearTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, source_data);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
-#endif
-    //resize image
-#if 1
-    glBindTexture(GL_TEXTURE_2D, head_list);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, global_platform.window_width, global_platform.window_height, 0,  GL_RED, GL_FLOAT, 0);
-
-#endif
-  
-#if 1
-    //clear ssbo
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, global_node_buffer);
-    void * data = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height *2 , NULL, GL_STATIC_DRAW);
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
-#endif
-#endif
-
-   //this clearing is done via a shader..
-   draw_quad(&clear_abuffer_shader); 
-   glMemoryBarrier(GL_ALL_BARRIER_BITS);
-
-}
-
-
-static void 
 render_abuffer(Model *m)
 {
- 
+
     use_shader(&render_abuffer_shader);
     mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
     mat4 view_IT = transpose_mat4(inv_mat4(view));
@@ -259,10 +231,14 @@ render_abuffer(Model *m)
     glDrawArrays(GL_TRIANGLES,0, m->mesh->vertices_count);
     glBindVertexArray(0);
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+    check_gl_errors();
+
 }
 
 static void display_abuffer(void)
 {
+
     //Ensure that all global memory write from render_abuffer() are done before resolving
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
@@ -271,8 +247,91 @@ static void display_abuffer(void)
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
 
 
+
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
     draw_quad(&display_abuffer_shader); 
+    //glFinish();
+    if (global_platform.key_pressed[KEY_Q]){ 
+        //get image-head data 
+        //NOTE: we get the image data from the framebuffer because glGetTexImage returns an all-black image
+        GLint *image_head= (GLint*)ALLOC(sizeof(u32) *global_platform.window_width * global_platform.window_height * 4);   
+        for (int i = 0; i < global_platform.window_width * global_platform.window_height; ++i)
+            image_head[i] = 0;
+        //glBindImageTexture(0, 0, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
+        //glMemoryBarrier(GL_ALL_BARRIER_BITS);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, head_list);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, image_head);
+
+        //glReadPixels(0, 0, global_platform.window_width,global_platform.window_height,GL_RGB, GL_FLOAT, image_head);
+        Texture tex = {head_list, global_platform.window_width, global_platform.window_height};
+        ppm_save_pixels(tex.width, tex.height,image_head);
+
+        //glReadPixels(0, 0, global_platform.window_width,global_platform.window_height,GL_RED, GL_FLOAT, head_list);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        //get the atomic counter data (size of ssbo)
+        glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
+        int counter_val = 0; 
+        //GLuint *counter_data = (GLuint*)glMapBufferRange(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(GLuint), GL_MAP_READ_BIT); 
+        GLuint *counter_data = (GLuint*)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_READ_ONLY); 
+        memcpy(&counter_val, counter_data, sizeof(int));
+        glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+        glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+        //get the ssbo (NodeTypeLL data)
+        
+        NodeTypeLL *nodes = (NodeTypeLL*)ALLOC(sizeof(NodeTypeLL) * counter_val); 
+        void *node_data= glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+        memcpy(nodes, node_data, sizeof(NodeTypeLL) * counter_val);
+        glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        sprintf(&infoLog, "Data Written to Disk");
+    }
+
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+}
+/*
+Texture t = {head_list, global_platform.window_width, global_platform.window_height};
+    glBindTexture(GL_TEXTURE_2D, head_list);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, head_list);
+    write_texture2D_to_disk(&t);
+    */
+
+
+
+
+
+
+
+
+
+
+
+/*
+    use_shader(&shader);
+    glBindBuffer (GL_ARRAY_BUFFER, quad_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quad_verts), quad_verts, GL_STATIC_DRAW);
+    setInt(shader, "screen_width", global_platform.window_width);
+    setInt(shader, "screen_height", global_platform.window_height);
+    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //head list is the opengl texture id
+
+    glDrawArrays(GL_TRIANGLES, 0, 24);
+    glBindVertexArray(0);
+
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
 
-}
+
+    //the image is just a GL_RED so one component
+     GLint *image_head= (GLint*)malloc(sizeof(u32) *window_width *window_height);   
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, head_list);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, image_head);
+*/
+
+
+
+
+
+
+
+
 #endif

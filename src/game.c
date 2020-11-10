@@ -60,7 +60,7 @@ update(void) {
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
     //background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
-    background_color = v4(0.2,0.2,0.2,1.f);
+    background_color = v4(0,0,0,1.f);
 }
 
 
@@ -76,11 +76,10 @@ static void
 render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(background_color.x, background_color.y, background_color.z,background_color.w);
-    render_skybox(&skybox);
+    //render_skybox(&skybox);
 
     //NOTE: a-buffer rendering
 #if 1
-    clear_abuffer();
     m.position = v3(0,0,-5);
     render_abuffer(&m);
     m.position = v3(0,0,-2);
@@ -89,7 +88,11 @@ render(void) {
     render_abuffer(&m);
     m.position = v3(0,0,-8);
     render_abuffer(&m);
+
     display_abuffer();
+
+
+    clear_abuffer();
 #endif
 
 
