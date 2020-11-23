@@ -204,6 +204,24 @@ rrandom(f32 lo, f32 hi)
 	return r;
 }
 
+//converts f32 to f16
+INLINE u16 f2h(f32 f)
+{
+	typedef union convertf2i {
+		u32 i;
+		f32 f;
+	}convertf2i;
+	convertf2i f2i;
+	f2i.f = f;
+	u32 i = f2i.i;
+
+	if (i==0)
+		return 0;
+
+	return ((i>>16)&0x8000)|((((i&0x7f800000)-0x38000000)>>13)&0x7c00)|((i>>13)&0x03ff);
+}
+
+
 
 //NOTE(ilias): maybe make a free_file because our game leaks :(
 INLINE char * 

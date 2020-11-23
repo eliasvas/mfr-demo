@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "platform.h"
+#include "openexr_write.h"
 
 //why 16 and not 4 ? maybe 16 is 4 X components(4)????
 #define ABUFFER_SIZE 16
@@ -37,13 +38,6 @@ static GLfloat quad_verts[] = {
    1.0f, 1.0f, 0.0f, 1.0f,
    -1.0f, 1.0f, 0.0f, 1.0f  
 };
-typedef struct NodeTypeLL
-{
-	f32 depth;
-	u32 color;
-	u32 next;
-}NodeTypeLL;
-
 static void check_gl_errors()
 {
     GLenum err;
@@ -278,6 +272,10 @@ static void display_abuffer(void)
         void *node_data= glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
         memcpy(nodes, node_data, sizeof(NodeTypeLL) * counter_val);
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        //deepexr_write(image_head,v2(global_platform.window_width, global_platform.window_height),(void *)nodes,counter_val,0);
+        //write a sample openexr image
+        deepexr_write(global_platform.window_width, global_platform.window_height,image_head, nodes,counter_val);
+        openexr_screenshot();
         sprintf(&infoLog, "Data Written to Disk");
     }
 

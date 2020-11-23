@@ -9,6 +9,7 @@
 #include "abuffer.h"
 #include "skybox.h"
 #include "depthpeel.h"
+#include "openexr_write.h"
 /*          TODO 
  *  -Work on the NEW renderer!
  *  -Scene Graph
@@ -53,7 +54,6 @@ init(void)
 }
 
 
-
 static void 
 update(void) {
     update_cam(&cam);
@@ -69,14 +69,14 @@ render_scene(void)
 {
     render_quad_mvp_dp(&q, mul_mat4(proj,view));
     render_quad_mvp_dp(&q, mul_mat4(mul_mat4(proj,view), translate_mat4(v3(0,0,-2))));
-    //render_model_textured_basic(&m,&proj, &view);
+    render_model_textured_basic(&m,&proj, &view);
 }
 
 static void 
 render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(background_color.x, background_color.y, background_color.z,background_color.w);
-    //render_skybox(&skybox);
+    render_skybox(&skybox);
 
     //NOTE: a-buffer rendering
 #if 1

@@ -22,7 +22,7 @@ NodeTypeLL nodes[];
 layout(binding = 2, offset = 0)
 uniform atomic_uint   in_next_address;
 
-
+uniform sampler2D diffuse_map;
 
 smooth in vec4 f_pos;
 smooth in vec3 f_tex_coord;
