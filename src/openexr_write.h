@@ -14,8 +14,11 @@ typedef struct NodeTypeLL
 //the xy coordinates are given by the file
 typedef struct DeepPixel
 {
-    u32 color; // R G B A
-    f32 depth;
+    f32 r;
+    f32 g;
+    f32 b;
+    f32 a; //its for all the DeepPixel, no layers needed!
+    f32 z;
 }DeepPixel;
 
 enum {
@@ -187,7 +190,7 @@ u8* openexr_write (u32 width, u32 height, u32 channels,void* rgba16f, i32* outSi
 }
 
 #if 1
-u8 *deepexr_write(u32 width, u32 height,f32 *image_head, NodeTypeLL *nodes,u32 nodes_count)
+u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32 num_of_deep_samples_per_pixel)
 {
 	u32 ww = width-1;
 	u32 hh = height-1;
@@ -198,6 +201,7 @@ u8 *deepexr_write(u32 width, u32 height,f32 *image_head, NodeTypeLL *nodes,u32 n
 		'c','h','a','n','n','e','l','s',0,
 		'c','h','l','i','s','t',0,
 		55,0,0,0,
+		'A',0, 2,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // R, FLOAT 
 		'B',0, 2,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // B, FLOAT 
 		'G',0, 2,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // G, FLOAT 
 		'R',0, 2,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // R, FLOAT 
@@ -254,7 +258,7 @@ u8 *deepexr_write(u32 width, u32 height,f32 *image_head, NodeTypeLL *nodes,u32 n
 	i32 hdr_size = array_count(hdr_data);
 
 	i32 scanline_table_size = 8 * height;
-	u32 pixel_row_size = width * 3 * 2;
+	u32 pixel_row_size = width * sizeof(DeepPixel) * num_of_deep_samples_per_pixel;
 	u32 full_row_size = pixel_row_size + 8;
 
 	u32 buf_size = hdr_size + scanline_table_size + height * full_row_size;
@@ -266,7 +270,6 @@ u8 *deepexr_write(u32 width, u32 height,f32 *image_head, NodeTypeLL *nodes,u32 n
 	// copy in header
 	memcpy (buf, hdr_data, hdr_size);
 
-    /*
 	// line offset table
 	u32 index = hdr_size + scanline_table_size;
 	u8* ptr = buf + hdr_size;
@@ -284,8 +287,8 @@ u8 *deepexr_write(u32 width, u32 height,f32 *image_head, NodeTypeLL *nodes,u32 n
 	}
 
 	// scanline data
-	u8* src = (u8*)nodes;
-	i32 stride = sizeof(NodeTypeLL);
+	u8* src = (u8*)pixels;
+	i32 stride = sizeof(DeepPixel);
 	for (i32 y = 0; y < height; ++y)
 	{
 		// coordinate
@@ -298,35 +301,61 @@ u8 *deepexr_write(u32 width, u32 height,f32 *image_head, NodeTypeLL *nodes,u32 n
 		*ptr++ = (pixel_row_size >> 8) & 0xFF;
 		*ptr++ = (pixel_row_size >> 16) & 0xFF;
 		*ptr++ = (pixel_row_size >> 24) & 0xFF;
-		// B, G, R
+		// R G B A Z data for each deep pixel
 		u8* chsrc;
-		chsrc = src + 4;
-		for (i32 x = 0; x < width; ++x)
-		{
-			*ptr++ = chsrc[0];
-			*ptr++ = chsrc[1];
-			chsrc += stride;
-		}
-		chsrc = src + 2;
-		for (i32 x = 0; x < width; ++x)
-		{
-			*ptr++ = chsrc[0];
-			*ptr++ = chsrc[1];
-			chsrc += stride;
-		}
 		chsrc = src + 0;
 		for (i32 x = 0; x < width; ++x)
 		{
 			*ptr++ = chsrc[0];
 			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+
+			chsrc += stride;
+		}
+        chsrc = src + 4;
+		for (i32 x = 0; x < width; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+			chsrc += stride;
+		}
+        chsrc = src + 8;
+		for (i32 x = 0; x < width; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+			chsrc += stride;
+		}
+
+		chsrc = src + 16;
+		for (i32 x = 0; x < width; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+			chsrc += stride;
+		}
+		chsrc = src + 24;
+		for (i32 x = 0; x < width; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
 
 		src += width * stride;
 	}
-
-	assert (ptr - buf == buf_size);
-    */
+  FILE* f = fopen ("test_deep.exr", "wb");
+  fwrite (buf, 1, buf_size, f);
+  fclose (f);
 
 	return buf;
 }

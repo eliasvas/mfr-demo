@@ -11,8 +11,9 @@ layout (location = 1) in vec3 vertex_normal;
 layout (location = 2) in vec2 vertex_tex_coord;
 
 smooth out vec4 f_pos;
-smooth out vec3 f_tex_coord;
+smooth out vec2 f_tex_coord;
 smooth out vec3 f_normal;
+smooth out vec4 f_frag_pos_ls;
 
 void main()
 {
@@ -21,8 +22,8 @@ void main()
 
    vec3 normal_eye = normalize((view_IT*vec4(vertex_normal, 1.0f)).xyz);
 
-   f_tex_coord.xy = vertex_pos.xy;
-   f_tex_coord.z = abs(normal_eye.z);
+   f_tex_coord = vertex_tex_coord;
+   //f_tex_coord.z = abs(normal_eye.z);
 
    f_normal = normal_eye;
    f_pos = pos;

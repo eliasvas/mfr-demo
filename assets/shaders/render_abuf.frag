@@ -25,11 +25,11 @@ uniform atomic_uint   in_next_address;
 uniform sampler2D diffuse_map;
 
 smooth in vec4 f_pos;
-smooth in vec3 f_tex_coord;
+smooth in vec2 f_tex_coord;
 smooth in vec3 f_normal;
 vec4 computePixelColor()
 {
-	return vec4(1.0,0.5,0.3,0.3);
+	return texture(diffuse_map, f_tex_coord);
 }
 //layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main(void)
@@ -38,12 +38,12 @@ void main(void)
 
 	// get next available location in global buffer
 	uint index = atomicCounterIncrement(in_next_address) + 1U;
-	
 
 	if(index < nodes.length())
 	{
 		//its not used rn
 		vec4 color = computePixelColor();
+		color.a = 0.3;
 		
 		nodes[index].color = packUnorm4x8(color);
 		nodes[index].depth = gl_FragCoord.z;

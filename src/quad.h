@@ -54,7 +54,7 @@ init_quad(Quad *q, char *tex_name)
 }
 
 static void 
-init_fullscreen_quad(Quad *q, char *tex_name)
+init_fullscreen_quad(Quad* q, char* tex_name)
 {
     shader_load(&q->shader,"../assets/shaders/fullscreen_tex.vert", "../assets/shaders/fullscreen_tex.frag");
     if (!load_texture(&q->texture,tex_name))
@@ -115,6 +115,20 @@ render_quad_mvp(Quad* q, mat4 mvp)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }
+
+static void 
+render_quad_mvp_shader(Quad* q, mat4 mvp, Shader *s)
+{
+    use_shader(s);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, q->texture.id);
+    setInt(&q->shader, "sampler", 0);
+    setMat4fv(&q->shader, "MVP", (float*)mvp.elements);
+    glBindVertexArray(q->VAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
 
 
 #include "fbo.h"

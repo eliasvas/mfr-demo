@@ -64,7 +64,7 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 		
 		vec4 col;
 		col.rgb=frag.rgb;
-		col.rgb = (float(ab_num_frag)/8) * warm + (1.f - float(ab_num_frag)/8) * cool;
+		//col.rgb = (float(ab_num_frag)/8) * warm + (1.f - float(ab_num_frag)/8) * cool;
 		col.w=fragment_alpha;	//uses constant alpha
 
 		col.rgb=col.rgb*col.w;

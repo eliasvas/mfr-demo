@@ -14,6 +14,7 @@ static Shader clear_abuffer_shader;
 static GLuint quad_vao, quad_vbo;
 
 static Shader render_abuffer_shader;
+static Texture texture;
 //static Shader render_abuffer_quad_shader;
 //the quad way
 static Shader display_abuffer_shader;
@@ -67,6 +68,7 @@ init_abuffer(void)
 {
     init_abuffer_shaders();
     source_data = arena_alloc(&global_platform.permanent_storage,global_platform.window_width * global_platform.window_height * sizeof(GLuint)); 
+    load_texture(&(texture),"../assets/bunny/stanford_bunny.jpg");
 		
     //we make the ssbo which by the end of the
     //drawcall will hold all fragments
@@ -217,6 +219,10 @@ render_abuffer(Model *m)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, global_node_buffer);
     setInt(&render_abuffer_shader, "screen_width", global_platform.window_width);
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
+    setInt(&m->s, "duiffuse-map", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture.id);
+
     //setVec4(&render_abuffer_shader, "background_color", background_color);
 
     //render the model (here we draw all the models one by one, 
@@ -229,6 +235,41 @@ render_abuffer(Model *m)
     check_gl_errors();
 
 }
+static void 
+render_abuffer_shad(Model *m, Shader *s)
+{
+
+    use_shader(s);
+    mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
+    mat4 view_IT = transpose_mat4(inv_mat4(view));
+    setMat4fv(&render_abuffer_shader, "model", (GLfloat*)model.elements);
+    setMat4fv(&render_abuffer_shader, "view", (GLfloat*)view.elements);
+    setMat4fv(&render_abuffer_shader, "proj", (GLfloat*)proj.elements);
+    setMat4fv(&render_abuffer_shader, "view_IT", (GLfloat*)view_IT.elements);
+    glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, next_address);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, global_node_buffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, global_node_buffer);
+    setInt(&render_abuffer_shader, "screen_width", global_platform.window_width);
+    setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
+    setInt(&m->s, "duiffuse-map", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture.id);
+
+    //setVec4(&render_abuffer_shader, "background_color", background_color);
+
+    //render the model (here we draw all the models one by one, 
+    //we just happen to have only one model rn)
+    glBindVertexArray(m->vao);
+    glDrawArrays(GL_TRIANGLES,0, m->mesh->vertices_count);
+    glBindVertexArray(0);
+    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+
+    check_gl_errors();
+
+}
+
 
 static void display_abuffer(void)
 {
@@ -274,7 +315,66 @@ static void display_abuffer(void)
         glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
         //deepexr_write(image_head,v2(global_platform.window_width, global_platform.window_height),(void *)nodes,counter_val,0);
         //write a sample openexr image
-        deepexr_write(global_platform.window_width, global_platform.window_height,image_head, nodes,counter_val);
+        //populat deep pixels array
+        u32 deep_pixels_count = 0;
+        u32 max_samples = 0;
+        u32 max_samples_i = 0;
+        //count max samples per-pixel
+        for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
+        {
+            u32 local_max_samples = 0;
+            if (image_head[i] == 0)continue;
+            NodeTypeLL *curr = &nodes[image_head[i]];
+            ++local_max_samples;
+            ++deep_pixels_count;
+            while (curr->next != 0)
+            {
+                ++local_max_samples;
+                ++deep_pixels_count;
+                curr = &nodes[curr->next];
+            }
+            if (local_max_samples > max_samples){
+                max_samples = local_max_samples;
+                max_samples_i = i / 4;
+            }
+        }
+        DeepPixel *pixels = malloc(sizeof(DeepPixel) * max_samples * global_platform.window_width * global_platform.window_height);
+        i32 k = 0;
+#if 1
+        for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
+        {
+            i32 remaining_samples = max_samples; 
+            //if no samples found, write {0}s
+            if (image_head[i] == 0)
+            {
+                for (u32 j = 0; j < max_samples;++j)
+                    pixels[k++] = (DeepPixel){0};
+               continue; 
+            }
+
+            //write samples found
+            NodeTypeLL *curr = &nodes[image_head[i]];
+            do
+            {
+                u32 color = curr->color;
+                DeepPixel to_add;
+                to_add.a = (f32)(color & 0xFF) /255.f;
+                to_add.b = (f32)((color >> 8) & 0xFF) / 255.f;
+                to_add.g = (f32)((color >> 16) & 0xFF)/255.f;
+                to_add.r = (f32)((color >> 24) & 0xFF)/255.f;
+                pixels[k++] = to_add;
+                remaining_samples--;
+                //curr->next = 0;
+                curr = &nodes[curr->next];
+            }while (curr->next != 0);
+
+            //write the remaining samples
+            for (u32 j = 0; j < remaining_samples;++j)
+                    pixels[k++] = (DeepPixel){0};
+
+        }
+#endif
+        deepexr_write(global_platform.window_width, global_platform.window_height,pixels, deep_pixels_count,max_samples);
         openexr_screenshot();
         sprintf(&infoLog, "Data Written to Disk");
     }
