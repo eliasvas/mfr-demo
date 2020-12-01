@@ -119,7 +119,6 @@ render_quad_mvp(Quad* q, mat4 mvp)
 static void 
 render_quad_mvp_shader(Quad* q, mat4 mvp, Shader *s)
 {
-    use_shader(s);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, q->texture.id);
     setInt(&q->shader, "sampler", 0);

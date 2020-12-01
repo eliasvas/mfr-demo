@@ -41,6 +41,7 @@ init_shadowmap_fbo(ShadowMapFBO *shadowmap)
     glReadBuffer(GL_NONE);//don't need to bind any color attachment to our FBO
     shader_load (&shadowmap->s, "../assets/shaders/shadowmap.vert","../assets/shaders/shadowmap.frag");
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 
@@ -66,7 +67,7 @@ setup_shadowmap(ShadowMapFBO* shadowmap, mat4 view_matrix)
     mat4 light_projection = orthographic_proj(-10.f,10.f,-10.f,10.f, near_plane, far_plane); //we use orthographic projection because we do direction lights..
 
     //view_matrix = mul_mat4(translate_mat4({view_matrix.elements[3][0],view_matrix.elements[3][1], view_matrix.elements[3][2]}),rotate_mat4(90.f, v3(1.f,0.f,0.f)));
-    view_matrix = look_at(v3(2,10,-5), v3(5,1,0), v3(0,1,0));
+    view_matrix = look_at(v3(0,2,5), v3(0,0,-5), v3(0,1,0));
 
     mat4 lightSpaceMatrix = mul_mat4(light_projection,view_matrix); 
 
@@ -79,7 +80,10 @@ setup_shadowmap(ShadowMapFBO* shadowmap, mat4 view_matrix)
     //ConfigureShaderAndMatrices
     use_shader(&shadowmap->s);
     setMat4fv(&shadowmap->s, "lightSpaceMatrix", (f32*)lightSpaceMatrix.elements);
+    setInt(&shadowmap->s, "shadowmap_on", 1);
+    setInt(&shadowmap->s, "shadowMap", 1);
 
+    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, shadowmap->depth_attachment);
     //RenderScene()
 }

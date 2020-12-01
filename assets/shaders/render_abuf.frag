@@ -23,13 +23,46 @@ layout(binding = 2, offset = 0)
 uniform atomic_uint   in_next_address;
 
 uniform sampler2D diffuse_map;
+uniform sampler2D shadowMap;
 
 smooth in vec4 f_pos;
 smooth in vec2 f_tex_coord;
 smooth in vec3 f_normal;
+smooth in vec4 f_frag_pos_ls;
+flat in int f_shadowmap_on;
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+	//perspective devide so we go to clip-space [-1,1]
+	vec3 projCoords = f_frag_pos_ls.xyz / f_frag_pos_ls.w;
+	//we transform to NDC so we go to [0,1]
+	projCoords = projCoords * 0.5 + 0.5;
+	float closestDepth = texture(shadowMap, projCoords.xy).r;   
+	float currentDepth = projCoords.z;  
+	
+	float shadow = 0.0;
+	vec2 texel_size = 1.0 / vec2(1024,720); //instead of vec2(1024,720) must be the size of the tilemap..
+	for (int x = -1; x <=1; ++x)
+	{
+		for (int y = -1; y <=1; ++y)
+		{
+			float pcf_depth = texture(shadowMap, projCoords.xy + vec2(x, y) * texel_size).r;
+			shadow += currentDepth - 0.0001 > pcf_depth ? 1.0 : 0.0; //if 0, stay 0, if else add the adjacent shadow tiles
+		}
+		shadow /= 9.0;
+	}
+	
+	//make the shadow 0 if it is outside the far plane
+	if (projCoords.z > 1.0)
+		shadow = 0.0;
+	
+	return shadow;
+}
 vec4 computePixelColor()
 {
-	return texture(diffuse_map, f_tex_coord);
+	vec4 color = texture(diffuse_map, f_tex_coord);
+	float shadow = ShadowCalculation(f_frag_pos_ls);       
+    vec3 lighting = (vec3(0.2,0.2,0.2) + (1.0 - shadow) * vec3(0.7,0.7,0.7)) * vec3(color);
+	return vec4(lighting, 1.0);
 }
 //layout(pixel_center_integer) in vec4 gl_FragCoord;
 void main(void)
@@ -50,5 +83,6 @@ void main(void)
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		
 	}
-	discard;
+	//if (f_shadowmap == 0)
+		discard;
 }

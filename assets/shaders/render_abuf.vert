@@ -5,6 +5,8 @@ uniform mat4 view;
 uniform mat4 model;
 //inverse transpose view matrix
 uniform mat4 view_IT;
+uniform mat4 lightSpaceMatrix;
+uniform int shadowmap_on;
 
 layout (location = 0) in vec3 vertex_pos;
 layout (location = 1) in vec3 vertex_normal;
@@ -14,6 +16,7 @@ smooth out vec4 f_pos;
 smooth out vec2 f_tex_coord;
 smooth out vec3 f_normal;
 smooth out vec4 f_frag_pos_ls;
+flat out int f_shadowmap_on;
 
 void main()
 {
@@ -27,6 +30,7 @@ void main()
 
    f_normal = normal_eye;
    f_pos = pos;
-   
+   f_frag_pos_ls = lightSpaceMatrix * vec4(vertex_pos,1.0);
    gl_Position = pos;
+   f_shadowmap_on = shadowmap_on;
 }

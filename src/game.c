@@ -11,15 +11,6 @@
 #include "depthpeel.h"
 #include "openexr_write.h"
 #include "shadowmap.h"
-/*          TODO 
- *  -Work on the NEW renderer!
- *  -Scene Graph
- *  -----------------------------
- *  -Make good strings!!
- *  -IMGUI layer?
- *  -Framebuffers and stuff
- *  -3D animations (collada)
-*/
 
 static Quad q;
 static Model m;
@@ -45,7 +36,7 @@ init(void)
         mesh = load_obj("../assets/bunny/stanford_bunny.obj");
         //mesh = load_obj("../assets/utah_teapot.obj");
         init_model_textured_basic(&m, &mesh);
-        load_texture(&(m.diff),"../assets/red.png");
+        load_texture(&(m.diff),"../assets/bunny/stanford_bunny.jpg");
     }
     m.position = v3(0,0,-2);
     init_text(&bmf, "../assets/BMF.png");
@@ -63,7 +54,7 @@ update(void) {
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
     //background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
-    background_color = v4(0,0,0,1.f);
+    background_color = v4(0.5,0.6,0.7,1.f);
 }
 
 
@@ -71,14 +62,31 @@ void
 render_scene(Shader *quad_shader, Shader *mesh_shader)
 {
 
+    //glBindFramebuffer(GL_FRAMEBUFFER,0);
 
-    //setup_shadowmap(&sfbo, view);
     mat4 quad_mvp = mul_mat4(proj, mul_mat4(view, mul_mat4(translate_mat4(v3(0,-1,0)),mul_mat4(quat_to_mat4(quat_from_angle(v3(1,0,0), -PI/2)), scale_mat4(v3(100,100,100))))));
-    render_quad_mvp_shader(&q, quad_mvp, quad_shader);
-
-    //NOTE: a-buffer rendering
-#if 1
+    setup_shadowmap(&sfbo, view);
+    use_shader(&sfbo.s);
+    render_quad_mvp_shader(&q, quad_mvp, &sfbo.s);
     m.position = v3(0,0,-5);
+    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+    m.position = v3(0,0,-2);
+    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+    m.position = v3(0,0,-11);
+    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+    m.position = v3(0,0,-8);
+    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    use_shader(quad_shader);
+    setInt(&m.s, "shadowMap", 1);
+    m.position = v3(0,0,-5);
+    render_model_textured_basic_shader(&m, &proj, &view, m.s);
+    render_quad_mvp_shader(&q, quad_mvp, quad_shader);
+    m.position = v3(0,0,-5);
+    use_shader(mesh_shader);
+    setInt(&m.s, "shadowMap", 1);
     render_abuffer_shad(&m, mesh_shader);
     m.position = v3(0,0,-2);
     render_abuffer_shad(&m, mesh_shader);
@@ -86,13 +94,8 @@ render_scene(Shader *quad_shader, Shader *mesh_shader)
     render_abuffer_shad(&m, mesh_shader);
     m.position = v3(0,0,-8);
     render_abuffer_shad(&m, mesh_shader);
-
     display_abuffer();
-
-
     clear_abuffer();
-#endif
-
 
 }
 
@@ -100,7 +103,7 @@ static void
 render(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(background_color.x, background_color.y, background_color.z,background_color.w);
-    render_skybox(&skybox);
+    //render_skybox(&skybox);
 
     render_scene(&q.shader, &render_abuffer_shader);
 

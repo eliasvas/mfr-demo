@@ -41,6 +41,7 @@ static GLfloat quad_verts[] = {
 };
 static void check_gl_errors()
 {
+    return;
     GLenum err;
     while((err = glGetError()) != GL_NO_ERROR)
     {
@@ -239,7 +240,6 @@ static void
 render_abuffer_shad(Model *m, Shader *s)
 {
 
-    use_shader(s);
     mat4 model = mul_mat4(translate_mat4(m->position),scale_mat4(v3(10,10,10)));
     mat4 view_IT = transpose_mat4(inv_mat4(view));
     setMat4fv(&render_abuffer_shader, "model", (GLfloat*)model.elements);
