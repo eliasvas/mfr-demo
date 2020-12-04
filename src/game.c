@@ -55,6 +55,8 @@ update(void) {
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
     //background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
     background_color = v4(0.5,0.6,0.7,1.f);
+    sfbo.lightSpaceMatrix = mul_mat4(proj,view);
+    mat4 lsm = mul_mat4(proj,view);
 }
 
 
@@ -67,22 +69,37 @@ render_scene(Shader *quad_shader, Shader *mesh_shader)
     mat4 quad_mvp = mul_mat4(proj, mul_mat4(view, mul_mat4(translate_mat4(v3(0,-1,0)),mul_mat4(quat_to_mat4(quat_from_angle(v3(1,0,0), -PI/2)), scale_mat4(v3(100,100,100))))));
     setup_shadowmap(&sfbo, view);
     use_shader(&sfbo.s);
-    render_quad_mvp_shader(&q, quad_mvp, &sfbo.s);
+    //render_quad_mvp_shader(&q, quad_mvp, &sfbo.s);
     m.position = v3(0,0,-5);
-    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+    render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
     m.position = v3(0,0,-2);
-    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+    render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
     m.position = v3(0,0,-11);
-    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+    render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
     m.position = v3(0,0,-8);
-    render_model_textured_basic_shader(&m, &proj, &view, sfbo.s);
+    render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    /*
+    use_shader(&m.s);
+    render_quad_mvp_shader(&q, quad_mvp, &m.s);
+    m.position = v3(0,0,-5);
+    render_model_textured_basic_shader(&m, &proj, &view, &m.s);
+    m.position = v3(0,0,-2);
+    render_model_textured_basic_shader(&m, &proj, &view, &m.s);
+    m.position = v3(0,0,-11);
+    render_model_textured_basic_shader(&m, &proj, &view, &m.s);
+    m.position = v3(0,0,-8);
+    render_model_textured_basic_shader(&m, &proj, &view, &m.s);
+    */
+
+
 
     use_shader(quad_shader);
     setInt(&m.s, "shadowMap", 1);
     m.position = v3(0,0,-5);
-    render_model_textured_basic_shader(&m, &proj, &view, m.s);
+    render_model_textured_basic_shader(&m, &proj, &view, &m.s);
     render_quad_mvp_shader(&q, quad_mvp, quad_shader);
     m.position = v3(0,0,-5);
     use_shader(mesh_shader);
