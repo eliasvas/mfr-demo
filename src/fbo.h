@@ -34,7 +34,7 @@ typedef struct OpenGLFBO
 }OpenGLFBO;
 
 static OpenGLFBO 
-init_fbo(u32 width, u32 height, i32 flags)
+fbo_init(u32 width, u32 height, i32 flags)
 {
     OpenGLFBO fbo = {0};
     fbo.flags = flags;
@@ -108,7 +108,7 @@ init_fbo(u32 width, u32 height, i32 flags)
 };
 
 static void
-cleanup_fbo(OpenGLFBO *fbo)
+fbo_cleanup(OpenGLFBO *fbo)
 {
     glDeleteFramebuffers(1, &fbo->fbo);
     for(u32 i = 0; i < array_count(fbo->color_attachments); ++i)
@@ -127,16 +127,16 @@ cleanup_fbo(OpenGLFBO *fbo)
 
 //it FORCES the fbo to the size
 static void
-resize_fbo(OpenGLFBO *fbo, u32 w, u32 h, i32 flags)
+fbo_resize(OpenGLFBO *fbo, u32 w, u32 h, i32 flags)
 {
     u32 adjusted_width = w + 1;
     u32 adjusted_height = h + 1;
-    cleanup_fbo(fbo);
-    *fbo = init_fbo(w, h, flags);
+    fbo_cleanup(fbo);
+    *fbo = fbo_init(w, h, flags);
 }
 
 static void
-bind_fbo(OpenGLFBO *fbo)
+fbo_bind(OpenGLFBO *fbo)
 {
     if(fbo)
     {
@@ -154,7 +154,7 @@ bind_fbo(OpenGLFBO *fbo)
 }
 
 static void
-clear_fbo(OpenGLFBO *fbo)
+fbo_clear(OpenGLFBO *fbo)
 {
     GLuint last_fbo_bound;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo_bound);
@@ -177,7 +177,7 @@ clear_fbo(OpenGLFBO *fbo)
 //please make sure the framebuffers are of the same size
 //I did it this way so you can copy to framebuffer 0 
 static void 
-copy_fbo_contents(GLuint src_fbo,GLuint dest_fbo)
+fbo_copy_contents(GLuint src_fbo,GLuint dest_fbo)
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, src_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);
@@ -187,7 +187,7 @@ glBlitFramebuffer(0, 0, global_platform.window_width, global_platform.window_hei
 }
 
 static void 
-blend_fbo_contents(GLuint src_fbo,GLuint dest_fbo)
+fbo_blend_contents(GLuint src_fbo,GLuint dest_fbo)
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, src_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dest_fbo);

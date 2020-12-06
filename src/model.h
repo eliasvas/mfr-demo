@@ -101,8 +101,6 @@ render_model_textured_basic_shader(Model* m,mat4 *proj,mat4 *view, Shader *shade
     setMat4fv(shader, "model", (GLfloat*)model.elements);
     setMat4fv(shader, "view", (GLfloat*)view->elements);
     setMat4fv(shader, "proj", (GLfloat*)proj->elements);
-    mat4 lsm = mul_mat4(*proj, *view);
-    setMat4fv(shader, "lightSpaceMatrix", (GLfloat*)lsm.elements);
 
     glBindVertexArray(m->vao);
     glDrawArrays(GL_TRIANGLES,0, m->mesh->vertices_count);

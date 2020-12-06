@@ -32,8 +32,8 @@ init_shadowmap_fbo(ShadowMapFBO *shadowmap)
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);  
 
     
     //we attach the depth texture as a depth attachment for our framebuffer
@@ -54,14 +54,14 @@ setup_shadowmap(ShadowMapFBO* shadowmap, mat4 view_matrix)
     //maybe do it only if resolution has changed
     glBindTexture(GL_TEXTURE_2D, shadowmap->depth_attachment);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, global_platform.window_width, global_platform.window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    //glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, global_platform.window_width, global_platform.window_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);  
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);  
 
     //render to depth map
-    glViewport(0,0,SHADOW_WIDTH, SHADOW_HEIGHT);
+    glViewport(0,0,global_platform.window_width*4, global_platform.window_height*4);
     glBindFramebuffer(GL_FRAMEBUFFER, shadowmap->fbo);
     glClear(GL_DEPTH_BUFFER_BIT);
     f32 near_plane = 0.1f;
@@ -69,15 +69,15 @@ setup_shadowmap(ShadowMapFBO* shadowmap, mat4 view_matrix)
     mat4 light_projection = orthographic_proj(-10.f,10.f,-10.f,10.f, near_plane, far_plane); //we use orthographic projection because we do direction lights..
 
     //view_matrix = mul_mat4(translate_mat4({view_matrix.elements[3][0],view_matrix.elements[3][1], view_matrix.elements[3][2]}),rotate_mat4(90.f, v3(1.f,0.f,0.f)));
-    //view_matrix = look_at(v3(0,2,5), v3(0,0,-5), v3(0,1,0));
+    view_matrix = look_at(v3(0,20,5), v3(0,0,-5), v3(0,1,0));
 
     mat4 lightSpaceMatrix = mul_mat4(light_projection,view_matrix); 
 
-    //shadowmap->lightSpaceMatrix = lightSpaceMatrix;
+    shadowmap->lightSpaceMatrix = lightSpaceMatrix;
     //glBindFramebuffer(GL_FRAMEBUFFER,0);
 
     //render the scene as normal
-    glViewport(0,0,global_platform.window_width, global_platform.window_height);
+    glViewport(0,0,global_platform.window_width,global_platform.window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //ConfigureShaderAndMatrices
     use_shader(&shadowmap->s);
@@ -85,7 +85,7 @@ setup_shadowmap(ShadowMapFBO* shadowmap, mat4 view_matrix)
     setInt(&shadowmap->s, "shadowmap_on", 1);
     setInt(&shadowmap->s, "shadowMap", 1);
 
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE10);
     glBindTexture(GL_TEXTURE_2D, shadowmap->depth_attachment);
     //RenderScene()
 }

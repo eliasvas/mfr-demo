@@ -30,6 +30,9 @@ smooth in vec2 f_tex_coord;
 smooth in vec3 f_normal;
 smooth in vec4 f_frag_pos_ls;
 flat in int f_shadowmap_on;
+
+float e = 0.0001;
+
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
 	//perspective devide so we go to clip-space [-1,1]
@@ -40,15 +43,16 @@ float ShadowCalculation(vec4 fragPosLightSpace)
 	float currentDepth = projCoords.z;  
 	
 	float shadow = 0.0;
-	vec2 texel_size = 1.0 / vec2(1024,720); //instead of vec2(1024,720) must be the size of the tilemap..
+	vec2 texel_size = 1.0 /vec2(1024,720); //instead of vec2(1024,720) must be the size of the tilemap..
 	for (int x = -1; x <=1; ++x)
 	{
 		for (int y = -1; y <=1; ++y)
 		{
 			float pcf_depth = texture(shadowMap, projCoords.xy + vec2(x, y) * texel_size).r;
-			shadow += currentDepth - 0.0001 > pcf_depth ? 1.0 : 0.0; //if 0, stay 0, if else add the adjacent shadow tiles
+			shadow += currentDepth - e > pcf_depth ? 1.0 : 0.0; //if 0, stay 0, if else add the adjacent shadow tiles
 		}
 		shadow /= 9.0;
+		shadow *=2;
 	}
 	
 	//make the shadow 0 if it is outside the far plane
@@ -83,6 +87,5 @@ void main(void)
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		
 	}
-	//if (f_shadowmap == 0)
-		discard;
+	discard;
 }

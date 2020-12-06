@@ -30,7 +30,7 @@ void main()
 
    f_normal = normal_eye;
    f_pos = pos;
-   f_frag_pos_ls = lightSpaceMatrix * vec4(vertex_pos,1.0);
+   f_frag_pos_ls = lightSpaceMatrix * vec4(vec3(model * vec4(vertex_pos, 1.0)),1.0);
    gl_Position = pos;
    f_shadowmap_on = shadowmap_on;
 }

@@ -5,8 +5,11 @@ layout (location = 1) in vec2 tex_coord;
   
 out vec4 vertexColor;
 out vec2 f_tex_coord;
+smooth out vec4 f_frag_pos_ls;
 
+uniform mat4 lightSpaceMatrix;
 uniform mat4 MVP;
+uniform mat4 model;
 
 void main()
 {
@@ -14,4 +17,5 @@ void main()
     gl_Position = MVP * gl_Position;
 	vertexColor = vec4(1.0,0.0,0.0,1.0); // set the output variable to a dark-red color
 	f_tex_coord = tex_coord;
+	f_frag_pos_ls = lightSpaceMatrix * vec4(vec3(model * vec4(aPos,1.0)),1.0);
 }

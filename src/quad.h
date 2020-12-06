@@ -119,11 +119,13 @@ render_quad_mvp(Quad* q, mat4 mvp)
 static void 
 render_quad_mvp_shader(Quad* q, mat4 mvp, Shader *s)
 {
+    glBindVertexArray(q->VAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, q->texture.id);
-    setInt(&q->shader, "sampler", 0);
-    setMat4fv(&q->shader, "MVP", (float*)mvp.elements);
-    glBindVertexArray(q->VAO);
+    setInt(s, "sampler", 0);
+    setMat4fv(s, "MVP", (float*)mvp.elements);
+    mat4 model = mul_mat4(quat_to_mat4(quat_from_angle(v3(1,0,0), -PI/2)), scale_mat4(v3(100,100,100)));
+    setMat4fv(s, "model", (float*)model.elements);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindVertexArray(0);
 }

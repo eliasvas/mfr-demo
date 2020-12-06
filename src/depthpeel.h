@@ -19,8 +19,8 @@ b32 rendering_front;
 static void 
 init_depth_peel(void)
 {
-    front = init_fbo(global_platform.window_width, global_platform.window_height, FBO_COLOR_0 | FBO_DEPTH);
-    back = init_fbo(global_platform.window_width, global_platform.window_height, FBO_COLOR_0 | FBO_DEPTH);
+    front = fbo_init(global_platform.window_width, global_platform.window_height, FBO_COLOR_0 | FBO_DEPTH);
+    back = fbo_init(global_platform.window_width, global_platform.window_height, FBO_COLOR_0 | FBO_DEPTH);
     //shader_load(&depthpeel_shader,"../assets/shaders/depthpeel_quad.vert","../assets/shaders/depthpeel_quad.frag");
 };
 
@@ -36,15 +36,15 @@ render_depth_peel(void)
     bind_fbo(&front);
     render_scene();
     rendering_front = FALSE;
-    bind_fbo(&back);
+    fbo_bind(&back);
     render_scene();
     glBindFramebuffer(GL_FRAMEBUFFER,0);
 
-    copy_fbo_contents(back.fbo,0);
+    fbo_copy_contents(back.fbo,0);
     //blend_fbo_contents(front.fbo,0);
     screen_quad.texture = (Texture){front.color_attachments[0], front.w, front.h};
     render_fullscreen_quad(&screen_quad);
-    bind_fbo(last_fbo_bound);
+    fbo_bind(last_fbo_bound);
 }
 
 //TODO: resize should happen only when it is needed!
@@ -67,7 +67,7 @@ clear_depth_peel_fbos(void)
     resize_fbo(&back, global_platform.window_width, global_platform.window_height, FBO_COLOR_0 | FBO_DEPTH);
     clear_fbo(&back);
 
-    bind_fbo(last_fbo_bound);
+    fbo_bind(last_fbo_bound);
 }
 
 #endif
