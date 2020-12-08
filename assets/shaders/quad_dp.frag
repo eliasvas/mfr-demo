@@ -11,7 +11,7 @@ uniform sampler2D shadowMap;
 uniform int window_width;
 uniform int window_height;
 uniform int peel;
-float e = 0.001;
+float e = 0.003;
 
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
