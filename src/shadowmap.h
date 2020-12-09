@@ -60,6 +60,7 @@ setup_shadowmap(ShadowMapFBO* shadowmap, mat4 view_matrix)
 
     //render to depth map
     glBindFramebuffer(GL_FRAMEBUFFER, shadowmap->fbo);
+    glViewport(0,0,global_platform.window_width, global_platform.window_height);
     glClear(GL_DEPTH_BUFFER_BIT);
     f32 near_plane = 0.1f;
     f32 far_plane = 100.f;
