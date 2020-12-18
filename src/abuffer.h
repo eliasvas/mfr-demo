@@ -358,10 +358,11 @@ static void display_abuffer(void)
             {
                 u32 color = curr->color;
                 DeepPixel to_add;
-                to_add.a = (f32)(color & 0xFF) /255.f;
-                to_add.b = (f32)((color >> 8) & 0xFF) / 255.f;
-                to_add.g = (f32)((color >> 16) & 0xFF)/255.f;
-                to_add.r = (f32)((color >> 24) & 0xFF)/255.f;
+                to_add.a = (f32)((i32)(color & 0xFF) /255.f);
+                to_add.b = (f32)((i32)((color >> 8) & 0xFF) / 255.f);
+                to_add.g = (f32)((i32)((color >> 16) & 0xFF)/255.f);
+                to_add.r = (f32)((i32)((color >> 24) & 0xFF)/255.f);
+                to_add.z = curr->depth;
                 pixels[k++] = to_add;
                 remaining_samples--;
                 //curr->next = 0;

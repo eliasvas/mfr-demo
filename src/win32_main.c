@@ -184,11 +184,11 @@ WinMain(HINSTANCE Instance,
 
     //NOTE(ilias): initializing arenas
     {
-        u8* permanent_memory = (u8*)malloc(megabytes(64));
+        u8* permanent_memory = (u8*)malloc(megabytes(32));
         u8* frame_memory = (u8*)malloc(megabytes(64));
         //mem = (void *)((u8*)arena->memory + arena->current_offset); 
         if (permanent_memory == NULL || frame_memory == NULL)memcpy(infoLog, "Not Enough Storage for Arenas", 29);
-        global_platform.permanent_storage = arena_init(permanent_memory, megabytes(64));
+        global_platform.permanent_storage = arena_init(permanent_memory, megabytes(32));
         global_platform.frame_storage = arena_init(frame_memory, megabytes(64));
      
     }
