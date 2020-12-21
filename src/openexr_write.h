@@ -356,7 +356,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 	u32 hh = height-1;
 	u8 hdr_data[] = {
 		0x76, 0x2f, 0x31, 0x01, // magic
-		0x02, 0x08, 0, 1, // version, DEEP scanline
+		0x02, 0x08, 0, 0, // version, DEEP scanline
 		// channels
 		'c','h','a','n','n','e','l','s',0,
 		'c','h','l','i','s','t',0,
@@ -408,6 +408,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 		0,0,0x80,0x3f, // 1.0f
     //@TODO DEEP IMAGE check these!!! it must be little endian!!
     // samples per pixel
+    /*
     'm','a','x','S','a','m','p','l','e','s','P','e','r','P','i','x','e','l',0,
     'i','n','t',0,
     0xFF,0xFF,0xFF,0xFF, //this is -1 in 2s complement
@@ -416,6 +417,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 		's','t','r','i','n','g',0,
 		 0x0C,0,0,0,
     'd','e','e','p','_','i','m','a','g','e','0','1',//0,
+    */
 
    	't','y','p','e',0,
 		's','t','r','i','n','g',0,
