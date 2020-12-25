@@ -480,7 +480,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
   u64 num_of_deep_samples_per_pixel_long = (u64)num_of_deep_samples_per_pixel;
   u64 pixel_row_size_long = (u64)pixel_row_size;
 	i32 pixel_row_size_int = (i32)pixel_row_size;
-	for (i32 y = 0; y < height; ++y)
+	for (i32 y = 0; y < (int)height; ++y)
 	{
 		// y coordinate
 		*ptr++ = y & 0xFF;
@@ -506,7 +506,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 		*ptr++ = (pixel_row_size_long >> 48) & 0xFF;
 		*ptr++ = (pixel_row_size_long >> 56) & 0xFF;
     // unpacked size of sample data
-		*ptr++ = pixel_row_size_long& 0xFF;
+		*ptr++ = pixel_row_size_long & 0xFF;
 		*ptr++ = (pixel_row_size_long>> 8) & 0xFF;
 		*ptr++ = (pixel_row_size_long>> 16) & 0xFF;
 		*ptr++ = (pixel_row_size_long>> 24) & 0xFF;
@@ -517,13 +517,14 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     //compressed pixel offset table (each deep pixel has num_of_.. samples per pixel!)
     for (i32 i = 0; i < width; ++i)
     {
-      *ptr++ = (0) & 0xFF;
-      *ptr++ = ((0) >> 8) & 0xFF;
-      *ptr++ = ((0) >> 16) & 0xFF;
-      *ptr++ = ((0) >> 24) & 0xFF;
+      *ptr++ = (num_of_deep_samples_per_pixel_int * (int)i) & 0xFF;
+      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)i) >> 8) & 0xFF;
+      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)i) >> 16) & 0xFF;
+      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)i) >> 24) & 0xFF;
     }
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
+    /*
 		u8* chsrc;
 		chsrc = src + 0;
 		for (i32 x = 0; x < width * num_of_deep_samples_per_pixel; ++x)
@@ -538,19 +539,29 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     chsrc = src + 4;
 		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
 		{
-			*ptr++ = chsrc[0];
-			*ptr++ = chsrc[1];
-			*ptr++ = chsrc[2];
-			*ptr++ = chsrc[3];
+      *ptr++ = 1.f;
+      *ptr++ = 1.f;
+      *ptr++ = 1.f;
+      *ptr++ = 1.f;
+			//*ptr++ = chsrc[0];
+			//*ptr++ = chsrc[1];
+			//*ptr++ = chsrc[2];
+			//*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
     chsrc = src + 8;
 		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
 		{
-			*ptr++ = chsrc[0];
-			*ptr++ = chsrc[1];
-			*ptr++ = chsrc[2];
-			*ptr++ = chsrc[3];
+			//*ptr++ = chsrc[0];
+			//*ptr++ = chsrc[1];
+			//*ptr++ = chsrc[2];
+			//*ptr++ = chsrc[3];
+      *ptr++ = y & 0xFF;
+      *ptr++ = (y >> 8) & 0xFF;
+      *ptr++ = (y >> 16) & 0xFF;
+      *ptr++ = (y >> 24) & 0xFF;
+
+
 			chsrc += stride;
 		}
 		chsrc = src + 16;
@@ -571,6 +582,14 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 			*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
+    */
+    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel * 5;++i)
+    {
+      *ptr++ = 0xFF; 
+      *ptr++ = 0xFF; 
+      *ptr++ = 0xFF; 
+      *ptr++ = 0xFF; 
+    }
 
 		src += width * stride;
 	}
