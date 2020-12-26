@@ -524,7 +524,6 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     }
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
-    /*
 		u8* chsrc;
 		chsrc = src + 0;
 		for (i32 x = 0; x < width * num_of_deep_samples_per_pixel; ++x)
@@ -582,7 +581,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 			*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
-    */
+    /*
     for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
     {
       f32 num = ((f32)y / (f32)height);
@@ -638,13 +637,14 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
       *ptr++ = (*fl >> 16) & 0xFF; 
       *ptr++ = (*fl >> 24) & 0xFF; 
     }
+    */
 
 
 
 
 
 
-		src += width * stride;
+		src += width * stride * num_of_deep_samples_per_pixel;
 	}
   FILE* f = fopen ("deep_image01.exr", "wb");
   fwrite (buf, 1, buf_size, f);
