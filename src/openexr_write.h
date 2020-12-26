@@ -517,10 +517,10 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     //compressed pixel offset table (each deep pixel has num_of_.. samples per pixel!)
     for (i32 i = 0; i < width; ++i)
     {
-      *ptr++ = (num_of_deep_samples_per_pixel_int * (int)i) & 0xFF;
-      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)i) >> 8) & 0xFF;
-      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)i) >> 16) & 0xFF;
-      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)i) >> 24) & 0xFF;
+      *ptr++ = (num_of_deep_samples_per_pixel_int * (int)(i+1)) & 0xFF;
+      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)(i+1)) >> 8) & 0xFF;
+      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)(i+1)) >> 16) & 0xFF;
+      *ptr++ = ((num_of_deep_samples_per_pixel_int* (int)(i+1)) >> 24) & 0xFF;
     }
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
