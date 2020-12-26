@@ -583,13 +583,66 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 			chsrc += stride;
 		}
     */
-    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel * 5;++i)
+    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
     {
-      *ptr++ = 0xFF; 
-      *ptr++ = 0xFF; 
-      *ptr++ = 0xFF; 
-      *ptr++ = 0xFF; 
+      f32 num = ((f32)y / (f32)height);
+      f32 one = 1.f;
+      f32 zero = 0.f;
+      u32 *fl = &one;
+      *ptr++ = (*fl >> 0) & 0xFF; 
+      *ptr++ = (*fl >> 8) & 0xFF; 
+      *ptr++ = (*fl >> 16) & 0xFF; 
+      *ptr++ = (*fl >> 24) & 0xFF; 
     }
+    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
+    {
+      f32 num = ((f32)y / (f32)height);
+      f32 one = 1.f;
+      f32 zero = 0.f;
+      u32 *fl = &zero;
+      *ptr++ = (*fl >> 0) & 0xFF; 
+      *ptr++ = (*fl >> 8) & 0xFF; 
+      *ptr++ = (*fl >> 16) & 0xFF; 
+      *ptr++ = (*fl >> 24) & 0xFF; 
+    }
+    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
+    {
+      f32 num = ((f32)y / (f32)height);
+      f32 one = 1.f;
+      f32 zero = 0.f;
+      u32 *fl = &zero;
+      *ptr++ = (*fl >> 0) & 0xFF; 
+      *ptr++ = (*fl >> 8) & 0xFF; 
+      *ptr++ = (*fl >> 16) & 0xFF; 
+      *ptr++ = (*fl >> 24) & 0xFF; 
+    }
+    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
+    {
+      f32 num = ((f32)y / (f32)height);
+      f32 one = 1.f;
+      f32 zero = 0.f;
+      u32 *fl = &num;
+      *ptr++ = (*fl >> 0) & 0xFF; 
+      *ptr++ = (*fl >> 8) & 0xFF; 
+      *ptr++ = (*fl >> 16) & 0xFF; 
+      *ptr++ = (*fl >> 24) & 0xFF; 
+    }
+    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
+    {
+      f32 num = ((f32)y / (f32)height);
+      f32 one = 1.f;
+      f32 zero = 0.f;
+      u32 *fl = &one;
+      *ptr++ = (*fl >> 0) & 0xFF; 
+      *ptr++ = (*fl >> 8) & 0xFF; 
+      *ptr++ = (*fl >> 16) & 0xFF; 
+      *ptr++ = (*fl >> 24) & 0xFF; 
+    }
+
+
+
+
+
 
 		src += width * stride;
 	}
