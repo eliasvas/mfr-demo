@@ -349,6 +349,7 @@ u8* openexr_write_half(u32 width, u32 height, u32 channels,void* rgba16f, i32* o
 	return buf;
 }
 
+extern mat4 view, proj;
 #if 1
 u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32 num_of_deep_samples_per_pixel)
 {
@@ -356,6 +357,8 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
   //height = global_platform.window_height;
 	u32 ww = width-1;
 	u32 hh = height-1;
+  u32 *v = &view;
+  u32 *p = &proj;
 	u8 hdr_data[] = {
 		0x76, 0x2f, 0x31, 0x01, // magic
 		0x02, 0x08, 0, 0, // version, DEEP scanline
@@ -420,6 +423,46 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 		 0x0C,0,0,0,
     'd','e','e','p','_','i','m','a','g','e','0','1',//0,
     */
+    'v','i','e','w','M','a','t','r','i','x',0,
+    'm','4','4','f',0,
+     64, 0, 0,0,
+     (v[0] >>0)& 0xFF,(v[0] >>4)& 0xFF,(v[0] >>8)& 0xFF,(v[0] >>12)& 0xFF,
+     (v[1] >>0)& 0xFF,(v[1] >>4)& 0xFF,(v[1] >>8)& 0xFF,(v[1] >>12)& 0xFF,
+     (v[2] >>0)& 0xFF,(v[2] >>4)& 0xFF,(v[2] >>8)& 0xFF,(v[2] >>12)& 0xFF,
+     (v[3] >>0)& 0xFF,(v[3] >>4)& 0xFF,(v[3] >>8)& 0xFF,(v[3] >>12)& 0xFF,
+     (v[4] >>0)& 0xFF,(v[4] >>4)& 0xFF,(v[4] >>8)& 0xFF,(v[4] >>12)& 0xFF,
+     (v[5] >>0)& 0xFF,(v[5] >>4)& 0xFF,(v[5] >>8)& 0xFF,(v[5] >>12)& 0xFF,
+     (v[6] >>0)& 0xFF,(v[6] >>4)& 0xFF,(v[6] >>8)& 0xFF,(v[6] >>12)& 0xFF,
+     (v[7] >>0)& 0xFF,(v[7] >>4)& 0xFF,(v[7] >>8)& 0xFF,(v[7] >>12)& 0xFF,
+     (v[8] >>0)& 0xFF,(v[8] >>4)& 0xFF,(v[8] >>8)& 0xFF,(v[8] >>12)& 0xFF,
+     (v[9] >>0)& 0xFF,(v[9] >>4)& 0xFF,(v[9] >>8)& 0xFF,(v[9] >>12)& 0xFF,
+     (v[10] >>0)& 0xFF,(v[10] >>4)& 0xFF,(v[10] >>8)& 0xFF,(v[10] >>12)& 0xFF,
+     (v[11] >>0)& 0xFF,(v[11] >>4)& 0xFF,(v[11] >>8)& 0xFF,(v[11] >>12)& 0xFF,
+     (v[12] >>0)& 0xFF,(v[12] >>4)& 0xFF,(v[12] >>8)& 0xFF,(v[12] >>12)& 0xFF,
+     (v[13] >>0)& 0xFF,(v[13] >>4)& 0xFF,(v[13] >>8)& 0xFF,(v[13] >>12)& 0xFF,
+     (v[14] >>0)& 0xFF,(v[14] >>4)& 0xFF,(v[14] >>8)& 0xFF,(v[14] >>12)& 0xFF,
+     (v[15] >>0)& 0xFF,(v[15] >>4)& 0xFF,(v[15] >>8)& 0xFF,(v[15] >>12)& 0xFF,
+
+    'p','r','o','j','e','c','t','i','o','n','M','a','t','r','i','x',0,
+    'm','4','4','f',0,
+     64, 0, 0,0,
+     (p[0] >>0)& 0xFF,(p[0] >>4)& 0xFF,(p[0] >>8)& 0xFF,(p[0] >>12)& 0xFF,
+     (p[1] >>0)& 0xFF,(p[1] >>4)& 0xFF,(p[1] >>8)& 0xFF,(p[1] >>12)& 0xFF,
+     (p[2] >>0)& 0xFF,(p[2] >>4)& 0xFF,(p[2] >>8)& 0xFF,(p[2] >>12)& 0xFF,
+     (p[3] >>0)& 0xFF,(p[3] >>4)& 0xFF,(p[3] >>8)& 0xFF,(p[3] >>12)& 0xFF,
+     (p[4] >>0)& 0xFF,(p[4] >>4)& 0xFF,(p[4] >>8)& 0xFF,(p[4] >>12)& 0xFF,
+     (p[5] >>0)& 0xFF,(p[5] >>4)& 0xFF,(p[5] >>8)& 0xFF,(p[5] >>12)& 0xFF,
+     (p[6] >>0)& 0xFF,(p[6] >>4)& 0xFF,(p[6] >>8)& 0xFF,(p[6] >>12)& 0xFF,
+     (p[7] >>0)& 0xFF,(p[7] >>4)& 0xFF,(p[7] >>8)& 0xFF,(p[7] >>12)& 0xFF,
+     (p[8] >>0)& 0xFF,(p[8] >>4)& 0xFF,(p[8] >>8)& 0xFF,(p[8] >>12)& 0xFF,
+     (p[9] >>0)& 0xFF,(p[9] >>4)& 0xFF,(p[9] >>8)& 0xFF,(p[9] >>12)& 0xFF,
+     (p[10] >>0)& 0xFF,(p[10] >>4)& 0xFF,(p[10] >>8)& 0xFF,(p[10] >>12)& 0xFF,
+     (p[11] >>0)& 0xFF,(p[11] >>4)& 0xFF,(p[11] >>8)& 0xFF,(p[11] >>12)& 0xFF,
+     (p[12] >>0)& 0xFF,(p[12] >>4)& 0xFF,(p[12] >>8)& 0xFF,(p[12] >>12)& 0xFF,
+     (p[13] >>0)& 0xFF,(p[13] >>4)& 0xFF,(p[13] >>8)& 0xFF,(p[13] >>12)& 0xFF,
+     (p[14] >>0)& 0xFF,(p[14] >>4)& 0xFF,(p[14] >>8)& 0xFF,(p[14] >>12)& 0xFF,
+     (p[15] >>0)& 0xFF,(p[15] >>4)& 0xFF,(p[15] >>8)& 0xFF,(p[15] >>12)& 0xFF,
+
 
    	't','y','p','e',0,
 		's','t','r','i','n','g',0,
@@ -582,65 +625,6 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 			*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
-    /*
-    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
-    {
-      f32 num = ((f32)y / (f32)height);
-      f32 one = 1.f;
-      f32 zero = 0.f;
-      u32 *fl = &one;
-      *ptr++ = (*fl >> 0) & 0xFF; 
-      *ptr++ = (*fl >> 8) & 0xFF; 
-      *ptr++ = (*fl >> 16) & 0xFF; 
-      *ptr++ = (*fl >> 24) & 0xFF; 
-    }
-    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
-    {
-      f32 num = ((f32)y / (f32)height);
-      f32 one = 1.f;
-      f32 zero = 0.f;
-      u32 *fl = &zero;
-      *ptr++ = (*fl >> 0) & 0xFF; 
-      *ptr++ = (*fl >> 8) & 0xFF; 
-      *ptr++ = (*fl >> 16) & 0xFF; 
-      *ptr++ = (*fl >> 24) & 0xFF; 
-    }
-    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
-    {
-      f32 num = ((f32)y / (f32)height);
-      f32 one = 1.f;
-      f32 zero = 0.f;
-      u32 *fl = &zero;
-      *ptr++ = (*fl >> 0) & 0xFF; 
-      *ptr++ = (*fl >> 8) & 0xFF; 
-      *ptr++ = (*fl >> 16) & 0xFF; 
-      *ptr++ = (*fl >> 24) & 0xFF; 
-    }
-    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
-    {
-      f32 num = ((f32)y / (f32)height);
-      f32 one = 1.f;
-      f32 zero = 0.f;
-      u32 *fl = &num;
-      *ptr++ = (*fl >> 0) & 0xFF; 
-      *ptr++ = (*fl >> 8) & 0xFF; 
-      *ptr++ = (*fl >> 16) & 0xFF; 
-      *ptr++ = (*fl >> 24) & 0xFF; 
-    }
-    for (u32 i = 0; i < width * num_of_deep_samples_per_pixel;++i)
-    {
-      f32 num = ((f32)y / (f32)height);
-      f32 one = 1.f;
-      f32 zero = 0.f;
-      u32 *fl = &one;
-      *ptr++ = (*fl >> 0) & 0xFF; 
-      *ptr++ = (*fl >> 8) & 0xFF; 
-      *ptr++ = (*fl >> 16) & 0xFF; 
-      *ptr++ = (*fl >> 24) & 0xFF; 
-    }
-    */
-
-
 
 
 

@@ -9,7 +9,6 @@
 #include "abuffer.h"
 #include "skybox.h"
 #include "depthpeel.h"
-#include "openexr_write.h"
 #include "shadowmap.h"
 
 static Quad q;
@@ -24,6 +23,7 @@ static mat4 view;
 static mat4 proj;
 static vec4 background_color;
 //Here goes any startup code you have.
+#include "openexr_write.h"
 static void 
 init(void)
 {
