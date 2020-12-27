@@ -435,6 +435,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 	};
 	i32 hdr_size = array_count(hdr_data);
 
+
 	i32 scanline_table_size = sizeof(u64) * height;
 	u32 pixel_row_size = width * sizeof(DeepPixel) * num_of_deep_samples_per_pixel;
 	u32 full_row_size = pixel_row_size + 4 * width + 28; //TODO(iv): investigate

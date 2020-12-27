@@ -340,12 +340,26 @@ static void display_abuffer(void)
         }
         DeepPixel *pixels = malloc(sizeof(DeepPixel) * max_samples * global_platform.window_width * global_platform.window_height);
         i32 k = 0;
-#if 1
+        //first flip so origin is at top left corner!!
+        i32 new_i = 0;
+        i32 * image_head_new = ALLOC(sizeof(image_head[0]) * global_platform.window_width * global_platform.window_height * 4);
+        for (i32 j = global_platform.window_height-1; j >=0; --j)
+        {
+            for (i32 i = 0; i < global_platform.window_width; ++i)
+            {
+                i32 index = global_platform.window_width * j * 4 +  4 * i;
+                u8 cmp[3];
+                image_head_new[new_i++]= (i32)(image_head[index]);
+                image_head_new[new_i++]= (i32)(image_head[index+1]);
+                image_head_new[new_i++]= (i32)(image_head[index+2]);
+                image_head_new[new_i++]= (i32)(image_head[index+3]);
+            }
+        }
         for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
         {
             i32 remaining_samples = max_samples; 
             //if no samples found, write {0}s
-            if (image_head[i] == 0)
+            if (image_head_new[i] == 0)
             {
                 for (u32 j = 0; j < max_samples;++j)
                     pixels[k++] = (DeepPixel){0};
@@ -353,7 +367,7 @@ static void display_abuffer(void)
             }
 
             //write samples found
-            NodeTypeLL *curr = &nodes[image_head[i]];
+            NodeTypeLL *curr = &nodes[image_head_new[i]];
             do
             {
                 u32 color = curr->color;
@@ -374,7 +388,6 @@ static void display_abuffer(void)
                     pixels[k++] = (DeepPixel){0};
 
         }
-#endif
         deepexr_write(global_platform.window_width, global_platform.window_height,pixels, deep_pixels_count,max_samples);
         openexr_screenshot();
         sprintf(&infoLog, "Data Written to Disk");
