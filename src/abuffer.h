@@ -29,6 +29,17 @@ static GLuint zero = 0;
 #define ABUF_SOFTWARE_CLEAR 0
 #endif
 
+//Data needed to render a Deep Image via A Buffer
+typedef struct DeepImageData
+{
+  u32 width, height;
+  i32 *image_head;
+  NodeTypeLL *nodes;
+  i32 atomic_counter;
+}DeepImageData;
+//trying to render with data via glMapBuffer glUnmapBuffer
+static DeepImageData test_data;
+
 //Full screen quad vertices definition
 static GLfloat quad_verts[] = {
    -1.0f, -1.0f, 0.0f, 1.0f,
@@ -235,6 +246,66 @@ render_abuffer(Model *m)
 
     check_gl_errors();
 
+}
+//we set image head and the ssbo to render just by the stored data 
+static void set_abuffer_data(DeepImageData data)
+{
+      //get image-head data 
+      //NOTE: we get the image data from the framebuffer because glGetTexImage returns an all-black image
+      GLint *image_head= (GLint*)ALLOC(sizeof(u32) *global_platform.window_width * global_platform.window_height * 4);   
+      for (int i = 0; i < global_platform.window_width * global_platform.window_height; ++i)
+          image_head[i] = 0;
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, head_list);
+      //THIS MIGHT BE WRONG, TODO checkk
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,data.width, data.height,0,GL_RGBA_INTEGER, GL_UNSIGNED_INT, data.image_head);
+      glBindTexture(GL_TEXTURE_2D, 0);
+      test_data.image_head = image_head;
+      
+      //TODO KEEP GOING
+
+      //get the atomic counter data (size of ssbo)
+      glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
+      int counter_val = 0; 
+      GLuint *counter_data = (GLuint*)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_READ_ONLY); 
+      memcpy(&counter_val, counter_data, sizeof(int));
+      glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
+      glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+      test_data.atomic_counter = counter_val;
+
+
+      //get the ssbo (NodeTypeLL data)
+      NodeTypeLL *nodes = (NodeTypeLL*)ALLOC(sizeof(NodeTypeLL) * counter_val); 
+      void *node_data= glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+      memcpy(nodes, node_data, sizeof(NodeTypeLL) * counter_val);
+      test_data.nodes = nodes;
+      glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+      //deepexr_write(image_head,v2(global_platform.window_width, global_platform.window_height),(void *)nodes,counter_val,0);
+      //write a sample openexr image
+      //populat deep pixels array
+      u32 deep_pixels_count = 0;
+      u32 max_samples = 0;
+      u32 max_samples_i = 0;
+      //count max samples per-pixel
+      for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
+      {
+          u32 local_max_samples = 0;
+          if (image_head[i] == 0)continue;
+          NodeTypeLL *curr = &nodes[image_head[i]];
+          ++local_max_samples;
+          ++deep_pixels_count;
+          while (curr->next != 0)
+          {
+              ++local_max_samples;
+              ++deep_pixels_count;
+              curr = &nodes[curr->next];
+          }
+          if (local_max_samples > max_samples){
+              max_samples = local_max_samples;
+              max_samples_i = i / 4;
+          }
+      }
+      
 }
 static void 
 render_abuffer_shad(Model *m, Shader *s)
