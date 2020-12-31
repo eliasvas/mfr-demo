@@ -7,7 +7,10 @@ uniform int	layer;
 struct NodeTypeLL
 {
 	float depth;
-	uint color;
+	float red;
+	float green;
+	float blue;
+	float alpha;
 	uint next;
 };
 layout(binding = 0, r32ui)		

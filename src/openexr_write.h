@@ -7,7 +7,10 @@
 typedef struct NodeTypeLL
 {
 	f32 depth;
-	u32 color;
+  f32 red;
+  f32 green;
+  f32 blue;
+  f32 alpha;
 	u32 next;
 }NodeTypeLL;
 
@@ -569,7 +572,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
 		u8* chsrc;
-		chsrc = src + 0;
+		chsrc = src + 16;
 		for (i32 x = 0; x < width * num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];
@@ -579,35 +582,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 
 			chsrc += stride;
 		}
-    chsrc = src + 4;
-		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
-		{
-      *ptr++ = 1.f;
-      *ptr++ = 1.f;
-      *ptr++ = 1.f;
-      *ptr++ = 1.f;
-			//*ptr++ = chsrc[0];
-			//*ptr++ = chsrc[1];
-			//*ptr++ = chsrc[2];
-			//*ptr++ = chsrc[3];
-			chsrc += stride;
-		}
-    chsrc = src + 8;
-		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
-		{
-			//*ptr++ = chsrc[0];
-			//*ptr++ = chsrc[1];
-			//*ptr++ = chsrc[2];
-			//*ptr++ = chsrc[3];
-      *ptr++ = y & 0xFF;
-      *ptr++ = (y >> 8) & 0xFF;
-      *ptr++ = (y >> 16) & 0xFF;
-      *ptr++ = (y >> 24) & 0xFF;
-
-
-			chsrc += stride;
-		}
-		chsrc = src + 16;
+    chsrc = src + 12;
 		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];
@@ -616,7 +591,26 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 			*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
-		chsrc = src + 24;
+    chsrc = src + 8;
+		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+
+			chsrc += stride;
+		}
+		chsrc = src + 4;
+		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+			chsrc += stride;
+		}
+		chsrc = src + 0;
 		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];

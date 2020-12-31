@@ -231,7 +231,7 @@ render_abuffer(Model *m)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, global_node_buffer);
     setInt(&render_abuffer_shader, "screen_width", global_platform.window_width);
     setInt(&render_abuffer_shader, "screen_height", global_platform.window_height);
-    setInt(&m->s, "duiffuse-map", 0);
+    setInt(&m->s, "diffuse-map", 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture.id);
 
@@ -441,12 +441,11 @@ static void display_abuffer(void)
             NodeTypeLL *curr = &nodes[image_head_new[i]];
             do
             {
-                u32 color = curr->color;
                 DeepPixel to_add;
-                to_add.a = (f32)((i32)(color & 0xFF) /255.f);
-                to_add.b = (f32)((i32)((color >> 8) & 0xFF) / 255.f);
-                to_add.g = (f32)((i32)((color >> 16) & 0xFF)/255.f);
-                to_add.r = (f32)((i32)((color >> 24) & 0xFF)/255.f);
+                to_add.a = curr->alpha;
+                to_add.b = curr->blue;
+                to_add.g = curr->green;
+                to_add.r = curr->red;
                 to_add.z = curr->depth;
                 pixels[k++] = to_add;
                 remaining_samples--;

@@ -1,3 +1,20 @@
+/*
+void sort_insert(const int num)
+{
+	for (int j = 1; j < num; ++j)
+	{
+		vec2 key = fragments[j];
+		int i = j - 1;
+
+		while (i >= 0 && fragments[i].g > key.g)
+		{
+			fragments[i+1] = fragments[i];
+			--i;
+		}
+		fragments[i+1] = key;
+	}
+}
+*/
 #version 460
 //#include "define.h"
 //#include "data_structs.h"
@@ -5,12 +22,16 @@
 struct NodeTypeLL
 {
 	float depth;
-	uint color;
+	float red;
+	float green;
+	float blue;
+	float alpha;
 	uint next;
 };
 #define LOCAL_SIZE 32
 
-vec2 fragments [LOCAL_SIZE];
+vec4 fragments [LOCAL_SIZE];
+float fragments_z [LOCAL_SIZE];
 const vec3 cool = vec3(0.2,0.1,0.5);
 const vec3 warm = vec3(0.9,0.2,0.1);
 
@@ -38,15 +59,24 @@ void sort_insert(const int num)
 {
 	for (int j = 1; j < num; ++j)
 	{
-		vec2 key = fragments[j];
+		float key = fragments_z[j];
+		vec4 key_color = fragments[j];
 		int i = j - 1;
 
-		while (i >= 0 && fragments[i].g > key.g)
+		while (i >= 0 && fragments_z[i] > key)
 		{
-			fragments[i+1] = fragments[i];
+			fragments[i+1].r = fragments[i].r;
+			fragments[i+1].g = fragments[i].g;
+			fragments[i+1].b = fragments[i].b;
+			fragments[i+1].a = fragments[i].a;
+			fragments_z[i+1] = fragments_z[i];
 			--i;
 		}
-		fragments[i+1] = key;
+		fragments_z[i+1] = key;
+		fragments[i+1].r = key_color.r;
+		fragments[i+1].g = key_color.g;
+		fragments[i+1].b = key_color.b;
+		fragments[i+1].a = key_color.a;
 	}
 }
 
@@ -60,7 +90,7 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 
 	final_color=vec4(0.0f);
 	for(int i=0; i<ab_num_frag; i++){
-		vec4 frag= unpackUnorm4x8(floatBitsToUint(fragments[i].r));
+		vec4 frag= vec4(fragments[i].r, fragments[i].g,fragments[i].b,fragments[i].a);
 		
 		vec4 col;
 		col.rgb=frag.rgb;
@@ -89,15 +119,13 @@ void main(void)
 	if(index == 0u)
 		discard;
 
-	// Alloc optionally, used for fixing next fragment pointers
-	uint fragments_id[LOCAL_SIZE];
 
 	// Store fragment data values to a local array
 	int count = 0;
 	while (index != 0u)
 	{
-		fragments_id[count] = index; // Set optionally
-		fragments[count++]  = vec2(uintBitsToFloat(nodes[index].color), nodes[index].depth);
+		fragments[count++]  = vec4(nodes[index].red, nodes[index].green, nodes[index].blue, nodes[index].alpha);
+		fragments_z[count] = nodes[index].depth;
 		index			    = nodes[index].next;
 	}
 	
