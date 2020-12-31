@@ -4,11 +4,12 @@
 //#include "sort.h"
 struct NodeTypeLL
 {
-	float depth;
-	float red;
-	float green;
-	float blue;
+
 	float alpha;
+	float blue;
+	float green;
+	float red;
+	float depth;
 	uint next;
 };
 #define LOCAL_SIZE 32

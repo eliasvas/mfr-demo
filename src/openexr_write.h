@@ -6,11 +6,11 @@
 
 typedef struct NodeTypeLL
 {
-	f32 depth;
-  f32 red;
-  f32 green;
-  f32 blue;
   f32 alpha;
+  f32 blue;
+  f32 green;
+  f32 red;
+	f32 depth;
 	u32 next;
 }NodeTypeLL;
 
@@ -414,18 +414,15 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 		'f','l','o','a','t',0, 
     4,0,0,0,
 		0,0,0x80,0x3f, // 1.0f
-    //@TODO DEEP IMAGE check these!!! it must be little endian!!
-    // samples per pixel
-    /*
+
     'm','a','x','S','a','m','p','l','e','s','P','e','r','P','i','x','e','l',0,
     'i','n','t',0,
-    0xFF,0xFF,0xFF,0xFF, //this is -1 in 2s complement
-    //deep image type attribute and version (must always be set to 1)
-    'n','a','m','e',0,
-		's','t','r','i','n','g',0,
-		 0x0C,0,0,0,
-    'd','e','e','p','_','i','m','a','g','e','0','1',//0,
-    */
+    4,0,0,0,
+    (((num_of_deep_samples_per_pixel) >> 0) & 0xFF),
+    (((num_of_deep_samples_per_pixel) >> 4) & 0xFF),
+    (((num_of_deep_samples_per_pixel) >> 8) & 0xFF),
+    (((num_of_deep_samples_per_pixel) >> 12) & 0xFF),
+
     'v','i','e','w','M','a','t','r','i','x',0,
     'm','4','4','f',0,
      64, 0, 0,0,
@@ -572,7 +569,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
 		u8* chsrc;
-		chsrc = src + 12;
+		chsrc = src + 16;
 		for (i32 x = 0; x < width * num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];
@@ -582,7 +579,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 
 			chsrc += stride;
 		}
-    chsrc = src + 16;
+    chsrc = src + 12;
 		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];

@@ -2,11 +2,12 @@
 
 struct NodeTypeLL
 {
-	float depth;
-	float red;
-	float green;
-	float blue;
+
 	float alpha;
+	float blue;
+	float green;
+	float red;
+	float depth;
 	uint next;
 };
 //layout(binding = 0, r32ui)		
