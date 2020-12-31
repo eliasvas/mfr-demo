@@ -569,7 +569,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
 		u8* chsrc;
-		chsrc = src + 0;
+		chsrc = src + 16;
 		for (i32 x = 0; x < width * num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];
