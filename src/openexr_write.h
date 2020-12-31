@@ -369,7 +369,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 		'c','h','a','n','n','e','l','s',0,
 		'c','h','l','i','s','t',0,
 		55,0,0,0,
-		'A',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // R, FLOAT 
+		'A',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // A, FLOAT 
 		'B',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // B, FLOAT 
 		'G',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // G, FLOAT 
 		'R',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // R, FLOAT 
@@ -572,7 +572,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
 		u8* chsrc;
-		chsrc = src + 16;
+		chsrc = src + 12;
 		for (i32 x = 0; x < width * num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];
@@ -582,7 +582,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 
 			chsrc += stride;
 		}
-    chsrc = src + 12;
+    chsrc = src + 16;
 		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];
