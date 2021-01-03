@@ -7,7 +7,7 @@
 extern mat4 proj, view;
 
 static u32 
-load_cubemap(char ** faces)
+load_cubemap(char **faces)
 {
     u32 textureID;
     glGenTextures(1, &textureID);

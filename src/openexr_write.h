@@ -607,7 +607,7 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 			*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
-		chsrc = src + 0;
+		chsrc = src + 16;
 		for (i32 x = 0; x < width* num_of_deep_samples_per_pixel; ++x)
 		{
 			*ptr++ = chsrc[0];
@@ -640,8 +640,8 @@ u8* openexr_screenshot(void)
             glReadPixels(0, 0, global_platform.window_width,global_platform.window_height,
                     GL_RGBA, GL_FLOAT, rgba);
             i32 exr_size; //in bytes
-            u8* exr = openexr_write(image_width, image_height , 4, rgba, &exr_size);
-            FILE* f = fopen ("test.exr", "wb");
+            u8 *exr = openexr_write(image_width, image_height , 4, rgba, &exr_size);
+            FILE *f = fopen ("test.exr", "wb");
             fwrite (exr, 1, exr_size, f);
             fclose (f);
             free (exr); 

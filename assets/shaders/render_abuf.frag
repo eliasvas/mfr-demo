@@ -33,6 +33,7 @@ smooth in vec4 f_pos;
 smooth in vec2 f_tex_coord;
 smooth in vec3 f_normal;
 smooth in vec4 f_frag_pos_ls;
+smooth in vec3 f_frag_pos_ws;
 flat in int f_shadowmap_on;
 
 float e = 0.0001;
@@ -84,13 +85,13 @@ void main(void)
 	{
 		//its not used rn
 		vec4 color = computePixelColor();
-		color.a = 0.1;
+		color.a = 0.2;
 		
 		nodes[index].red = color.r;
 		nodes[index].green = color.g;
 		nodes[index].blue = color.b;
 		nodes[index].alpha = color.a;
-		nodes[index].depth = gl_FragCoord.z;
+		nodes[index].depth = f_frag_pos_ws.z;
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		
 	}

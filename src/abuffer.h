@@ -61,7 +61,7 @@ static void check_gl_errors()
 
 }
 
-extern mat4 view, proj;
+extern mat4 view, proj, invview, invproj;
 extern vec4 background_color;
 
 static void 
@@ -224,6 +224,9 @@ render_abuffer(Model *m)
     setMat4fv(&render_abuffer_shader, "view", (GLfloat*)view.elements);
     setMat4fv(&render_abuffer_shader, "proj", (GLfloat*)proj.elements);
     setMat4fv(&render_abuffer_shader, "view_IT", (GLfloat*)view_IT.elements);
+    setmat4fv(&render_abuffer_shader, "invproj", (GLfloat*)invproj.elements);
+    setmat4fv(&render_abuffer_shader, "invview", (GLfloat*)invview.elements);
+
     glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
     glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, next_address);
@@ -268,7 +271,7 @@ static void set_abuffer_data(DeepImageData data)
       glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
       int counter_val = 0; 
       GLuint *counter_data = (GLuint*)glMapBuffer(GL_ATOMIC_COUNTER_BUFFER, GL_READ_ONLY); 
-      memcpy(&counter_val, counter_data, sizeof(int));
+      memcpy(counter_data, &data.atomic_counter, sizeof(int));
       glUnmapBuffer(GL_ATOMIC_COUNTER_BUFFER);
       glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
       test_data.atomic_counter = counter_val;
@@ -277,35 +280,9 @@ static void set_abuffer_data(DeepImageData data)
       //get the ssbo (NodeTypeLL data)
       NodeTypeLL *nodes = (NodeTypeLL*)ALLOC(sizeof(NodeTypeLL) * counter_val); 
       void *node_data= glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-      memcpy(nodes, node_data, sizeof(NodeTypeLL) * counter_val);
+      memcpy(node_data,data.nodes, sizeof(NodeTypeLL) * counter_val);
       test_data.nodes = nodes;
       glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-      //deepexr_write(image_head,v2(global_platform.window_width, global_platform.window_height),(void *)nodes,counter_val,0);
-      //write a sample openexr image
-      //populat deep pixels array
-      u32 deep_pixels_count = 0;
-      u32 max_samples = 0;
-      u32 max_samples_i = 0;
-      //count max samples per-pixel
-      for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
-      {
-          u32 local_max_samples = 0;
-          if (image_head[i] == 0)continue;
-          NodeTypeLL *curr = &nodes[image_head[i]];
-          ++local_max_samples;
-          ++deep_pixels_count;
-          while (curr->next != 0)
-          {
-              ++local_max_samples;
-              ++deep_pixels_count;
-              curr = &nodes[curr->next];
-          }
-          if (local_max_samples > max_samples){
-              max_samples = local_max_samples;
-              max_samples_i = i / 4;
-          }
-      }
-      
 }
 static void 
 render_abuffer_shad(Model *m, Shader *s)
@@ -317,6 +294,10 @@ render_abuffer_shad(Model *m, Shader *s)
     setMat4fv(&render_abuffer_shader, "view", (GLfloat*)view.elements);
     setMat4fv(&render_abuffer_shader, "proj", (GLfloat*)proj.elements);
     setMat4fv(&render_abuffer_shader, "view_IT", (GLfloat*)view_IT.elements);
+    setMat4fv(&render_abuffer_shader, "invproj", (GLfloat*)invproj.elements);
+    setMat4fv(&render_abuffer_shader, "invview", (GLfloat*)invview.elements);
+    setMat4fv(&s, "invproj", (GLfloat*)invproj.elements);
+    setMat4fv(&s, "invview", (GLfloat*)invview.elements);
     glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
     glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, next_address);
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, next_address);
