@@ -1,6 +1,7 @@
 #version 430
 
 uniform mat4 proj;
+uniform mat4 ortho;
 uniform mat4 view;
 uniform mat4 model;
 uniform mat4 invproj;

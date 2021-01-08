@@ -61,7 +61,7 @@ static void check_gl_errors()
 
 }
 
-extern mat4 view, proj, invview, invproj;
+extern mat4 view, proj,ortho, invview, invproj;
 extern vec4 background_color;
 
 static void 
@@ -223,6 +223,7 @@ render_abuffer(Model *m)
     setMat4fv(&render_abuffer_shader, "model", (GLfloat*)model.elements);
     setMat4fv(&render_abuffer_shader, "view", (GLfloat*)view.elements);
     setMat4fv(&render_abuffer_shader, "proj", (GLfloat*)proj.elements);
+    setMat4fv(&render_abuffer_shader, "ortho", (GLfloat*)ortho.elements);
     setMat4fv(&render_abuffer_shader, "view_IT", (GLfloat*)view_IT.elements);
     setmat4fv(&render_abuffer_shader, "invproj", (GLfloat*)invproj.elements);
     setmat4fv(&render_abuffer_shader, "invview", (GLfloat*)invview.elements);
@@ -296,6 +297,8 @@ render_abuffer_shad(Model *m, Shader *s)
     setMat4fv(&render_abuffer_shader, "view_IT", (GLfloat*)view_IT.elements);
     setMat4fv(&render_abuffer_shader, "invproj", (GLfloat*)invproj.elements);
     setMat4fv(&render_abuffer_shader, "invview", (GLfloat*)invview.elements);
+    setMat4fv(&render_abuffer_shader, "ortho", (GLfloat*)ortho.elements);
+    setMat4fv(s, "ortho", (GLfloat*)ortho.elements);
     setMat4fv(&s, "invproj", (GLfloat*)invproj.elements);
     setMat4fv(&s, "invview", (GLfloat*)invview.elements);
     glBindImageTexture(0, head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??

@@ -90,8 +90,8 @@ void main(void)
 		nodes[index].red = color.r;
 		nodes[index].green = color.g;
 		nodes[index].blue = color.b;
-		nodes[index].alpha = color.a;
-		nodes[index].depth = f_frag_pos_ws.z;
+		nodes[index].alpha = 0.9;//color.a;
+		nodes[index].depth = gl_FragCoord.z;
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		
 	}

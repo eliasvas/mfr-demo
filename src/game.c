@@ -21,6 +21,7 @@ static ShadowMapFBO sfbo;
 
 static mat4 view;
 static mat4 proj;
+static mat4 ortho;
 static mat4 invproj;
 static mat4 invview;
 static vec4 background_color;
@@ -55,6 +56,7 @@ update(void) {
     update_cam(&cam);
     view = get_view_mat(&cam);
     proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
+    ortho = orthographic_proj(-20, 20, -20, 20, 0.1, 100);
     //background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
     background_color = v4(0.5,0.6,0.7,1.f);
 
@@ -78,13 +80,13 @@ render_scene(Shader *quad_shader, Shader *mesh_shader)
         setup_shadowmap(&sfbo, view);
         use_shader(&sfbo.s);
         render_quad_mvp_shader(&q, quad_mvp, &sfbo.s);
-        m.position = v3(0,0,-5);
+        m.position = v3(0,0,5);
         render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
-        m.position = v3(0,0,-2 * sin(global_platform.current_time));
+        m.position = v3(0,0,2 * sin(global_platform.current_time));
         render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
-        m.position = v3(0,0,-11);
+        m.position = v3(0,0,11);
         render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
-        m.position = v3(0,0,-8);
+        m.position = v3(0,0,8);
         render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -108,19 +110,19 @@ render_scene(Shader *quad_shader, Shader *mesh_shader)
 
 
 
-        m.position = v3(0,0,-5);
+        m.position = v3(0,0,5);
         render_quad_mvp_shader(&q, quad_mvp, quad_shader);
-        m.position = v3(0,0,-5);
+        m.position = v3(0,0,5);
         use_shader(mesh_shader);
         glActiveTexture(GL_TEXTURE10);
         glBindTexture(GL_TEXTURE_2D, sfbo.depth_attachment);
         setInt(mesh_shader, "shadowMap", 10);
         render_abuffer_shad(&m, mesh_shader);
-        m.position = v3(0,0,-2 * sin(global_platform.current_time));
+        m.position = v3(0,0,2 * sin(global_platform.current_time));
         render_abuffer_shad(&m, mesh_shader);
-        m.position = v3(0,0,-11);
+        m.position = v3(0,0,11);
         render_abuffer_shad(&m, mesh_shader);
-        m.position = v3(0,0,-8);
+        m.position = v3(0,0,8);
         render_abuffer_shad(&m, mesh_shader);
         display_abuffer();
         clear_abuffer();
