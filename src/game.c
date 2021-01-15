@@ -55,7 +55,7 @@ static void
 update(void) {
     update_cam(&cam);
     view = get_view_mat(&cam);
-    proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
+    proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,50.f); 
     ortho = orthographic_proj(-20, 20, -20, 20, 0.1, 100);
     //background_color = v4(0.4f ,0.3f + fabs(cos(global_platform.current_time)), 0.9f, 1.f); 
     background_color = v4(0.5,0.6,0.7,1.f);
@@ -90,8 +90,6 @@ render_scene(Shader *quad_shader, Shader *mesh_shader)
         render_model_textured_basic_shader(&m, &proj, &view, &sfbo.s);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
         use_shader(quad_shader);
         glActiveTexture(GL_TEXTURE10);
         glBindTexture(GL_TEXTURE_2D, sfbo.depth_attachment);
@@ -102,9 +100,19 @@ render_scene(Shader *quad_shader, Shader *mesh_shader)
         setMat4fv(quad_shader, "lightSpaceMatrix", (GLfloat*)sfbo.lightSpaceMatrix.elements);
         setMat4fv(quad_shader, "invproj", (GLfloat*)invproj.elements);
         setMat4fv(quad_shader, "invview", (GLfloat*)invview.elements);
+
+        setFloat(&quad_shader, "near", 0.1f);
+        setFloat(&quad_shader, "far", 50.f);
+
+
         setMat4fv(mesh_shader, "lightSpaceMatrix", (GLfloat*)sfbo.lightSpaceMatrix.elements);
         setMat4fv(mesh_shader, "invproj", (GLfloat*)invproj.elements);
         setMat4fv(mesh_shader, "invview", (GLfloat*)invview.elements);
+
+        setFloat(&mesh_shader, "near", 0.1f);
+        setFloat(&mesh_shader, "far", 50.f);
+
+
         setMat4fv(&m.s, "invproj", (GLfloat*)invproj.elements);
         setMat4fv(&m.s, "invview", (GLfloat*)invview.elements);
 

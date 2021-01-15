@@ -298,6 +298,9 @@ render_abuffer_shad(Model *m, Shader *s)
     setMat4fv(&render_abuffer_shader, "invproj", (GLfloat*)invproj.elements);
     setMat4fv(&render_abuffer_shader, "invview", (GLfloat*)invview.elements);
     setMat4fv(&render_abuffer_shader, "ortho", (GLfloat*)ortho.elements);
+    setFloat(&render_abuffer_shader, "near", 0.1f);
+    setFloat(&render_abuffer_shader, "far", 50.f);
+
     setMat4fv(s, "ortho", (GLfloat*)ortho.elements);
     setMat4fv(&s, "invproj", (GLfloat*)invproj.elements);
     setMat4fv(&s, "invview", (GLfloat*)invview.elements);
@@ -397,7 +400,12 @@ static void display_abuffer(void)
         i32 k = 0;
         //first flip so origin is at top left corner!!
         i32 new_i = 0;
-        i32 * image_head_new = ALLOC(sizeof(image_head[0]) * global_platform.window_width * global_platform.window_height * 4);
+        i32 *image_head_new = ALLOC(sizeof(image_head[0]) * global_platform.window_width * global_platform.window_height * 4);
+        u32 *samples_per_pixel = ALLOC(sizeof(u32) * global_platform.window_width * global_platform.window_height);
+        for(u32 i = 0; i < global_platform.window_width * global_platform.window_height; ++i)
+        {
+            samples_per_pixel[i] = 0;
+        }
         for (i32 j = global_platform.window_height-1; j >=0; --j)
         {
             for (i32 i = 0; i < global_platform.window_width; ++i)
@@ -410,14 +418,13 @@ static void display_abuffer(void)
                 image_head_new[new_i++]= (i32)(image_head[index+3]);
             }
         }
+        u32 curr_pixel = 0;
         for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
         {
-            i32 remaining_samples = max_samples; 
-            //if no samples found, write {0}s
+            i32 total_samples = 0; 
             if (image_head_new[i] == 0)
             {
-                for (u32 j = 0; j < max_samples;++j)
-                    pixels[k++] = (DeepPixel){0};
+               samples_per_pixel[curr_pixel++] = 0;
                continue; 
             }
 
@@ -432,17 +439,14 @@ static void display_abuffer(void)
                 to_add.r = curr->red;
                 to_add.z = curr->depth;
                 pixels[k++] = to_add;
-                remaining_samples--;
+                total_samples++;
                 //curr->next = 0;
                 curr = &nodes[curr->next];
             }while (curr->next != 0);
-
-            //write the remaining samples
-            for (u32 j = 0; j < remaining_samples;++j)
-                    pixels[k++] = (DeepPixel){0};
+            samples_per_pixel[curr_pixel++] = total_samples;
 
         }
-        deepexr_write(global_platform.window_width, global_platform.window_height,pixels, deep_pixels_count,max_samples);
+        deepexr_write_new(global_platform.window_width, global_platform.window_height,pixels,samples_per_pixel, deep_pixels_count,max_samples);
         openexr_screenshot();
         sprintf(&infoLog, "Data Written to Disk");
     }

@@ -1,5 +1,6 @@
 #version 430
-
+uniform float near;
+uniform float far;
 struct NodeTypeLL
 {
 
@@ -74,6 +75,13 @@ vec4 computePixelColor()
 	return vec4(lighting, 1.0);
 }
 //layout(pixel_center_integer) in vec4 gl_FragCoord;
+
+float linearize_depth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main(void)
 {
     ivec2 coords = ivec2(gl_FragCoord.xy);
@@ -85,13 +93,13 @@ void main(void)
 	{
 		//its not used rn
 		vec4 color = computePixelColor();
-		color.a = 0.2;
+		color.a = 0.9;
 		
 		nodes[index].red = color.r;
 		nodes[index].green = color.g;
 		nodes[index].blue = color.b;
-		nodes[index].alpha = 0.9;//color.a;
-		nodes[index].depth = gl_FragCoord.z;
+		nodes[index].alpha = color.a;
+		nodes[index].depth = linearize_depth(f_frag_pos_ws.z);
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		
 	}

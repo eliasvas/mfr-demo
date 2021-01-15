@@ -631,6 +631,298 @@ u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32
 }
 #endif
 
+u8 *deepexr_write_new(u32 width, u32 height,DeepPixel *pixels,u32 *samples_per_pixel, u32 pixels_count, u32 num_of_deep_samples_per_pixel)
+{
+    //width = global_platform.window_width;
+    //height = global_platform.window_height;
+    u32 ww = width-1;
+    u32 hh = height-1;
+    u32 *v = &view;
+    u32 *p = &proj;
+	u8 hdr_data[] = {
+		0x76, 0x2f, 0x31, 0x01, // magic
+		0x02, 0x08, 0, 0, // version, DEEP scanline
+		// channels
+		'c','h','a','n','n','e','l','s',0,
+		'c','h','l','i','s','t',0,
+		55,0,0,0,
+		'A',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // A, FLOAT 
+		'B',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // B, FLOAT 
+		'G',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // G, FLOAT 
+		'R',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // R, FLOAT 
+		'Z',0, 0x02,0,0,0, 0, 0,0,0,1,0,0,0,1,0,0,0, // Z, FLOAT 
+		0,
+		// compression
+		'c','o','m','p','r','e','s','s','i','o','n',0,
+		'c','o','m','p','r','e','s','s','i','o','n',0,
+		1,0,0,0,
+		0, // no compression
+		// dataWindow
+		'd','a','t','a','W','i','n','d','o','w',0,
+		'b','o','x','2','i',0,
+		16,0,0,0,
+		0,0,0,0,0,0,0,0,
+		ww&0xFF, (ww>>8)&0xFF, (ww>>16)&0xFF, (ww>>24)&0xFF,
+		hh&0xFF, (hh>>8)&0xFF, (hh>>16)&0xFF, (hh>>24)&0xFF,
+		// displayWindow
+		'd','i','s','p','l','a','y','W','i','n','d','o','w',0,
+		'b','o','x','2','i',0,
+		16,0,0,0,
+		0,0,0,0,0,0,0,0,
+		ww&0xFF, (ww>>8)&0xFF, (ww>>16)&0xFF, (ww>>24)&0xFF,
+		hh&0xFF, (hh>>8)&0xFF, (hh>>16)&0xFF, (hh>>24)&0xFF,
+		// lineOrder
+		'l','i','n','e','O','r','d','e','r',0,
+		'l','i','n','e','O','r','d','e','r',0,
+		1,0,0,0,
+		0, // increasing Y
+		// pixelAspectRatio
+		'p','i','x','e','l','A','s','p','e','c','t','R','a','t','i','o',0,
+		'f','l','o','a','t',0,
+		4,0,0,0,
+		0,0,0x80,0x3f, // 1.0f
+		// screenWindowCenter
+		's','c','r','e','e','n','W','i','n','d','o','w','C','e','n','t','e','r',0,
+		'v','2','f',0,
+		8,0,0,0,
+		0,0,0,0, 0,0,0,0,
+		// screenWindowWidth
+		's','c','r','e','e','n','W','i','n','d','o','w','W','i','d','t','h',0,
+		'f','l','o','a','t',0, 
+    4,0,0,0,
+		0,0,0x80,0x3f, // 1.0f
+
+    'm','a','x','S','a','m','p','l','e','s','P','e','r','P','i','x','e','l',0,
+    'i','n','t',0,
+    4,0,0,0,
+    (((num_of_deep_samples_per_pixel) >> 0) & 0xFF),
+    (((num_of_deep_samples_per_pixel) >> 4) & 0xFF),
+    (((num_of_deep_samples_per_pixel) >> 8) & 0xFF),
+    (((num_of_deep_samples_per_pixel) >> 12) & 0xFF),
+
+    'v','i','e','w','M','a','t','r','i','x',0,
+    'm','4','4','f',0,
+     64, 0, 0,0,
+     (v[0] >>0)& 0xFF,(v[0] >>4)& 0xFF,(v[0] >>8)& 0xFF,(v[0] >>12)& 0xFF,
+     (v[1] >>0)& 0xFF,(v[1] >>4)& 0xFF,(v[1] >>8)& 0xFF,(v[1] >>12)& 0xFF,
+     (v[2] >>0)& 0xFF,(v[2] >>4)& 0xFF,(v[2] >>8)& 0xFF,(v[2] >>12)& 0xFF,
+     (v[3] >>0)& 0xFF,(v[3] >>4)& 0xFF,(v[3] >>8)& 0xFF,(v[3] >>12)& 0xFF,
+     (v[4] >>0)& 0xFF,(v[4] >>4)& 0xFF,(v[4] >>8)& 0xFF,(v[4] >>12)& 0xFF,
+     (v[5] >>0)& 0xFF,(v[5] >>4)& 0xFF,(v[5] >>8)& 0xFF,(v[5] >>12)& 0xFF,
+     (v[6] >>0)& 0xFF,(v[6] >>4)& 0xFF,(v[6] >>8)& 0xFF,(v[6] >>12)& 0xFF,
+     (v[7] >>0)& 0xFF,(v[7] >>4)& 0xFF,(v[7] >>8)& 0xFF,(v[7] >>12)& 0xFF,
+     (v[8] >>0)& 0xFF,(v[8] >>4)& 0xFF,(v[8] >>8)& 0xFF,(v[8] >>12)& 0xFF,
+     (v[9] >>0)& 0xFF,(v[9] >>4)& 0xFF,(v[9] >>8)& 0xFF,(v[9] >>12)& 0xFF,
+     (v[10] >>0)& 0xFF,(v[10] >>4)& 0xFF,(v[10] >>8)& 0xFF,(v[10] >>12)& 0xFF,
+     (v[11] >>0)& 0xFF,(v[11] >>4)& 0xFF,(v[11] >>8)& 0xFF,(v[11] >>12)& 0xFF,
+     (v[12] >>0)& 0xFF,(v[12] >>4)& 0xFF,(v[12] >>8)& 0xFF,(v[12] >>12)& 0xFF,
+     (v[13] >>0)& 0xFF,(v[13] >>4)& 0xFF,(v[13] >>8)& 0xFF,(v[13] >>12)& 0xFF,
+     (v[14] >>0)& 0xFF,(v[14] >>4)& 0xFF,(v[14] >>8)& 0xFF,(v[14] >>12)& 0xFF,
+     (v[15] >>0)& 0xFF,(v[15] >>4)& 0xFF,(v[15] >>8)& 0xFF,(v[15] >>12)& 0xFF,
+
+    'p','r','o','j','e','c','t','i','o','n','M','a','t','r','i','x',0,
+    'm','4','4','f',0,
+     64, 0, 0,0,
+     (p[0] >>0)& 0xFF,(p[0] >>4)& 0xFF,(p[0] >>8)& 0xFF,(p[0] >>12)& 0xFF,
+     (p[1] >>0)& 0xFF,(p[1] >>4)& 0xFF,(p[1] >>8)& 0xFF,(p[1] >>12)& 0xFF,
+     (p[2] >>0)& 0xFF,(p[2] >>4)& 0xFF,(p[2] >>8)& 0xFF,(p[2] >>12)& 0xFF,
+     (p[3] >>0)& 0xFF,(p[3] >>4)& 0xFF,(p[3] >>8)& 0xFF,(p[3] >>12)& 0xFF,
+     (p[4] >>0)& 0xFF,(p[4] >>4)& 0xFF,(p[4] >>8)& 0xFF,(p[4] >>12)& 0xFF,
+     (p[5] >>0)& 0xFF,(p[5] >>4)& 0xFF,(p[5] >>8)& 0xFF,(p[5] >>12)& 0xFF,
+     (p[6] >>0)& 0xFF,(p[6] >>4)& 0xFF,(p[6] >>8)& 0xFF,(p[6] >>12)& 0xFF,
+     (p[7] >>0)& 0xFF,(p[7] >>4)& 0xFF,(p[7] >>8)& 0xFF,(p[7] >>12)& 0xFF,
+     (p[8] >>0)& 0xFF,(p[8] >>4)& 0xFF,(p[8] >>8)& 0xFF,(p[8] >>12)& 0xFF,
+     (p[9] >>0)& 0xFF,(p[9] >>4)& 0xFF,(p[9] >>8)& 0xFF,(p[9] >>12)& 0xFF,
+     (p[10] >>0)& 0xFF,(p[10] >>4)& 0xFF,(p[10] >>8)& 0xFF,(p[10] >>12)& 0xFF,
+     (p[11] >>0)& 0xFF,(p[11] >>4)& 0xFF,(p[11] >>8)& 0xFF,(p[11] >>12)& 0xFF,
+     (p[12] >>0)& 0xFF,(p[12] >>4)& 0xFF,(p[12] >>8)& 0xFF,(p[12] >>12)& 0xFF,
+     (p[13] >>0)& 0xFF,(p[13] >>4)& 0xFF,(p[13] >>8)& 0xFF,(p[13] >>12)& 0xFF,
+     (p[14] >>0)& 0xFF,(p[14] >>4)& 0xFF,(p[14] >>8)& 0xFF,(p[14] >>12)& 0xFF,
+     (p[15] >>0)& 0xFF,(p[15] >>4)& 0xFF,(p[15] >>8)& 0xFF,(p[15] >>12)& 0xFF,
+
+
+   	't','y','p','e',0,
+		's','t','r','i','n','g',0,
+		 0x0C,0,0,0,
+    'd','e','e','p','s','c','a','n','l','i','n','e',//0,
+
+    'v','e','r','s','i','o','n',0,
+    'i','n','t',0,
+    4,0,0,0,
+    1,0,0,0,
+		// end of header
+		0,
+	};
+	i32 hdr_size = array_count(hdr_data);
+
+
+	i32 scanline_table_size = sizeof(u64) * height;
+	u32 pixel_row_size = width * sizeof(DeepPixel) * num_of_deep_samples_per_pixel;
+	u32 full_row_size = pixel_row_size + 4 * width + 28; //TODO(iv): investigate
+
+	u32 buf_size = hdr_size + scanline_table_size + height * full_row_size;
+    //TODO: write in custom allocator?!!?!
+	u8* buf = (u8*)malloc (buf_size);
+	if (!buf)
+		return NULL;
+
+	// copy in header
+	memcpy (buf, hdr_data, hdr_size);
+
+	// line offset table
+	u32 index = hdr_size + scanline_table_size;
+	u8* ptr = buf + hdr_size;
+    u32 *row_sizes = ALLOC(sizeof(u32) * width * height);
+    for (u32 i = 0; i < height; ++i)
+    {
+        u32 samples = 0;
+        for (u32 j = 0; j <width; ++j)
+        {
+            samples += samples_per_pixel[i * height + j]; 
+        }
+        row_sizes[i] = samples*sizeof(DeepPixel);
+    }
+	for (i32 y = 0; y < height; ++y)
+	{
+        //u32 row_size_i = calc_row_size_i(pp, i);
+		*ptr++ = index & 0xFF;
+		*ptr++ = (index >> 8) & 0xFF;
+		*ptr++ = (index >> 16) & 0xFF;
+		*ptr++ = (index >> 24) & 0xFF;
+		*ptr++ = 0;
+		*ptr++ = 0;
+		*ptr++ = 0;
+		*ptr++ = 0;
+		index += row_sizes[y]; //TODO(iv): SUSPECT GUY 
+	}
+
+	// scanline data (channels MUST be in alphabetical order!)
+  /*each deep scanline must have:
+     - y coordinate (int)
+     - packed size of pixel offset table (u64)
+     - packed size of sample data (u64)
+     - unpacked size of sample data (u64)
+     - compressed pixel offset table (ints??)
+     - compressed sample data (sizeof(DeepData))
+  */
+	u8* src = (u8*)pixels;
+	i32 stride = sizeof(DeepPixel);
+  //we do this because the packed size is a list of ints
+  i32 num_of_deep_samples_per_pixel_int = (i32)num_of_deep_samples_per_pixel;
+  u64 num_of_deep_samples_per_pixel_long = (u64)num_of_deep_samples_per_pixel;
+  u64 pixel_row_size_long = (u64)pixel_row_size;
+	i32 pixel_row_size_int = (i32)pixel_row_size;
+	for (i32 y = 0; y < (int)height; ++y)
+	{
+        pixel_row_size = row_sizes[y] * width * sizeof(DeepPixel);
+        u64 pixel_row_size_long = (u64)pixel_row_size;
+        i32 pixel_row_size_int = (i32)pixel_row_size;
+
+		// y coordinate
+		*ptr++ = y & 0xFF;
+		*ptr++ = (y >> 8) & 0xFF;
+		*ptr++ = (y >> 16) & 0xFF;
+		*ptr++ = (y >> 24) & 0xFF;
+        //packed size of pixel offset table
+        *ptr++ = (width*sizeof(int)) & 0xFF;
+        *ptr++ = ((width*sizeof(int)) >> 8) & 0xFF;
+        *ptr++ = ((width*sizeof(int)) >> 16) & 0xFF;
+        *ptr++ = ((width*sizeof(int)) >> 24) & 0xFF;
+        *ptr++ = 0;
+        *ptr++ = 0;
+        *ptr++ = 0;
+        *ptr++ = 0;
+		// packed size of sample data 
+		*ptr++ = pixel_row_size_long & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 8) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 16) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 24) & 0xFF;
+		*ptr++ = (pixel_row_size_long >> 32) & 0xFF;
+		*ptr++ = (pixel_row_size_long >> 40) & 0xFF;
+		*ptr++ = (pixel_row_size_long >> 48) & 0xFF;
+		*ptr++ = (pixel_row_size_long >> 56) & 0xFF;
+    // unpacked size of sample data
+		*ptr++ = pixel_row_size_long & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 8) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 16) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 24) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 32) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 40) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 48) & 0xFF;
+		*ptr++ = (pixel_row_size_long>> 56) & 0xFF;
+    //compressed pixel offset table (each deep pixel has num_of_.. samples per pixel!)
+    for (i32 i = 0; i < width; ++i)
+    {
+      *ptr++ = (samples_per_pixel[y *height +i] >> 0) & 0xFF;
+      *ptr++ = ((samples_per_pixel[y *height +i]) >> 8) & 0xFF;
+      *ptr++ = ((samples_per_pixel[y *height +i]) >> 16) & 0xFF;
+      *ptr++ = ((samples_per_pixel[y*height+i]) >> 24) & 0xFF;
+    }
+    //compressed sample data
+		// R G B A Z(ABGRZ ya mean) data for each deep pixel
+		u8* chsrc;
+		chsrc = src + 0;
+		for (i32 x = 0; x < row_sizes[y]; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+
+			chsrc += stride;
+		}
+    chsrc = src + 4; //ok
+		for (i32 x = 0; x < row_sizes[y]; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+			chsrc += stride;
+		}
+    chsrc = src + 8; //ok
+		for (i32 x = 0; x < row_sizes[y]; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+
+			chsrc += stride;
+		}
+		chsrc = src + 12;
+		for (i32 x = 0; x < row_sizes[y]; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+			chsrc += stride;
+		}
+		chsrc = src + 16;
+		for (i32 x = 0; x < row_sizes[y]; ++x)
+		{
+			*ptr++ = chsrc[0];
+			*ptr++ = chsrc[1];
+			*ptr++ = chsrc[2];
+			*ptr++ = chsrc[3];
+			chsrc += stride;
+		}
+
+
+
+
+		src += sizeof(DeepPixel) * row_sizes[y];
+	}
+  FILE* f = fopen ("deep_image01.exr", "wb");
+  fwrite (buf, 1, buf_size, f);
+  //fwrite (buf, 1, buf_size, f);
+  fclose (f);
+
+	return buf;
+}
+
+
 u8* openexr_screenshot(void)
 {
             i32 image_width = global_platform.window_width;
