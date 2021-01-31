@@ -421,7 +421,7 @@ static void display_abuffer(void)
         u32 curr_pixel = 0;
         for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
         {
-            i32 total_samples = 0; 
+            u32 total_samples = 0; 
             if (image_head_new[i] == 0)
             {
                samples_per_pixel[curr_pixel++] = 0;
@@ -430,7 +430,7 @@ static void display_abuffer(void)
 
             //write samples found
             NodeTypeLL *curr = &nodes[image_head_new[i]];
-            do
+            while(TRUE) 
             {
                 DeepPixel to_add;
                 to_add.a = curr->alpha;
@@ -441,13 +441,13 @@ static void display_abuffer(void)
                 pixels[k++] = to_add;
                 total_samples++;
                 //curr->next = 0;
+                if (curr->next == NULL)break;
                 curr = &nodes[curr->next];
-            }while (curr->next != 0);
+            };
+            
             samples_per_pixel[curr_pixel++] = total_samples;
-
         }
         deepexr_write_new(global_platform.window_width, global_platform.window_height,pixels,samples_per_pixel, deep_pixels_count,max_samples);
-        openexr_screenshot();
         sprintf(&infoLog, "Data Written to Disk");
     }
 

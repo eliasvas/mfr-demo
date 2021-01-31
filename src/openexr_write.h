@@ -754,13 +754,28 @@ u8 *deepexr_write_new(u32 width, u32 height,DeepPixel *pixels,u32 *samples_per_p
 		0,
 	};
 	i32 hdr_size = array_count(hdr_data);
+    u32 *row_sizes = ALLOC(sizeof(u32) * width * height);
+    for (u32 i = 0; i < height; ++i)
+    {
+        u32 samples = 0;
+        for (u32 j = 0; j <width; ++j)
+        {
+            samples += samples_per_pixel[i * width + j]; 
+        }
+        row_sizes[i] = samples;//*sizeof(DeepPixel);
+    }
 
 
 	i32 scanline_table_size = sizeof(u64) * height;
-	u32 pixel_row_size = width * sizeof(DeepPixel) * num_of_deep_samples_per_pixel;
-	u32 full_row_size = pixel_row_size + 4 * width + 28; //TODO(iv): investigate
 
-	u32 buf_size = hdr_size + scanline_table_size + height * full_row_size;
+    u32 row_size_sum = 0;
+    for (u32 i = 0; i < height; ++i)
+    {
+        row_size_sum += row_sizes[i] * sizeof(DeepPixel); 
+        row_size_sum += 4 * width + 28;
+    }
+
+	u32 buf_size = hdr_size + row_size_sum + scanline_table_size;
     //TODO: write in custom allocator?!!?!
 	u8* buf = (u8*)malloc (buf_size);
 	if (!buf)
@@ -772,16 +787,6 @@ u8 *deepexr_write_new(u32 width, u32 height,DeepPixel *pixels,u32 *samples_per_p
 	// line offset table
 	u32 index = hdr_size + scanline_table_size;
 	u8* ptr = buf + hdr_size;
-    u32 *row_sizes = ALLOC(sizeof(u32) * width * height);
-    for (u32 i = 0; i < height; ++i)
-    {
-        u32 samples = 0;
-        for (u32 j = 0; j <width; ++j)
-        {
-            samples += samples_per_pixel[i * height + j]; 
-        }
-        row_sizes[i] = samples*sizeof(DeepPixel);
-    }
 	for (i32 y = 0; y < height; ++y)
 	{
         //u32 row_size_i = calc_row_size_i(pp, i);
@@ -793,7 +798,7 @@ u8 *deepexr_write_new(u32 width, u32 height,DeepPixel *pixels,u32 *samples_per_p
 		*ptr++ = 0;
 		*ptr++ = 0;
 		*ptr++ = 0;
-		index += row_sizes[y]; //TODO(iv): SUSPECT GUY 
+		index += row_sizes[y] * sizeof(DeepPixel) + 4*width + 28; //TODO(iv): SUSPECT GUY 
 	}
 
 	// scanline data (channels MUST be in alphabetical order!)
@@ -808,15 +813,8 @@ u8 *deepexr_write_new(u32 width, u32 height,DeepPixel *pixels,u32 *samples_per_p
 	u8* src = (u8*)pixels;
 	i32 stride = sizeof(DeepPixel);
   //we do this because the packed size is a list of ints
-  i32 num_of_deep_samples_per_pixel_int = (i32)num_of_deep_samples_per_pixel;
-  u64 num_of_deep_samples_per_pixel_long = (u64)num_of_deep_samples_per_pixel;
-  u64 pixel_row_size_long = (u64)pixel_row_size;
-	i32 pixel_row_size_int = (i32)pixel_row_size;
 	for (i32 y = 0; y < (int)height; ++y)
 	{
-        pixel_row_size = row_sizes[y] * width * sizeof(DeepPixel);
-        u64 pixel_row_size_long = (u64)pixel_row_size;
-        i32 pixel_row_size_int = (i32)pixel_row_size;
 
 		// y coordinate
 		*ptr++ = y & 0xFF;
@@ -824,39 +822,43 @@ u8 *deepexr_write_new(u32 width, u32 height,DeepPixel *pixels,u32 *samples_per_p
 		*ptr++ = (y >> 16) & 0xFF;
 		*ptr++ = (y >> 24) & 0xFF;
         //packed size of pixel offset table
-        *ptr++ = (width*sizeof(int)) & 0xFF;
-        *ptr++ = ((width*sizeof(int)) >> 8) & 0xFF;
-        *ptr++ = ((width*sizeof(int)) >> 16) & 0xFF;
-        *ptr++ = ((width*sizeof(int)) >> 24) & 0xFF;
+        u32 offset_table_size = width * sizeof(int);
+        *ptr++ = (offset_table_size >> 0) & 0xFF;
+        *ptr++ = (offset_table_size >> 8) & 0xFF;
+        *ptr++ = (offset_table_size >> 16) & 0xFF;
+        *ptr++ = (offset_table_size >> 24) & 0xFF;
         *ptr++ = 0;
         *ptr++ = 0;
         *ptr++ = 0;
         *ptr++ = 0;
 		// packed size of sample data 
-		*ptr++ = pixel_row_size_long & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 8) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 16) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 24) & 0xFF;
-		*ptr++ = (pixel_row_size_long >> 32) & 0xFF;
-		*ptr++ = (pixel_row_size_long >> 40) & 0xFF;
-		*ptr++ = (pixel_row_size_long >> 48) & 0xFF;
-		*ptr++ = (pixel_row_size_long >> 56) & 0xFF;
-    // unpacked size of sample data
-		*ptr++ = pixel_row_size_long & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 8) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 16) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 24) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 32) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 40) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 48) & 0xFF;
-		*ptr++ = (pixel_row_size_long>> 56) & 0xFF;
+        u32 packed_size = row_sizes[y] * sizeof(DeepPixel);
+		*ptr++ = (packed_size >> 0)& 0xFF;
+		*ptr++ = (packed_size >> 8)& 0xFF;
+		*ptr++ = (packed_size >> 16)& 0xFF;
+		*ptr++ = (packed_size >> 24)& 0xFF;
+        *ptr++ = 0;
+        *ptr++ = 0;
+        *ptr++ = 0;
+        *ptr++ = 0;
+        // unpacked size of sample data
+        *ptr++ = (packed_size >> 0)& 0xFF;
+        *ptr++ = (packed_size >> 8)& 0xFF;
+        *ptr++ = (packed_size >> 16)& 0xFF;
+        *ptr++ = (packed_size >> 24)& 0xFF;
+        *ptr++ = 0;
+        *ptr++ = 0;
+        *ptr++ = 0;
+        *ptr++ = 0;
     //compressed pixel offset table (each deep pixel has num_of_.. samples per pixel!)
+    i32 row_sum = 0;
     for (i32 i = 0; i < width; ++i)
     {
-      *ptr++ = (samples_per_pixel[y *height +i] >> 0) & 0xFF;
-      *ptr++ = ((samples_per_pixel[y *height +i]) >> 8) & 0xFF;
-      *ptr++ = ((samples_per_pixel[y *height +i]) >> 16) & 0xFF;
-      *ptr++ = ((samples_per_pixel[y*height+i]) >> 24) & 0xFF;
+      row_sum += samples_per_pixel[y * width + i];
+      *ptr++ = (row_sum >> 0) & 0xFF;
+      *ptr++ = (row_sum >> 8) & 0xFF;
+      *ptr++ = (row_sum>> 16) & 0xFF;
+      *ptr++ = (row_sum >> 24) & 0xFF;
     }
     //compressed sample data
 		// R G B A Z(ABGRZ ya mean) data for each deep pixel
@@ -908,8 +910,6 @@ u8 *deepexr_write_new(u32 width, u32 height,DeepPixel *pixels,u32 *samples_per_p
 			*ptr++ = chsrc[3];
 			chsrc += stride;
 		}
-
-
 
 
 		src += sizeof(DeepPixel) * row_sizes[y];
