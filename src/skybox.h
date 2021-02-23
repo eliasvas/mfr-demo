@@ -4,29 +4,39 @@
 
 #include "tools.h"
 
-extern mat4 proj, view;
+internal char **cubemap_default()
+{
+  char *res[6] = {
+        "../assets/vrb/vrbft.tga",
+                "../assets/vrb/vrbbk.tga",
+        "../assets/vrb/vrbdn.tga", //up
+        "../assets/vrb/vrbup.tga", //dn
+"../assets/vrb/vrbrt.tga",
+        "../assets/vrb/vrblf.tga",
 
-static u32 
-load_cubemap(char **faces)
+  };
+  return res;
+}
+
+internal u32 
+cubemap_load(char **faces)
 {
     u32 textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-    //stbi_set_flip_vertically_on_load(TRUE);
     i32 width, height, nrChannels;
     for (u32 i = 0; i < 6; i++)
     {
-        unsigned char *data = stbi_load(faces[i], &width, &height, &nrChannels, 0);
-        if (data)
+        TGAInfo *image = tga_load(faces[i]);
+        if (image && image->status == TGA_OK)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
-                         0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-            );
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->image_data);
+            glGenerateMipmap(GL_TEXTURE_2D);
         }
         else
         {
-            sprintf(infoLog, "cubemap at: %s failed to load!\n", faces[0]);
+            sprintf(error_log, "cubemap texture at: %s failed to load!\n", faces[i]);
         }
     }
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -48,19 +58,16 @@ typedef struct Skybox {
     Shader shader;
 }Skybox;
 
-static void 
-load_skybox(Skybox *skybox,const char**faces) {
+internal void 
+skybox_load(Skybox *skybox,const char**faces) {
     skybox->faces = faces;
-    skybox->tex_id = load_cubemap(faces);
-    //make a cubemap_texture 
-    //attach the images
-    // render
+    skybox->tex_id = cubemap_load(faces);
 }
 
-static void
-init_skybox(Skybox* skybox, char**faces) {
-    shader_load(&skybox->shader,"../assets/shaders/skybox_rendering.vert", "../assets/shaders/skybox_rendering.frag");
-    load_skybox(skybox,faces);
+internal void
+skybox_init(Skybox* skybox, char**faces) {
+    shader_load(&skybox->shader,"../assets/shaders/skybox.vert", "../assets/shaders/skybox.frag");
+    skybox_load(skybox,faces);
     f32 skybox_vertices[] = {
         // positions          
         -1.0f,  1.0f, -1.0f,
@@ -115,22 +122,21 @@ init_skybox(Skybox* skybox, char**faces) {
     glBindVertexArray(0);
 }
 
-static void 
-render_skybox(Skybox* skybox) {
+internal void 
+skybox_render(Skybox* skybox, mat4 proj, mat4 view) {
     use_shader(&skybox->shader);
-    //this render must be done at the beginning of the scene rendering process
-    //because we disabled depth testing and basically only the color buffer gets updated
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
     glBindVertexArray(skybox->vao);
-    setMat4fv(&skybox->shader, "uniform_projection_matrix", (float*)proj.elements);
-    setMat4fv(&skybox->shader, "uniform_view_matrix", (float*)view.elements);
+    shader_set_mat4fv(&skybox->shader, "uniform_projection_matrix", (float*)proj.elements);
+    shader_set_mat4fv(&skybox->shader, "uniform_view_matrix", (float*)view.elements);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->tex_id);
-    setInt(&skybox->shader, "skybox", 0);
-    //setMat4fv(&skybox->shader, "MVP", (float*)(mul_mat4(projection,view).elements));
+    shader_set_int(&skybox->shader, "skybox", 0);
 
     glDrawArrays(GL_TRIANGLES, 0,36);
-    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
+    //glDepthMask(GL_TRUE);
 }
 
 #endif

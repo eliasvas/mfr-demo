@@ -3,7 +3,7 @@
 
 #include "tools.h"
 
-static const f32 MAX_DISTANCE = 5.f;
+local_persist f32 MAX_DISTANCE = 5.f;
 
 typedef struct Camera
 {
@@ -20,41 +20,35 @@ typedef struct Camera
     b32 first_mouse;
 }Camera;
 
-static void 
-init_camera (Camera* cam)
+internal void 
+camera_init(Camera* cam)
 {
-    cam->pos = v3(0,1,20);
+    cam->pos = v3(0,3,10);
     cam->front = v3(0.0f,0.0f,-1.0f);
     cam->up = v3(0.f,1.f,0.f);
     cam->yaw = -90.0f;
     
-    cam->camera_speed = 4.f;
+    //cam->camera_speed = 100.f;
+    cam->camera_speed = 15.f;
     cam->first_mouse = 0;
 }
 
-static void 
-move_camera_wrt_player(Camera* cam, vec2 player_pos)
-{
-    cam->pos.x  = player_pos.x;
-    cam->pos.y = player_pos.y;
-}
-
-static void 
-update_cam(Camera* cam)
+internal void 
+camera_update(Camera* cam)
 {
     //global_platform.dt = 0.01f;
     if (global_platform.key_down[KEY_A])
-        cam->pos = sub_vec3(cam->pos, mul_vec3f(cross_vec3(cam->front, cam->up), cam->camera_speed * global_platform.dt));
+        cam->pos = vec3_sub(cam->pos, vec3_mulf(vec3_cross(cam->front, cam->up), cam->camera_speed * global_platform.dt));
     if (global_platform.key_down[KEY_D])
-        cam->pos = add_vec3(cam->pos, mul_vec3f(cross_vec3(cam->front, cam->up), cam->camera_speed * global_platform.dt));
+        cam->pos = vec3_add(cam->pos, vec3_mulf(vec3_cross(cam->front, cam->up), cam->camera_speed * global_platform.dt));
     if (global_platform.key_down[KEY_W])
-        cam->pos = add_vec3(cam->pos, mul_vec3f(cam->front,cam->camera_speed* global_platform.dt));
+        cam->pos = vec3_add(cam->pos, vec3_mulf(cam->front,cam->camera_speed* global_platform.dt));
     if (global_platform.key_down[KEY_S])
-        cam->pos = sub_vec3(cam->pos, mul_vec3f(cam->front,cam->camera_speed* global_platform.dt));
+        cam->pos = vec3_sub(cam->pos, vec3_mulf(cam->front,cam->camera_speed* global_platform.dt));
     if (global_platform.key_down[KEY_SPACE])
-        cam->pos = sub_vec3(cam->pos, mul_vec3f(cam->up,(-1.f)*cam->camera_speed* global_platform.dt));
+        cam->pos = vec3_sub(cam->pos, vec3_mulf(cam->up,(-1.f)*cam->camera_speed* global_platform.dt));
     if (global_platform.key_down[KEY_CTRL])
-        cam->pos = sub_vec3(cam->pos, mul_vec3f(cam->up,cam->camera_speed* global_platform.dt));
+        cam->pos = vec3_sub(cam->pos, vec3_mulf(cam->up,cam->camera_speed* global_platform.dt));
 
 
 
@@ -91,18 +85,12 @@ update_cam(Camera* cam)
     direction.x = cos(to_radians(cam->yaw)) * cos(to_radians(cam->pitch));
     direction.y = sin(to_radians(cam->pitch));
     direction.z = sin(to_radians(cam->yaw)) * cos(to_radians(cam->pitch));
-    cam->front = normalize_vec3(direction);
+    cam->front = vec3_normalize(direction);
 }
-static void 
-update_wrt_player(Camera* cam, vec2 player_pos)
-{
-    move_camera_wrt_player(cam, player_pos);
-}
-
 
 mat4 get_view_mat(Camera* cam)
 {
-    mat4 camera = look_at(cam->pos,add_vec3(cam->pos, cam->front),cam->up);
+    mat4 camera = look_at(cam->pos,vec3_add(cam->pos, cam->front),cam->up);
     return camera;
 }
  

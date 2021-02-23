@@ -31,8 +31,12 @@ typedef double    f64;
 typedef int32_t   b32;
 typedef char      b8;
 
+#if !defined(internal)
+#define internal static 
+#endif
+#define local_persist static  
+#define global static 
 #define INLINE static inline
-#define INTERNAL static
 
 #define kilobytes(val) ((val)*1024LL)
 #define megabytes(val) ((kilobytes(val))*1024LL)
@@ -40,6 +44,8 @@ typedef char      b8;
 #define terabytes(val) ((gigabytes(val))*1024LL)
 
 #define PI 3.1415926535897f
+#define TRUE 1
+#define FALSE 0
 
 #ifdef CRTLESS | 1 
 #define offsetof2(type, member) ((unsigned int)((unsigned char*)&((type*)0)->member - (unsigned char*)0)) 
@@ -133,17 +139,17 @@ INLINE b32 is_pow2(u32 val)
     b32 res = ((val & ~(val - 1)) == val);
     return(res);
 }
-static b32
+internal b32
 char_is_alpha(i32 c)
 {
     return ((c >='A' && c <= 'z') || (c >= 'a' && c <= 'z'));
 }
-static b32 char_is_digit(i32 c)
+internal b32 char_is_digit(i32 c)
 {
     return c >= '0'&& c <= '9';
 }
 
-static i32 char_to_lower(i32 c)
+internal i32 char_to_lower(i32 c)
 {
     if (c >= 'A' && c <= 'z')
     {
@@ -152,7 +158,7 @@ static i32 char_to_lower(i32 c)
     return c;
 }
 
-static u32 
+internal u32 
 str_size(char* str)
 {
     u32 i = 0;
@@ -160,7 +166,15 @@ str_size(char* str)
     return i;
 }
 
-static u32
+internal u32 
+str_sizespace(char* str)
+{
+    u32 i = 0;
+    while (str[i] != 32 || str[i] != 0)++i;
+    return i;
+}
+
+internal u32
 find_char_in_string(char *string,i32 start_index, char tofind)
 {
     i32 iter = start_index;
@@ -168,7 +182,7 @@ find_char_in_string(char *string,i32 start_index, char tofind)
     return iter;
 }
 
-static void
+internal void
 seed_random()
 {
     srand((u32)time(0));
@@ -190,8 +204,8 @@ random01(void)
 {
     //seed_random();
     f32 r = (f32)rand();
-	r /= RAND_MAX;
-	return r;
+    r /= RAND_MAX;
+    return r;
 }
 
 INLINE f32 
@@ -203,24 +217,6 @@ rrandom(f32 lo, f32 hi)
 	r = (hi - lo) * r + lo;
 	return r;
 }
-
-//converts f32 to f16
-INLINE u16 f2h(f32 f)
-{
-	typedef union convertf2i {
-		u32 i;
-		f32 f;
-	}convertf2i;
-	convertf2i f2i;
-	f2i.f = f;
-	u32 i = f2i.i;
-
-	if (i==0)
-		return 0;
-
-	return ((i>>16)&0x8000)|((((i&0x7f800000)-0x38000000)>>13)&0x7c00)|((i>>13)&0x03ff);
-}
-
 
 
 //NOTE(ilias): maybe make a free_file because our game leaks :(
@@ -264,7 +260,7 @@ file_exists(char* filename) {
   return ret;
 }
 
-static i32 
+internal i32 
 get_num_from_string(char *str)
 {
    char num[64];
@@ -396,7 +392,21 @@ typedef union ivec3
     i32 elements[3];
 }ivec3;
 
-INLINE b32 equals_ivec3(ivec3 l, ivec3 r)
+typedef union ivec2
+{
+    struct
+    {
+        i32 x,y;
+    };
+    struct
+    {
+        i32 r,g;
+    };
+    i32 elements[2];
+}ivec2;
+
+
+INLINE b32 ivec3_equals(ivec3 l, ivec3 r)
 {
     i32 res = ((l.x == r.x) && (l.y == r.y) && (l.z == r.z));
     return res;
@@ -441,7 +451,7 @@ INLINE vec4 v4(f32 x, f32 y, f32 z, f32 w)
     return res;
 }
 
-INLINE vec2 add_vec2(vec2 l, vec2 r)
+INLINE vec2 vec2_add(vec2 l, vec2 r)
 {
     vec2 res;
     res.x = l.x + r.x;
@@ -449,7 +459,7 @@ INLINE vec2 add_vec2(vec2 l, vec2 r)
     return res;
 }
 
-INLINE vec2 add_vec2f(vec2 v,f32 val)
+INLINE vec2 vec2_addf(vec2 v,f32 val)
 {
     vec2 res;
     res.x = v.x + val;
@@ -458,7 +468,7 @@ INLINE vec2 add_vec2f(vec2 v,f32 val)
 }
 
 
-INLINE vec2 sub_vec2(vec2 l, vec2 r)
+INLINE vec2 vec2_sub(vec2 l, vec2 r)
 {
     vec2 res;
     res.x = l.x - r.x;
@@ -466,7 +476,7 @@ INLINE vec2 sub_vec2(vec2 l, vec2 r)
     return res;
 }
 
-INLINE vec2 sub_vec2f(vec2 v,f32 val)
+INLINE vec2 vec2_subf(vec2 v,f32 val)
 {
     vec2 res;
     res.x = v.x - val;
@@ -474,7 +484,7 @@ INLINE vec2 sub_vec2f(vec2 v,f32 val)
     return res;
 }
 
-INLINE vec2 mul_vec2(vec2 l, vec2 r)
+INLINE vec2 vec2_mul(vec2 l, vec2 r)
 {
     vec2 res;
     res.x = l.x * r.x;
@@ -482,7 +492,7 @@ INLINE vec2 mul_vec2(vec2 l, vec2 r)
     return res;
 }
 
-INLINE vec2 mul_vec2f(vec2 l, f32 r)
+INLINE vec2 vec2_mulf(vec2 l, f32 r)
 {
     vec2 res;
     res.x = l.x * r;
@@ -490,7 +500,7 @@ INLINE vec2 mul_vec2f(vec2 l, f32 r)
     return res;
 }
 
-INLINE vec2 div_vec2(vec2 l, vec2 r)
+INLINE vec2 vec2_div(vec2 l, vec2 r)
 {
     vec2 res;
     res.x = l.x / r.x;
@@ -498,7 +508,7 @@ INLINE vec2 div_vec2(vec2 l, vec2 r)
     return res;
 }
 
-INLINE vec2 div_vec2f(vec2 l, f32 r)
+INLINE vec2 vec2_divf(vec2 l, f32 r)
 {
     vec2 res;
     res.x = l.x / r;
@@ -506,13 +516,13 @@ INLINE vec2 div_vec2f(vec2 l, f32 r)
     return res;
 }
 
-INLINE f32 dot_vec2(vec2 l, vec2 r)
+INLINE f32 vec2_dot(vec2 l, vec2 r)
 {
     f32 res = (l.x + r.x)+(l.y + r.y); // Ó(Ai*Bi)
     return res;
 }
 
-INLINE vec2 sqrt_vec2(vec2 v)
+INLINE vec2 vec2_sqrt(vec2 v)
 {
     vec2 res;
     res.x = sqrt(v.x);
@@ -520,7 +530,7 @@ INLINE vec2 sqrt_vec2(vec2 v)
     return res;
 }
 
-INLINE vec2 rotate_vec2(vec2 v, f32 a) {
+INLINE vec2 vec2_rotate(vec2 v, f32 a) {
 	vec2 res;
     f32 sn = sin(a);
 	f32 cs = cos(a);
@@ -529,19 +539,19 @@ INLINE vec2 rotate_vec2(vec2 v, f32 a) {
     return res;
 } 
 
-INLINE f32 length_vec2(vec2 v)
+INLINE f32 vec2_length(vec2 v)
 {
-    f32 res = sqrt(dot_vec2(v,v)); // (x^2 + y^2)^(1/2)
+    f32 res = sqrtf(dot_vec2(v,v)); // (x^2 + y^2)^(1/2)
     return res;
 }
 
-INLINE vec2 abs_vec2(vec2 v)
+INLINE vec2 vec2_abs(vec2 v)
 {
     vec2 res = v2(fabs(v.x), fabs(v.y));
     return res;
 }
    
-INLINE vec2 normalize_vec2(vec2 v)
+INLINE vec2 vec2_normalize(vec2 v)
 {
     vec2 res = {0}; //in case length is zero we return zero vector
     f32 vec_length = length_vec2(v);
@@ -553,7 +563,7 @@ INLINE vec2 normalize_vec2(vec2 v)
     return res;
 }
 
-INLINE vec3 add_vec3(vec3 l, vec3 r)
+INLINE vec3 vec3_add(vec3 l, vec3 r)
 {
     vec3 res;
     res.x = l.x + r.x;
@@ -562,7 +572,7 @@ INLINE vec3 add_vec3(vec3 l, vec3 r)
     return res;
 }
 
-INLINE vec3 sub_vec3(vec3 l, vec3 r)
+INLINE vec3 vec3_sub(vec3 l, vec3 r)
 {
     vec3 res;
     res.x = l.x - r.x;
@@ -571,7 +581,7 @@ INLINE vec3 sub_vec3(vec3 l, vec3 r)
     return res;
 }
 
-INLINE vec3 mul_vec3(vec3 l, vec3 r)
+INLINE vec3 vec3_mul(vec3 l, vec3 r)
 {
     vec3 res;
     res.x = l.x * r.x;
@@ -580,7 +590,7 @@ INLINE vec3 mul_vec3(vec3 l, vec3 r)
     return res;
 }
 
-INLINE vec3 mul_vec3f(vec3 l, f32 r)
+INLINE vec3 vec3_mulf(vec3 l, f32 r)
 {
     vec3 res;
     res.x = l.x * r;
@@ -589,7 +599,7 @@ INLINE vec3 mul_vec3f(vec3 l, f32 r)
     return res;
 }
 
-INLINE vec3 div_vec3(vec3 l, vec3 r)
+INLINE vec3 vec3_div(vec3 l, vec3 r)
 {
     vec3 res;
     res.x = l.x / r.x;
@@ -598,7 +608,7 @@ INLINE vec3 div_vec3(vec3 l, vec3 r)
     return res;
 }
 
-INLINE vec3 div_vec3f(vec3 l, f32 r)
+INLINE vec3 vec3_divf(vec3 l, f32 r)
 {
     vec3 res;
     res.x = l.x / r;
@@ -607,19 +617,19 @@ INLINE vec3 div_vec3f(vec3 l, f32 r)
     return res;
 }
 
-INLINE f32 dot_vec3(vec3 l, vec3 r)
+INLINE f32 vec3_dot(vec3 l, vec3 r)
 {
     f32 res = (l.x * r.x)+(l.y * r.y)+(l.z * r.z); // Ó(Ai*Bi)
     return res;
 }
 
-INLINE f32 length_vec3(vec3 v)
+INLINE f32 vec3_length(vec3 v)
 {
-    f32 res = sqrt(dot_vec3(v,v)); // (x^2 + y^2)^(1/2)
+    f32 res = sqrtf(vec3_dot(v,v)); // (x^2 + y^2)^(1/2)
     return res;
 }
 
-INLINE vec3 rotate_vec3(vec3 v, f32 a)
+INLINE vec3 vec3_rotate(vec3 v, f32 a)
 {
     vec3 res;
     //TBA
@@ -627,10 +637,10 @@ INLINE vec3 rotate_vec3(vec3 v, f32 a)
 }
 
 
-INLINE vec3 normalize_vec3(vec3 v)
+INLINE vec3 vec3_normalize(vec3 v)
 {
     vec3 res = {0}; //in case length is zero we return zero vector
-    f32 vec_length = length_vec3(v);
+    f32 vec_length = vec3_length(v);
     if (vec_length != 0)
     {
         res.x = v.x * (1.0f/vec_length);
@@ -640,7 +650,7 @@ INLINE vec3 normalize_vec3(vec3 v)
     return res;
 }
 
-INLINE vec3 lerp_vec3(vec3 l, vec3 r, f32 time)
+INLINE vec3 vec3_lerp(vec3 l, vec3 r, f32 time)
 {
     vec3 res;
 
@@ -652,7 +662,7 @@ INLINE vec3 lerp_vec3(vec3 l, vec3 r, f32 time)
     return res;
 }
 
-INLINE vec3 cross_vec3(vec3 l,vec3 r)
+INLINE vec3 vec3_cross(vec3 l,vec3 r)
 {
     vec3 res;
     res.x = (l.y*r.z) - (l.z*r.y);
@@ -661,12 +671,7 @@ INLINE vec3 cross_vec3(vec3 l,vec3 r)
     return (res);
 }
 
-INLINE vec3 blender_to_opengl_vec3(vec3 v)
-{
-    return v3(v.x, -v.z, v.y);
-}
-
-INLINE vec4 add_vec4(vec4 l, vec4 r)
+INLINE vec4 vec4_add(vec4 l, vec4 r)
 {
     vec4 res;
 #ifdef TOOLS_SSE
@@ -680,7 +685,7 @@ INLINE vec4 add_vec4(vec4 l, vec4 r)
     return res;
 }
 
-INLINE vec4 sub_vec4(vec4 l, vec4 r)
+INLINE vec4 vec4_sub(vec4 l, vec4 r)
 {
     vec4 res;
 #ifdef TOOLS_SSE
@@ -694,7 +699,7 @@ INLINE vec4 sub_vec4(vec4 l, vec4 r)
     return res;
 }
 
-INLINE vec4 mul_vec4(vec4 l, vec4 r)
+INLINE vec4 vec4_mul(vec4 l, vec4 r)
 {
     vec4 res;
 #ifdef TOOLS_SSE
@@ -708,7 +713,7 @@ INLINE vec4 mul_vec4(vec4 l, vec4 r)
     return res;
 }
 
-INLINE vec4 mul_vec4f(vec4 l, f32 r)
+INLINE vec4 vec4_mulf(vec4 l, f32 r)
 {
     vec4 res;
 #ifdef TOOLS_SSE
@@ -723,7 +728,7 @@ INLINE vec4 mul_vec4f(vec4 l, f32 r)
     return res;
 }
 
-INLINE vec4 div_vec4(vec4 l, vec4 r)
+INLINE vec4 vec4_div(vec4 l, vec4 r)
 {
     vec4 res;
 #ifdef TOOLS_SSE
@@ -737,7 +742,7 @@ INLINE vec4 div_vec4(vec4 l, vec4 r)
     return res;
 }
 
-INLINE vec4 div_vec4f(vec4 l, f32 r)
+INLINE vec4 vec4_divf(vec4 l, f32 r)
 {
     vec4 res;
 #ifdef TOOLS_SSE
@@ -752,22 +757,22 @@ INLINE vec4 div_vec4f(vec4 l, f32 r)
     return res;
 }
 
-INLINE f32 dot_vec4(vec4 l, vec4 r)
+INLINE f32 vec4_dot(vec4 l, vec4 r)
 {
     f32 res = (l.x + r.x)+(l.y + r.y)+(l.z + r.z)+(l.w + r.w); // Ó(Ai*Bi)
     return res;
 }
 
-INLINE f32 length_vec4(vec4 v)
+INLINE f32 vec4_length(vec4 v)
 {
-    f32 res = sqrt(dot_vec4(v,v)); // (x^2 + y^2)^(1/2)
+    f32 res = sqrt(vec4_dot(v,v)); // (x^2 + y^2)^(1/2)
     return res;
 }
    
-INLINE vec4 normalize_vec4(vec4 v)
+INLINE vec4 vec4_normalize(vec4 v)
 {
     vec4 res = {0}; //in case length is zero we return zero vector
-    f32 vec_length = length_vec4(v);
+    f32 vec_length = vec4_length(v);
     if (!equalf(vec_length, 0.f, 0.01))
     {
         res.x = v.x * (1.0f/vec_length);
@@ -795,7 +800,7 @@ INLINE mat4 m4d(f32 d)
     return res;
 }
 
-INLINE mat4 transpose_mat4(mat4 m)
+INLINE mat4 mat4_transpose(mat4 m)
 {
     mat4 res;
     for (u32 i = 0; i < 4;++i)
@@ -807,7 +812,7 @@ INLINE mat4 transpose_mat4(mat4 m)
     }
     return res;
 }
-INLINE mat4 mul_mat4f(mat4 m, f32 s)
+INLINE mat4 mat4_mulf(mat4 m, f32 s)
 {
     mat4 res;
     for (u32 i = 0; i < 4; ++i)
@@ -819,18 +824,26 @@ INLINE mat4 mul_mat4f(mat4 m, f32 s)
     }
     return res;
 }
-
-
-#ifdef TOOLS_SSE
-INLINE __m128 linear_combine_sse(__m128 l, mat4 r)
+INLINE vec4 mat4_mulv(mat4 mat, vec4 vec)
 {
-    __m128 res;
-    //some complex shit
+    vec4 res;
+
+    i32 cols, rows;
+    for(rows = 0; rows < 4; ++rows)
+    {
+        f32 s = 0;
+        for(cols = 0; cols < 4; ++cols)
+        {
+            s += mat.elements[cols][rows] * vec.elements[cols];
+        }
+
+        res.elements[rows] = s;
+    }
+
     return (res);
 }
-#endif
 
-INLINE mat4 div_mat4f(mat4 m, f32 s)
+INLINE mat4 mat4_divf(mat4 m, f32 s)
 {
     mat4 res = {0};
     
@@ -847,7 +860,7 @@ INLINE mat4 div_mat4f(mat4 m, f32 s)
     return res;
 }
 
-INLINE mat4 add_mat4(mat4 l, mat4 r)
+INLINE mat4 mat4_add(mat4 l, mat4 r)
 {
     mat4 res;
     for (u32 i = 0; i < 4; ++i)
@@ -861,7 +874,7 @@ INLINE mat4 add_mat4(mat4 l, mat4 r)
 }
 
 
-INLINE mat4 sub_mat4(mat4 l, mat4 r)
+INLINE mat4 mat4_sub(mat4 l, mat4 r)
 {
     mat4 res;
     for (u32 i = 0; i < 4; ++i)
@@ -874,7 +887,8 @@ INLINE mat4 sub_mat4(mat4 l, mat4 r)
     return res;
 }
 
-INLINE mat4 mul_mat4(mat4 l, mat4 r)
+//r is done first and then l
+INLINE mat4 mat4_mul(mat4 l, mat4 r)
 {
     mat4 res;
     for (u32 col = 0; col < 4; ++col)
@@ -893,7 +907,7 @@ INLINE mat4 mul_mat4(mat4 l, mat4 r)
 }
 
 
-INLINE mat4 translate_mat4(vec3 t) //TODO(ilias): check handedness
+INLINE mat4 mat4_translate(vec3 t) //TODO(ilias): check handedness
 {
     mat4 res = m4d(1.0f);
     res.elements[3][0] = t.x;
@@ -902,11 +916,11 @@ INLINE mat4 translate_mat4(vec3 t) //TODO(ilias): check handedness
     return res;
 }
 
-INLINE mat4 rotate_mat4(float angle, vec3 axis)
+INLINE mat4 mat4_rotate(f32 angle, vec3 axis)
 {
     mat4 res = m4d(1.0f);
 
-    axis = normalize_vec3(axis);
+    axis = vec3_normalize(axis);
 
     float sinA = sin(to_radians(angle));
     float cosA = cos(to_radians(angle));
@@ -927,7 +941,7 @@ INLINE mat4 rotate_mat4(float angle, vec3 axis)
     return (res);
 }
 
-INLINE mat4 scale_mat4(vec3 s)
+INLINE mat4 mat4_scale(vec3 s)
 {
     mat4 res = m4d(1.f);
     res.elements[0][0] *= s.x;
@@ -935,8 +949,8 @@ INLINE mat4 scale_mat4(vec3 s)
     res.elements[2][2] *= s.z;
     return res;
 }
-//what the fuuuuuuuck is this shit??
-INLINE mat4 inv_mat4(mat4 m)
+
+INLINE mat4 mat4_inv(mat4 m)
 {
     mat4 res;
     f32 det;
@@ -1109,9 +1123,9 @@ INLINE mat4 look_at(vec3 eye, vec3 center, vec3 fake_up)
 {
     mat4 res = m4();
 
-    vec3 f = normalize_vec3(sub_vec3(center, eye));
-    vec3 r = normalize_vec3(cross_vec3(f, fake_up));
-    vec3 up = cross_vec3(r, f);
+    vec3 f = vec3_normalize(vec3_sub(center, eye));
+    vec3 r = vec3_normalize(vec3_cross(f, fake_up));
+    vec3 up = vec3_cross(r, f);
 
     res.elements[0][0] = r.x;
     res.elements[0][1] = up.x;
@@ -1128,9 +1142,9 @@ INLINE mat4 look_at(vec3 eye, vec3 center, vec3 fake_up)
     res.elements[2][2] = -f.z;
     res.elements[2][3] = 0.0f;
 
-    res.elements[3][0] = -dot_vec3(r, eye);
-    res.elements[3][1] = -dot_vec3(up, eye);
-    res.elements[3][2] = dot_vec3(f, eye);
+    res.elements[3][0] = -vec3_dot(r, eye);
+    res.elements[3][1] = -vec3_dot(up, eye);
+    res.elements[3][2] = vec3_dot(f, eye);
     res.elements[3][3] = 1.0f;
 
     return res;
@@ -1182,118 +1196,132 @@ blender_to_opengl_mat4(mat4 mat)
    mat = negate_row_mat4(mat, 3);
    return mat;
 }
+INLINE mat4
+blender_to_opengl(mat4 mat)
+{
+   return mat;
+}
+
+
+
+INLINE mat4
+maya_to_opengl(mat4 mat)
+{
+    return mat;
+}
+
 
 //some operator overloading
 #ifdef __cplusplus
 INLINE vec2 operator+(vec2 l, vec2 r)
 {
-    vec2 res = add_vec2(l, r);
+    vec2 res = vec2_add(l, r);
 
     return res;
 }
 INLINE vec2 operator-(vec2 l, vec2 r)
 {
-    vec2 res = sub_vec2(l, r);
+    vec2 res = vec2_sub(l, r);
 
     return res;
 }
 INLINE vec2 operator*(vec2 l, vec2 r)
 {
-    vec2 res = mul_vec2(l, r);
+    vec2 res = vec2_mul(l, r);
 
     return res;
 }
 INLINE vec2 operator*(vec2 l, f32 x)
 {
-    vec2 res = mul_vec2f(l, x);
+    vec2 res = vec2_mulf(l, x);
 
     return res;
 }
 
 INLINE vec2 operator/(vec2 l, vec2 r)
 {
-    vec2 res = div_vec2(l, r);
+    vec2 res = vec2_div(l, r);
 
     return res;
 }
 
 INLINE vec2 operator/(vec2 l,f32 r)
 {
-    vec2 res = div_vec2f(l, r);
+    vec2 res = vec2_divf(l, r);
 
     return res;
 }
 
 INLINE vec3 operator+(vec3 l, vec3 r)
 {
-    vec3 res = add_vec3(l, r);
+    vec3 res = vec3_add(l, r);
 
     return res;
 }
 INLINE vec3 operator-(vec3 l, vec3 r)
 {
-    vec3 res = sub_vec3(l, r);
+    vec3 res = vec3_sub(l, r);
 
     return res;
 }
 INLINE vec3 operator*(vec3 l, vec3 r)
 {
-    vec3 res = mul_vec3(l, r);
+    vec3 res = vec3_mul(l, r);
 
     return res;
 }
 INLINE vec3 operator*(vec3 l, f32 r)
 {
-    vec3 res = mul_vec3f(l, r);
+    vec3 res = vec3_mulf(l, r);
 
     return res;
 }
 INLINE vec3 operator/(vec3 l, vec3 r)
 {
-    vec3 res = div_vec3(l, r);
+    vec3 res = vec3_div(l, r);
 
     return res;
 }
 INLINE vec3 operator/(vec3 l,f32 r)
 {
-    vec3 res = div_vec3f(l, r);
+    vec3 res = vec3_divf(l, r);
 
     return res;
 }
 
 INLINE vec4 operator+(vec4 l, vec4 r)
 {
-    vec4 res = add_vec4(l, r);
+    vec4 res = vec4_add(l, r);
 
     return res;
 }
 INLINE vec4 operator-(vec4 l, vec4 r)
 {
-    vec4 res = sub_vec4(l, r);
+    vec4 res = vec4_sub(l, r);
 
     return res;
 }
 INLINE vec4 operator*(vec4 l, vec4 r)
 {
-    vec4 res = mul_vec4(l, r);
+    vec4 res = vec4_mul(l, r);
 
     return res;
 }
 INLINE vec4 operator*(vec4 l, f32 r)
 {
-    vec4 res = mul_vec4f(l, r);
+    vec4 res = vec4_mulf(l, r);
 
     return res;
 }
 INLINE vec4 operator/(vec4 l, vec4 r)
 {
-    vec4 res = div_vec4(l, r);
+    vec4 res = vec4_div(l, r);
 
     return res;
 }
 INLINE vec4 operator/(vec4 l,f32 r)
 {
-    vec4 res = div_vec4f(l, r);
+    vec4 res = vec4_divf(l, r);
 
     return res;
 }
@@ -1301,27 +1329,27 @@ INLINE vec4 operator/(vec4 l,f32 r)
 
 INLINE mat4 operator+(mat4 l, mat4 r)
 {
-    mat4 res = add_mat4(l,r);
+    mat4 res = mat4_add(l,r);
 
     return res;
 }
 INLINE mat4 operator-(mat4 l, mat4 r)
 {
-    mat4 res = sub_mat4(l,r);
+    mat4 res = mat4_sub(l,r);
 
     return res;
 }
 
 INLINE mat4 operator*(mat4 l, mat4 r)
 {
-    mat4 res = mul_mat4(l,r);
+    mat4 res = mat4_mul(l,r);
 
     return res;
 }
 
 INLINE mat4 operator*(mat4 l,f32 r)
 {
-    mat4 res = mul_mat4f(l,r);
+    mat4 res = mat4_mulf(l,r);
 
     return res;
 }
@@ -1372,7 +1400,7 @@ INLINE Quaternion quat_vec4(vec4 vec)
     return res;
 }
 
-INLINE Quaternion add_quat(Quaternion l, Quaternion r)
+INLINE Quaternion quat_add(Quaternion l, Quaternion r)
 {
     Quaternion res;
 
@@ -1384,7 +1412,7 @@ INLINE Quaternion add_quat(Quaternion l, Quaternion r)
     return res;
 }
 
-INLINE Quaternion sub_quat(Quaternion l, Quaternion r)
+INLINE Quaternion quat_sub(Quaternion l, Quaternion r)
 {
     Quaternion res;
 
@@ -1397,7 +1425,7 @@ INLINE Quaternion sub_quat(Quaternion l, Quaternion r)
 }
 
 //TODO(ilias): check the scalars..
-INLINE Quaternion mul_quat(Quaternion l, Quaternion r)
+INLINE Quaternion quat_mul(Quaternion l, Quaternion r)
 {
     Quaternion res;
 
@@ -1410,7 +1438,7 @@ INLINE Quaternion mul_quat(Quaternion l, Quaternion r)
 }
 
 
-INLINE Quaternion mul_quatf(Quaternion l, f32 val)
+INLINE Quaternion quat_mulf(Quaternion l, f32 val)
 {
     Quaternion res;
 
@@ -1422,7 +1450,7 @@ INLINE Quaternion mul_quatf(Quaternion l, f32 val)
     return res;
 }
 
-INLINE Quaternion div_quatf(Quaternion l, f32 val)
+INLINE Quaternion quat_divf(Quaternion l, f32 val)
 {
     assert(val);
     Quaternion res;
@@ -1435,7 +1463,7 @@ INLINE Quaternion div_quatf(Quaternion l, f32 val)
     return res;
 }
 
-INLINE f32 dot_quat(Quaternion l, Quaternion r)
+INLINE f32 quat_dot(Quaternion l, Quaternion r)
 {
    f32 res;
 
@@ -1444,19 +1472,19 @@ INLINE f32 dot_quat(Quaternion l, Quaternion r)
    return res;
 }
 
-INLINE b32 equals_quat(Quaternion l, Quaternion r)
+INLINE b32 quat_equals(Quaternion l, Quaternion r)
 {
-    f32 dot = dot_quat(l,r);
+    f32 dot = quat_dot(l,r);
     return 1 ? 0 : fabs(dot - 1.f) < 0.001f;
 }
 
 
-INLINE Quaternion inv_quat(Quaternion l)
+INLINE Quaternion quat_inv(Quaternion l)
 {
     Quaternion res;
 
-    f32 len = sqrt(dot_quat(l,l));
-    res = div_quatf(l, len);
+    f32 len = sqrtf(dot_quat(l,l));
+    res = quat_divf(l, len);
 
     return res;
 }
@@ -1474,22 +1502,35 @@ INLINE Quaternion quat_from_angle(vec3 axis, f32 angle)
 {
     Quaternion res;
 
-    vec3 axis_normalized = normalize_vec3(axis);
+    vec3 axis_normalized = vec3_normalize(axis);
     //this because quaternions are (i)q(i^-1) so angles are double
     f32 sintheta = sin(angle / 2.f); 
 
-    res.xyz = mul_vec3f(axis_normalized, sintheta);
+    res.xyz = vec3_mulf(axis_normalized, sintheta);
     res.w = cos(angle / 2.f);
     
     return res;
 }
 
-INLINE Quaternion normalize_quat(Quaternion l)
+INLINE vec3 quat_to_angle(Quaternion quat)
+{
+    f32 theta = acos(quat.w) *2.f;
+
+    float ax = quat.x / sin(acos(theta));
+    float ay = quat.y / sin(acos(theta));
+    float az = quat.z / sin(acos(theta));
+
+    return v3(ax,ay,az);
+}
+
+
+
+INLINE Quaternion quat_normalize(Quaternion l)
 {
     Quaternion res;
 
-    f32 len = sqrt(dot_quat(l,l)) ;
-    res = div_quatf(l,len);
+    f32 len = sqrtf(quat_dot(l,l));
+    res = quat_divf(l,len);
 
     return res;
 }
@@ -1504,7 +1545,7 @@ INLINE Quaternion nlerp(Quaternion l, Quaternion r, f32 time)
     res.z = lerp(l.z, r.z, time);
     res.w = lerp(l.w, r.w, time);
 
-    res = normalize_quat(res);
+    res = quat_normalize(res);
     
     return res;
 }
@@ -1514,7 +1555,7 @@ INLINE mat4 quat_to_mat4(Quaternion l)
 {
     mat4 res;
 
-    Quaternion norm_quat = normalize_quat(l);
+    Quaternion norm_quat = quat_normalize(l);
 
     f32 XX, YY, ZZ, XY, XZ, YZ, WX, WY, WZ;
 
@@ -1597,7 +1638,7 @@ mat4_to_quat(mat4 m)
         }
     }
 
-    Q = mul_quatf(Q, 0.5f / sqrt(T));
+    Q = quat_mulf(Q, 0.5f / sqrtf(T));
 
     return Q;
 }
@@ -1616,25 +1657,25 @@ enum {
 typedef struct TGAInfo
 {
     i32 status;
-    u8 type, pixel_depth;
+    u8 type, bits_per_pixel;
     i16 width, height;
     u8 *image_data;
 }TGAInfo;
 
-static TGAInfo* tga_init_image_RGB(i16 width, i16 height)
+internal TGAInfo* tga_init_image_RGB(i16 width, i16 height)
 {
     TGAInfo* info;
     info = (TGAInfo*)ALLOC(sizeof(TGAInfo));
     info->width = width;
     info->height = height;
-    info->pixel_depth = 24;
+    info->bits_per_pixel = 24;
     info->type = 2; 
     info->status = TGA_OK;
-    info->image_data = (u8*)ALLOC(sizeof(u8) * width * height * (info->pixel_depth / 8));
+    info->image_data = (u8*)ALLOC(sizeof(u8) * width * height * (info->bits_per_pixel / 8));
     return info;
 }
 
-static void 
+internal void 
 tga_load_header(FILE *file, TGAInfo *info) {
 
 	u8 c_garbage;
@@ -1654,17 +1695,17 @@ tga_load_header(FILE *file, TGAInfo *info) {
 
 	fread(&info->width, sizeof(i16), 1, file);
 	fread(&info->height, sizeof(i16), 1, file);
-	fread(&info->pixel_depth, sizeof(u8), 1, file);
+	fread(&info->bits_per_pixel, sizeof(u8), 1, file);
 
 	fread(&c_garbage, sizeof(u8), 1, file);
 }
-static void tga_load_image_data(FILE *file, TGAInfo *info) {
+internal void tga_load_image_data(FILE *file, TGAInfo *info) {
 
 	i32 mode,total,i;
 	u8 aux;
 
     // mode equal the number of components for each pixel
-	mode = info->pixel_depth / 8;
+	mode = info->bits_per_pixel / 8;
     // total is the number of bytes we'll have to read
 	total = info->height * info->width * mode;
 	
@@ -1678,10 +1719,45 @@ static void tga_load_image_data(FILE *file, TGAInfo *info) {
 			info->image_data[i] = info->image_data[i+2];
 			info->image_data[i+2] = aux;
 		}
+    //flip the image
+    u8* pixels_new = (u8*)ALLOC(sizeof(u8) * info->width * info->height * (info->bits_per_pixel / 8));
+    i32 new_i = 0;
+    if (mode == 3)
+    {
+      for (i32 j = info->height - 1; j >=0; --j)
+      {
+          for (i32 i = 0; i < info->width-1; ++i)
+          {
+              i32 index = info->width * 3 *j + 3 * i;
+              u8 cmp[3];
+              pixels_new[new_i++]= (u8)(info->image_data[index]);
+              pixels_new[new_i++]= (u8)(info->image_data[index+1]);
+              pixels_new[new_i++]= (u8)(info->image_data[index+2]);
+        }
+      }
+
+    info->image_data = pixels_new;
+    }else if (mode == 4)
+    {
+     for (i32 j = info->height - 1; j >=0; --j)
+      {
+          for (i32 i = 0; i < info->width; ++i)
+          {
+              i32 index = info->width * 4 *j + 4 * i;
+              u8 cmp[3];
+              pixels_new[new_i++]= (u8)(info->image_data[index]);
+              pixels_new[new_i++]= (u8)(info->image_data[index+1]);
+              pixels_new[new_i++]= (u8)(info->image_data[index+2]);
+              pixels_new[new_i++]= (u8)(info->image_data[index+3]);
+        }
+      }
+     free(info->image_data);
+    info->image_data = pixels_new;
+    }
 }
 
-static TGAInfo* 
-tga_load(const char * filename)
+internal TGAInfo* 
+tga_load(char *filename)
 {
     TGAInfo *info;
     FILE* file;
@@ -1717,7 +1793,7 @@ tga_load(const char * filename)
        info->status = TGA_ERROR_COMPRESSED_FILE; 
     }
 
-    mode = info->pixel_depth / 8;
+    mode = info->bits_per_pixel / 8;
     total =info->height * info->width * mode;
     info->image_data = (u8*)ALLOC(total * sizeof(u8));
 
@@ -1745,8 +1821,8 @@ tga_load(const char * filename)
 }
 
 
-static i16 
-tga_save(const char *filename, i16 width, i16 height, u8 pixel_depth, u8 *image_data)
+internal i16 
+tga_save(char *filename, i16 width, i16 height, u8 bits_per_pixel, u8 *image_data)
 {
     u8 c_garbage = 0, type,mode, aux;
     i16 i_garbage;
@@ -1755,8 +1831,8 @@ tga_save(const char *filename, i16 width, i16 height, u8 pixel_depth, u8 *image_
     file = fopen(filename, "wb");
     if (file == NULL)
         return TGA_ERROR_FILE_OPEN;
-    mode = pixel_depth / 8;
-    if ((pixel_depth == 24) || (pixel_depth == 32))
+    mode = bits_per_pixel / 8;
+    if ((bits_per_pixel == 24) || (bits_per_pixel == 32))
         type = 2;
     else
         type = 3;
@@ -1775,7 +1851,7 @@ tga_save(const char *filename, i16 width, i16 height, u8 pixel_depth, u8 *image_
 
 	fwrite(&width, sizeof(i16), 1, file);
 	fwrite(&height, sizeof(i16), 1, file);
-	fwrite(&pixel_depth, sizeof(u8), 1, file);
+	fwrite(&bits_per_pixel, sizeof(u8), 1, file);
 
 	fwrite(&c_garbage, sizeof(u8), 1, file);
 
@@ -1797,7 +1873,7 @@ tga_save(const char *filename, i16 width, i16 height, u8 pixel_depth, u8 *image_
 	return TGA_OK;
 }
 
-static void
+internal void
 tga_destroy(TGAInfo * info)
 {
     if (info != NULL)
@@ -1805,269 +1881,10 @@ tga_destroy(TGAInfo * info)
         if (info->image_data != NULL)
             free(info->image_data);
         free(info);
+        info = NULL;
     }
     
 }
-
-//PPM LIB
-
-typedef struct PPMInfo
-{
-    i32 status;
-    i32 width, height;
-    i32 max_color;
-    char type[3];
-    f32 *image_data;
-}PPMInfo;
-
-enum {
-    PPM_ERROR_FILE_OPEN = 1,
-    PPM_ERROR_READING_FILE,
-    PPM_ERROR_INDEXED_COLOR, 
-    PPM_ERROR_MEMORY,
-    PPM_ERROR_UNSUPPORTED_FILE, 
-    PPM_OK
-};
-
-
-static color3
-ppm_get_pixel(i32 i, i32 j, PPMInfo* info)
-{
-    assert(i + j * info->height < info->width * info->height);
-    f32 x = info->image_data[(i + (info->height -1- j) * info->height)*3]; 
-    f32 y = info->image_data[(i + (info->height -1- j)* info->height)*3 + 1]; 
-    f32 z = info->image_data[(i + (info->height -1- j)* info->height)*3 + 2]; 
-
-    vec3 ret = {x,y,z};
-    return ret;
-}
-
-static color3
-ppm_set_pixel(i32 i, i32 j, PPMInfo* info, color3 col)
-{
-    assert(i + j * info->height < info->width * info->height);
-    info->image_data[(i + (info->height -1- j) * info->height)*3] = col.x; 
-    info->image_data[(i + (info->height -1- j)* info->height)*3 + 1] = col.y; 
-    info->image_data[(i + (info->height -1- j)* info->height)*3 + 2] = col.z; 
-    return col;
-}
-
-static PPMInfo*
-ppm_init(i32 width, i32 height)
-{
-    PPMInfo* info;
-    info = (PPMInfo*)ALLOC(sizeof(PPMInfo));
-    if (info == NULL)return NULL;
-    info->type[0] = 'P';
-    info->type[1] = '3';
-    info->type[2] = 0;
-    info->width = width;
-    info->height = height;
-    info->max_color = 255;
-    info->image_data = (f32*)ALLOC(sizeof(f32) * info->width * info->height * 3); 
-    if (info->image_data == NULL)return NULL;
-    i32 i;
-    for (i = 0; i < info->width * info->height*3; ++i)
-    {
-        info->image_data[i] = 0; 
-    }
-#if 0
-    for (i = 0; i < info->width * info->height; ++i)
-    {
-        i32 x = i % info->width;
-        i32 y = i / info->height;
-        if (x == y)
-            ppm_set_pixel(x,y,info, {1,1,1});
-    }
-#endif
- 
-    return info;
-}
-static void 
-ppm_load_header(FILE* file, PPMInfo* info)
-{
-	i32 i_garbage;
-    char buff;
-
-    info->type[0] = fgetc(file);
-    info->type[1] = fgetc(file);
-    info->type[2] = 0;
-
-    fscanf (file, "%d", &i_garbage);
-    info->width = i_garbage;
-    fscanf (file, "%d", &i_garbage);
-    info->height = i_garbage;
-    fscanf (file, "%d", &i_garbage);
-    info->max_color = i_garbage;
-
-
-}
-static void ppm_load_P3_data(FILE* file, PPMInfo* info)
-{
-    i32 garbage[3];
-    u32 iter = 0;
-    int i;
-    for (i = 0; i < info->width * info->height; ++i)
-    {
-        fscanf (file, "%d %d %d", &garbage[0], &garbage[1], &garbage[2]);
-        info->image_data[iter++] = ((f32)garbage[0]) / (f32)info->max_color;
-        info->image_data[iter++] = ((f32)garbage[1]) / (f32)info->max_color;
-        info->image_data[iter++] = ((f32)garbage[2]) / (f32)info->max_color;
-    }
-}
-static PPMInfo*
-ppm_read(const char *filename)
-{
-    PPMInfo *info;
-    FILE* file;
-
-    //allocate memory for PPMInfo
-    info = (PPMInfo*)ALLOC(sizeof(PPMInfo));
-    if(info == NULL)return(NULL);
-
-    file = fopen(filename, "r");
-    if (file == NULL)
-    {
-        info->status = PPM_ERROR_FILE_OPEN;
-        //fclose(file);
-        return info;
-    }
-
-    //we load the header and fill out neccesary info
-    ppm_load_header(file, info);
-
-    info->image_data = (f32*)ALLOC(sizeof(f32) * info->width * info->height * 3);
-    if (info->image_data == NULL)
-    {
-        info->status = PPM_ERROR_MEMORY;
-        fclose(file);
-        return info;
-    }
-
-    if (strcmp(info->type, "P3") == 0)ppm_load_P3_data(file, info);
-    else
-    {
-        info->status = PPM_ERROR_UNSUPPORTED_FILE;
-        fclose(file);
-        return info;
-    }
-
-    if (ferror(file))
-    {
-        info->status = PPM_ERROR_READING_FILE;
-        fclose(file);
-        //info->status = TGA_OK;
-        return info;
-    }
-    fclose(file);
-    info->status = PPM_OK;
-
-    //flip_image_horizontally(info->width, info->height, info->image_data);
-    return info;
-}
-
-static i32
-ppm_write(PPMInfo* info, const char *filename)
-{
-    //flip_image_horizontally(info->width, info->height, info->image_data);
-    FILE* file;
-    file = fopen(filename, "w");
-    if (file == NULL)
-    {
-        fclose(file);
-        return PPM_ERROR_FILE_OPEN;
-    }
-    if (strcmp(info->type, "P3") != 0)
-    {
-       fclose(file);
-       return PPM_ERROR_UNSUPPORTED_FILE;
-    }
-    fputc(info->type[0], file);
-    fputc(info->type[1], file);
-    fputc('\n', file);
-    fprintf(file, "%d\n", info->width);
-    fprintf(file, "%d\n", info->height);
-    fprintf(file, "%d\n", info->max_color);
-
-    int i;
-    for (i = 0; i < info->width * info->height; ++i)
-    {
-        i32 cmp[3];
-        cmp[0]= (i32)(info->image_data[i*3] * info->max_color);
-        cmp[1]= (i32)(info->image_data[i*3+1] * info->max_color);
-        cmp[2]= (i32)(info->image_data[i*3+2] * info->max_color);
-        fprintf(file, "%d ", cmp[0]);
-        fprintf(file, "%d ", cmp[1]);
-        fprintf(file, "%d", cmp[2]);
-        fputc('\n', file);
-    }
-    return PPM_OK;
-}
-
-static i32
-ppm_write01(PPMInfo* info, const char *filename)
-{
-    //flip_image_horizontally(info->width, info->height, info->image_data);
-    FILE* file;
-    file = fopen(filename, "w");
-    if (file == NULL)
-    {
-        fclose(file);
-        return PPM_ERROR_FILE_OPEN;
-    }
-    if (strcmp(info->type, "P3") != 0)
-    {
-       fclose(file);
-       return PPM_ERROR_UNSUPPORTED_FILE;
-    }
-    fputc(info->type[0], file);
-    fputc(info->type[1], file);
-    fputc('\n', file);
-    fprintf(file, "%d\n", info->width);
-    fprintf(file, "%d\n", info->height);
-    fprintf(file, "%d\n", info->max_color);
-    int j;
-    int i;
-    for (j = info->height-1; j >=0; --j)
-    {
-        for (i = 0; i < info->width; ++i)
-        {
-            int index = info->width * 3 *j + 3 * i;
-            i32 cmp[3];
-            cmp[0]= (i32)(info->image_data[index] * info->max_color);
-            cmp[1]= (i32)(info->image_data[index+1] * info->max_color);
-            cmp[2]= (i32)(info->image_data[index+2] * info->max_color);
-            fprintf(file, "%d ", cmp[0]);
-            fprintf(file, "%d ", cmp[1]);
-            fprintf(file, "%d", cmp[2]);
-            fputc('\n', file);
-
-        }
-    }
-
-    return PPM_OK;
-}
-
-//TODO: put this whole thing on a thread of its own
-static i32 ppm_save_pixels(i32 width, i32 height, f32* pixels)
-{
-    PPMInfo *info = ppm_init(width,height);
-    i32 i;
-    memcpy(info->image_data, pixels , sizeof(f32) * info->width * info->height * 3);
-    ppm_write01(info, "screenshot.ppm");
-    return 1;
-}
-/*  example usage of ppm_save_current_framebuffer
- if (global_platform.key_pressed[KEY_K])
-    {
-        f32 *pixels = (f32*)ALLOC(sizeof(f32) * 3 * global_platform.window_width* global_platform.window_height); 
-        glReadPixels(0, 0, global_platform.window_width,global_platform.window_height,GL_RGB, GL_FLOAT, pixels);
-        ppm_save_pixels( global_platform.window_width, global_platform.window_height, pixels);
-        free(pixels);
-    }
-*/
-
-//TODO: make a ppm_write_FBO to write color attachments of a framebuffer as PPM images.. 
 
 //MEMORY STUFF
 
@@ -2079,7 +1896,7 @@ typedef struct Arena
 } Arena;
 
 
-static Arena 
+internal Arena 
 arena_init(void* memory, u32 size)
 {
     Arena a = {0};
@@ -2090,13 +1907,13 @@ arena_init(void* memory, u32 size)
     return a;
 }
 
-static void
+internal void
 arena_free(Arena* arena, u32 size)
 {
     //do nothing
 }
 
-static void * 
+internal void * 
 arena_alloc(Arena* arena, u32 size)
 {
     void* mem = 0;
@@ -2111,13 +1928,13 @@ arena_alloc(Arena* arena, u32 size)
     return mem;
 }
 
-static void
+internal void
 arena_clear(Arena* arena)
 {
     arena->current_offset = 0;
 }
 
-static void 
+internal void 
 arena_zero(Arena* arena)
 {
     memset(arena->memory, 0, arena->memory_size);
@@ -2134,7 +1951,7 @@ typedef struct String
     b32 is_constant;
 }String;
 
-static String
+internal String
 init_string_in_arena(Arena* arena, u32 size)
 {
     String str = {0};
@@ -2152,7 +1969,7 @@ init_string_in_arena(Arena* arena, u32 size)
     return str;
 }
 
-static String str(Arena* arena, char* characters)
+internal String str(Arena* arena, char* characters)
 {
 
     String s = init_string_in_arena(arena, str_size(characters) + 1);
@@ -2160,123 +1977,16 @@ static String str(Arena* arena, char* characters)
     return s; 
 }
 
-
-//SIMPLE INT TO INT HASHMAP NOTE: VERY SLOW TODO: FIX..
-
-typedef struct IntPair IntPair; 
-struct IntPair
+internal String substr(Arena* arena, char* characters, i32 start, i32 finish)
 {
-   i32 key;
-   i32 value;
-   IntPair *next;
-};
-
-typedef struct IntHashMap
-{
-    IntPair **data;
-    u32 size;
-}IntHashMap;
-
-static IntHashMap 
-create_hashmap(u32 size)
-{
-    IntHashMap res;
-    res.size = size;
-    //res.data = (IntPair**)arena_alloc(&global_platform.permanent_storage, sizeof(IntPair*) * size);
-    res.data = (IntPair**)ALLOC(sizeof(IntPair*) * size);
-    for (i32 i = 0; i < size; ++i)
-        res.data[i] = NULL;
-    return res;
-}
-static i32
-hash_code(IntHashMap* table, i32 key)
-{
-    return abs((i32)(key % table->size));
+    assert(finish - start < str_size(characters));
+    assert(start < str_size(characters));
+    String s = init_string_in_arena(arena, finish - start + 1);
+    memcpy(s.data , characters + start, finish - start);
+    return s; 
 }
 
-static void
-insert_hashmap(IntHashMap* table, i32 key, i32 val)
-{
-   i32 pos = hash_code(table, key);
-   IntPair *list_to_insert_pair = table->data[pos];
-   IntPair *new_pair = (IntPair*)ALLOC(sizeof(IntPair));
-   IntPair *temp = list_to_insert_pair;
-   while (temp)
-   {
-        if (temp->key == key)
-        {
-            temp->value = val;
-            return;
-        }
-        temp = temp->next;
-   }
-   new_pair->key = key;
-   new_pair->value = val;
-   new_pair->next = list_to_insert_pair;
-   table->data[pos] = new_pair;
-}
 
-static i32 
-lookup_hashmap(IntHashMap* table, u32 key)
-{
-    u32 pos = hash_code(table, key);
-    IntPair *list_to_search = table->data[pos];
-    IntPair *iter = list_to_search;
-    while (iter)
-    {
-       if (iter->key == key)
-       {
-            return iter->value;
-       }
-       iter = iter->next;
-    }
-    return -1;
-}
-
-static i32 
-remove_hashmap(IntHashMap* table, u32 key)
-{
-    u32 pos = hash_code(table, key);
-    IntPair *list_to_search = table->data[pos];
-    IntPair *iter = list_to_search;
-    IntPair *prev = NULL;
-    while (iter)
-    {
-       if (iter->key == key)
-       {
-          if (prev == NULL)
-          {
-              table->data[pos] = iter->next;
-              free(iter);
-              return 1;
-          }else
-          {
-            prev->next = iter->next;
-            free(iter);
-            return 1;
-          }
-       }
-       prev = iter;
-       iter = iter->next;
-    }
-    return -1;
-}
-
-static void* free_next(IntPair *p)
-{
-    free_next(p->next);
-    free(p);
-}
-
-//NOTE(ilias): This is so wrong!! Never use this!!
-static void free_hashmap(IntHashMap* table)
-{
-    for (u32 i = 0; i < table->size; ++i)
-    {
-        IntPair *next = table->data[i];
-        free_next(next);
-    }
-}
 
 //A stretchy buffer implementation [C99]
 
@@ -2307,7 +2017,7 @@ typedef struct BufHdr
 #define buf_push(b, ...) (buf_fit((b), 1 + buf_len(b)), (b)[buf__hdr(b)->len++] = (__VA_ARGS__))
 #define buf_free(b) ((b) ? (free(buf__hdr(b)), (b) = NULL) : 0)
 
-static void *buf__grow(const void *buf, u32 new_len, u32 element_size)
+internal void *buf__grow(const void *buf, u32 new_len, u32 element_size)
 {
    u32 new_cap = max(16, max(1 + 2*buf_cap(buf), new_len));
    assert(new_len <= new_cap);
@@ -2344,6 +2054,131 @@ static void *buf__grow(const void *buf, u32 new_len, u32 element_size)
         buf_free(arr);
 }
 */
+
+
+//A LINKED-LIST INT-TO-INT HASHMAP IMPLEMENTATION
+
+typedef struct IntPair
+{
+   i32 key;
+   i32 value;
+   struct IntPair *next;
+}IntPair;
+
+typedef struct IntHashMap
+{
+    IntPair **data;
+    u32 size;
+}IntHashMap;
+
+internal IntHashMap 
+hashmap_create(u32 size)
+{
+    IntHashMap res;
+    res.size = size;
+    //res.data = (IntPair**)arena_alloc(&global_platform.permanent_storage, sizeof(IntPair*) * size);
+    res.data = (IntPair**)ALLOC(sizeof(IntPair*) * size);
+    i32 i;
+    for (i = 0; i < size; ++i)
+        res.data[i] = NULL;
+    return res;
+}
+internal i32
+hash_code(IntHashMap* table, i32 key)
+{
+    return abs((i32)(key % table->size));
+}
+
+internal void
+hashmap_insert(IntHashMap* table, i32 key, i32 val)
+{
+   i32 pos = hash_code(table, key);
+   IntPair *list_to_insert_pair = table->data[pos];
+   IntPair *new_pair = (IntPair*)ALLOC(sizeof(IntPair));
+   IntPair *iter = &list_to_insert_pair[0];
+   while (iter)
+   {
+        if (iter->key == key)
+        {
+            iter->value = val;
+            return;
+        }
+        iter = iter->next;
+   }
+   new_pair->key = key;
+   new_pair->value = val;
+   new_pair->next = &list_to_insert_pair[0];
+   table->data[pos] = new_pair;
+}
+
+internal i32 
+hashmap_lookup(IntHashMap* table, u32 key)
+{
+    u32 pos = hash_code(table, key);
+    IntPair* list_to_search = table->data[pos];
+    IntPair* iter = list_to_search;
+    while (iter)
+    {
+       if (iter->key == key)
+       {
+            return iter->value;
+       }
+       iter = iter->next;
+    }
+    return -1;
+}
+
+static u32 
+hashmap_remove(IntHashMap *table, u32 key)
+{
+    u32 pos = hash_code(table, key);
+    IntPair *list_to_search = table->data[pos];
+    IntPair *iter = list_to_search;
+    IntPair *prev = NULL;
+    while (iter)
+    {
+       if (iter->key == key)
+       {
+          if (prev == NULL)
+          {
+              table->data[pos] = iter->next;
+              free(iter);
+              return 1;
+          }else
+          {
+            prev->next = iter->next;
+            free(iter);
+            return 1;
+          }
+       }
+       prev = iter;
+       iter = iter->next;
+    }
+    return 0;
+}
+
+internal void *free_next(IntPair *p)
+{
+    free_next(p->next);
+    free(p);
+}
+
+internal void hashmap_destroy(IntHashMap *table)
+{
+    for (u32 i = 0; i < table->size; ++i)
+    {
+        IntPair *next = table->data[i];
+        free_next(next);
+    }
+}
+
+
+
+
+
+
+
+
 #ifdef __cplusplus
 }
 #endif

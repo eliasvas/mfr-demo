@@ -43,7 +43,7 @@ enum {
 
 #define DEEP_IMAGE_VERSION_BITMASK 0x800
 
-static u32
+internal u32
 count_bytes_in_file(FILE *file)
 {
     u32 bytes = 0;

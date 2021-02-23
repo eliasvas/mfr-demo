@@ -1,16 +1,14 @@
 #version 330 core
-in vec2 UV;
+out vec4 FragColor;
+  
+in vec2 f_tex_coords;
+uniform sampler2D bmf_sampler;
 
-// Ouput data
-out vec4 color;
-
-// Values that stay constant for the whole mesh.
-uniform sampler2D sampler;
-
-void main(){
-
-	color = texture( sampler, UV );
-	if (color.a > 0.01)color.a = 0.5;//semi transparent
-	else discard;
-	color = vec4(0.8,0.8,0.8,1);
-}
+void main()
+{
+	FragColor = texture(bmf_sampler, f_tex_coords);
+	FragColor.y/=2.f;
+	FragColor.z/=2.f;
+	//FragColor.w = 1.0;
+	if (FragColor.x < 0.1)discard;
+} 

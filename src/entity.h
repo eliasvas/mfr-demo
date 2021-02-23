@@ -1,50 +1,30 @@
 #ifndef ENTITY_H
 #define ENTITY_H
-
 #include "tools.h"
 
-#define MAX_ENTITY 1000
-#define INVALID_ENTITY 0
-static u32 entity_id = 1;
+#define MAX_ENTITY 1024
+#define MAX_COMPONENTS 1024
+typedef u32 entity_id;
 typedef u32 Entity;
-
-static Entity
-create_entity(void)
-{
-    return entity_id++;
-}
-
-static b32 entity_equals(Entity l, Entity r)
-{
-    return (l == r);
-}
-
-//NOTE(ilias): this is just for testing purposes
-typedef struct PositionComponent
-{
-    vec3 pos;
-}PositionComponent;
+#define INVALID_ENTITY 0
 
 typedef IntHashMap EntityHashMap;
+typedef struct PositionComponent
+{
+   vec3 position; 
+}PositionComponent;
+
 typedef struct PositionManager
 {
-    //maybe make them pointers into an arena allocator???
-    PositionComponent positions[MAX_ENTITY];
+    PositionComponent positions[MAX_COMPONENTS];
     Entity entities[MAX_ENTITY];
     u32 next_index;
     EntityHashMap table;
-    
 }PositionManager;
 
-static void 
-init_position_manager(PositionManager* m)
-{
-    m->next_index = 0;
-    m->table = create_hashmap(20);
-}
 //creates an empty component of type position TODO generalize?
-static PositionComponent*
-add_position_component(PositionManager* manager, Entity entity)
+internal PositionComponent*
+entity_add_pos(PositionManager *manager, Entity entity)
 {
   // INVALID_ENTITY is not allowed!
   assert(entity != INVALID_ENTITY);
@@ -53,7 +33,7 @@ add_position_component(PositionManager* manager, Entity entity)
   //assert(lookup_hashmap(&manager->table, entity) == -1);
 
   // Update the entity lookup table:
-  insert_hashmap(&manager->table, entity, manager->next_index);
+  hashmap_insert(&manager->table, entity, manager->next_index);
 
   // New components are always pushed to the end:
   manager->positions[manager->next_index] = (PositionComponent){0}; 
@@ -64,10 +44,11 @@ add_position_component(PositionManager* manager, Entity entity)
   return &manager->positions[manager->next_index++];
 }
 
-//removes the component of an entity from the manager's data 
-static void remove_position_entity(PositionManager* manager, Entity entity)
+//removes an entity and its component from the manager's data TODO generalize?
+internal void 
+entity_remove_pos(PositionManager* manager, Entity entity)
 {
-  u32 index = lookup_hashmap(&manager->table, entity);
+  u32 index = hashmap_lookup(&manager->table, entity);
   if (index != -1)
   {
     // Directly index into components and entities array:
@@ -79,61 +60,50 @@ static void remove_position_entity(PositionManager* manager, Entity entity)
       manager->positions[index] = manager->positions[manager->next_index-1];// try to use move
       manager->entities[index] = manager->entities[manager->next_index-1];
 
-      //NOTE(ilias): this is not ver performant.. fix
-      remove_hashmap(&manager->table,entity);
-      remove_hashmap(&manager->table,manager->entities[index]);
-      insert_hashmap(&manager->table,manager->entities[index], index); 
+      //NOTE: this is not ver performant..
+      hashmap_remove(&manager->table,entity);
+      hashmap_remove(&manager->table,manager->entities[index]);
+      hashmap_insert(&manager->table,manager->entities[index], index); 
     }
 
-    // Shrink the container
+    //shrink the container 
     manager->next_index--;
   }
 }
 
-static PositionComponent* get_component(PositionManager* manager, Entity entity)
+internal PositionComponent* 
+entity_get_pos(PositionManager *manager, Entity entity)
 {
-    i32 index = lookup_hashmap(&manager->table, entity);
+    i32 index = hashmap_lookup(&manager->table, entity);
     if (index != -1)
     {
         return &manager->positions[index];
     }
     return NULL;
 }
-
-//NOTE(ilias): maybe I should make a component.h for all different components no?
-typedef struct TransformComponent
+internal void
+position_manager_init(PositionManager *manager)
 {
-    vec3 position;
-    vec3 scale;
-    Quaternion rotation;
-}TransformComponent;
-typedef struct TransformManager
+    manager->table = hashmap_create(20);
+    manager->next_index = 0;
+}
+
+typedef struct EntityManager
 {
-     //maybe make them pointers into an arena allocator???
-    TransformComponent transforms[MAX_ENTITY];
-    Entity entities[MAX_ENTITY];
-    u32 next_index;
-    EntityHashMap table;
-}TransformManager;
+    Entity next_entity;
+    PositionManager position_manager;
+}EntityManager;
 
-/* Entity test
-    {
-        for (u32 i = 0; i < 100; ++i){
-            Entity entity = create_entity();
-            PositionComponent* position_component = add_component(&position_manager,entity);
-            position_component->pos = v3((f32)i,(f32)i,(f32)i);
-        }
-        remove_entity(&position_manager,1);
-        remove_entity(&position_manager,2);
-        remove_entity(&position_manager,3);
-    }
-*/
-
-
-
-//NOTE(ilias): Component Managers (these are used everywhere)
-static PositionManager position_manager;
-static TransformManager transform_manager;
-
+internal void 
+entity_manager_init(EntityManager *manager)
+{
+    manager->next_entity = 0;
+    position_manager_init(&manager->position_manager);
+}
+internal Entity 
+entity_create(EntityManager *manager)
+{
+   return ++manager->next_entity; 
+}
 
 #endif

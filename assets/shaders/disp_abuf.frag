@@ -49,11 +49,11 @@ void sort_insert(const int num)
 
 		while (i >= 0 && fragments_z[i] > key)
 		{
-			fragments[i+1].r = fragments[i].r;
-			fragments[i+1].g = fragments[i].g;
-			fragments[i+1].b = fragments[i].b;
-			fragments[i+1].a = fragments[i].a;
-			fragments_z[i+1] = fragments_z[i];
+			fragments[i].r = fragments[i+1].r;
+			fragments[i].g = fragments[i+1].g;
+			fragments[i].b = fragments[i+1].b;
+			fragments[i].a = fragments[i+1].a;
+			fragments_z[i] = fragments_z[i+1];
 			--i;
 		}
 		fragments_z[i+1] = key;
