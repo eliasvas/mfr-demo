@@ -7,6 +7,7 @@ layout (location = 2) in vec2 tex_coord;
 out vec2 f_tex_coord;
 out vec3 f_normal;
 out vec3 f_frag_pos;
+out vec3 f_frag_pos_ws;
 out vec4 f_frag_pos_ls;
 out mat4 f_proj;
 
@@ -22,7 +23,8 @@ void main()
 	f_tex_coord = tex_coord;
 
 	f_normal = mat3(transpose(inverse(model))) * n;
-	f_frag_pos = vec3(model*vec4(vertex_pos,1.0));
+	f_frag_pos_ws = vec3(model*vec4(vertex_pos,1.0));
+	f_frag_pos = vec3(gl_Position);
 	f_frag_pos_ls = light_space_matrix * vec4(f_frag_pos, 1.0);
 	f_proj = proj;
 }

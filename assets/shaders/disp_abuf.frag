@@ -41,26 +41,20 @@ layout(location = 0, index = 0) out vec4 out_frag_color;
 
 void sort_insert(const int num)
 {
-	for (int j = 1; j < num; ++j)
+	for (int i = 1; i < num; ++i)
 	{
-		float key = fragments_z[j];
-		vec4 key_color = fragments[j];
-		int i = j - 1;
+		float key = fragments_z[i];
+		vec4 key_color = fragments[i];
+		int j = i - 1;
 
-		while (i >= 0 && fragments_z[i] > key)
+		while (j >= 0 && fragments_z[j] > key)
 		{
-			fragments[i].r = fragments[i+1].r;
-			fragments[i].g = fragments[i+1].g;
-			fragments[i].b = fragments[i+1].b;
-			fragments[i].a = fragments[i+1].a;
-			fragments_z[i] = fragments_z[i+1];
-			--i;
+			fragments[j+1] = fragments[j];
+			fragments_z[j+1] = fragments_z[j];
+			--j;
 		}
-		fragments_z[i+1] = key;
-		fragments[i+1].r = key_color.r;
-		fragments[i+1].g = key_color.g;
-		fragments[i+1].b = key_color.b;
-		fragments[i+1].a = key_color.a;
+		fragments_z[j+1] = key;
+		fragments[j+1] = key_color;
 	}
 }
 
@@ -77,17 +71,31 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 		vec4 frag= vec4(fragments[i].r, fragments[i].g,fragments[i].b,fragments[i].a);
 		
 		vec4 col;
-		col.rgb=frag.rgb;
+		col.rgba=frag.rgba;
 		//col.rgb = (float(ab_num_frag)/8) * warm + (1.f - float(ab_num_frag)/8) * cool;
-		col.w=fragment_alpha;	//uses constant alpha
+		//col.w=fragment_alpha;	//uses constant alpha
 
-		col.rgb=col.rgb*col.w;
+		col.rgb=col.rgb*col.a;
 
 		final_color=final_color+col*(1.0f-final_color.a);
 	}
 
 	//final_color=final_color+background_color*(1.0f-final_color.a);
 
+	return final_color;
+
+}
+vec4 resolve_closest(ivec2 coords, int ab_num_frag){
+		
+	vec4 final_color=vec4(0.0f);
+
+	final_color=vec4(0.0f);
+	vec4 closest = vec4(0,0,100000,100000.0);
+	for(int i=0; i<ab_num_frag; i++){
+		vec4 frag= vec4(fragments[i].r, fragments[i].g,fragments[i].b,fragments[i].a);
+		if (frag.w < closest.w)closest = frag;
+	}
+	final_color = closest;
 	return final_color;
 
 }
@@ -107,9 +115,10 @@ void main(void)
 	// Store fragment data values to a local array
 	int count = 0;
 	while (index != 0u)
-	{
-		fragments[count++]  = vec4(nodes[index].red, nodes[index].green, nodes[index].blue, nodes[index].alpha);
+	{		
+		fragments[count]  = vec4(nodes[index].red, nodes[index].green, nodes[index].blue, nodes[index].alpha);
 		fragments_z[count] = nodes[index].depth;
+		count++;
 		index			    = nodes[index].next;
 	}
 	

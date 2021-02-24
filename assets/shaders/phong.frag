@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 in vec2 f_tex_coord;
 in vec3 f_frag_pos;
+in vec3 f_frag_pos_ws;
 in vec3 f_normal;
 in vec4 f_frag_pos_ls;
 in mat4 f_proj;
@@ -112,7 +113,7 @@ void main()
 	float diff = max(dot(n, light_dir), 0.0);
 	vec3 diffuse = dirlight.diffuse * diff * vec3(texture(material.diffuse,f_tex_coord));
 	
-	vec3 view_dir = normalize(view_pos - f_frag_pos);
+	vec3 view_dir = normalize(view_pos - f_frag_pos_ws);
 	vec3 reflect_dir = reflect(-light_dir, n);
 	
 	float spec = pow(max(dot(view_dir, reflect_dir),0.0),4);
@@ -133,18 +134,18 @@ void main()
 		ambient = point_lights[i].ambient * vec3(texture(material.diffuse,f_tex_coord));	
 			
 		n = normalize(f_normal);
-		light_dir = normalize(point_lights[i].position - f_frag_pos);
+		light_dir = normalize(point_lights[i].position - f_frag_pos_ws);
 		
 		diff = max(dot(n,-light_dir),0.0);
 		diffuse = point_lights[i].diffuse * diff * vec3(texture(material.diffuse,f_tex_coord));
 		
-		view_dir = normalize(view_pos - f_frag_pos);
+		view_dir = normalize(view_pos - f_frag_pos_ws);
 		reflect_dir = reflect(-light_dir, n);
 		
 		spec = pow(max(dot(view_dir, reflect_dir),0.0),256);
 		specular = point_lights[i].specular * spec * vec3(texture(material.specular,f_tex_coord));
 		
-		float distance = abs(length(point_lights[i].position - f_frag_pos));
+		float distance = abs(length(point_lights[i].position - f_frag_pos_ws));
 		float attenuation = 1.0/(constant + linear * distance + quadratic*(distance*distance));
 		attenuation = 1.0/(distance);
 		ambient *= attenuation;
@@ -158,7 +159,7 @@ void main()
 		*/
 		color += ((specular + diffuse) + ambient);
 	}
-	FragColor = vec4(color,gl_FragDepth);
+	FragColor = vec4(color,texture(material.diffuse,f_tex_coord).a);
 	{
 		ivec2 coords = ivec2(gl_FragCoord.xy);
 
@@ -169,7 +170,7 @@ void main()
 	{
 		//its not used rn
 		vec4 color = FragColor;
-		color.a = 0.9;
+		//color.a = 0.9;
 		
 		nodes[index].red = color.r;
 		nodes[index].green = color.g;
@@ -177,7 +178,7 @@ void main()
 		nodes[index].alpha = color.a;
 		nodes[index].depth = f_frag_pos.z;
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
-		//discard;
+		discard;
 	}
 		
 	}

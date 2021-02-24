@@ -26,6 +26,7 @@ internal b32 texture_load(Texture* tex,const char *filename)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     TGAInfo *image = tga_load(filename);
+    //if (image->bits_per_pixel > 24)sprintf(error_log, "success!!");
     if (image && image->status == TGA_OK)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->image_data);

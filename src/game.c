@@ -51,14 +51,15 @@ render(void)
 
     light_cube.model = mat4_translate(v3(40*sin(global_platform.current_time),5,40*cos(global_platform.current_time)));
     renderer_push_model(&rend, &light_cube);
-    sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
-    renderer_push_model(&rend, &sphere);
-
+    
     //renderer_push_model(&rend, &debug_cube);
     //debug_cube.model = mat4_scale(v3(10,1,10));
 
     renderer_push_model(&rend, &debug_cube);
     debug_cube.model = mat4_translate(v3(0,5,-1));
+sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
+    renderer_push_model(&rend, &sphere);
+
     //UI bullshit..
     {
         if (global_platform.key_pressed[KEY_TAB])
