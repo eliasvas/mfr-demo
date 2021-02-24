@@ -52,8 +52,8 @@ render(void)
     light_cube.model = mat4_translate(v3(40*sin(global_platform.current_time),5,40*cos(global_platform.current_time)));
     renderer_push_model(&rend, &light_cube);
     
-    //renderer_push_model(&rend, &debug_cube);
-    //debug_cube.model = mat4_scale(v3(10,1,10));
+    renderer_push_model(&rend, &debug_cube);
+    debug_cube.model = mat4_scale(v3(10,1,10));
 
     renderer_push_model(&rend, &debug_cube);
     debug_cube.model = mat4_translate(v3(0,5,-1));

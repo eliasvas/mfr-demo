@@ -25,6 +25,6 @@ void main()
 	f_normal = mat3(transpose(inverse(model))) * n;
 	f_frag_pos_ws = vec3(model*vec4(vertex_pos,1.0));
 	f_frag_pos = vec3(gl_Position);
-	f_frag_pos_ls = light_space_matrix * vec4(f_frag_pos, 1.0);
+	f_frag_pos_ls = light_space_matrix * vec4(f_frag_pos_ws, 1.0);
 	f_proj = proj;
 }
