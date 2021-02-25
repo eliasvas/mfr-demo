@@ -86,6 +86,8 @@ renderer_init(Renderer *rend)
     char **faces= cubemap_default();
     skybox_init(&rend->skybox, faces);
     rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,80.f); 
+    rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 30.f);
+    //rend->ortho = orthographic_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,80.f); 
 
     //initialize postproc VAO
     {
@@ -488,6 +490,7 @@ renderer_render_scene3D(Renderer *rend,Shader *shader)
     shader_set_mat4fv(&shader[0], "model", (GLfloat*)data.model.elements);
     shader_set_mat4fv(&shader[0], "view", (GLfloat*)rend->view.elements);
     shader_set_mat4fv(&shader[0], "proj", (GLfloat*)rend->proj.elements);
+    shader_set_mat4fv(&shader[0], "ortho", (GLfloat*)rend->ortho.elements);
     shader_set_mat4fv(&shader[0], "light_space_matrix", (GLfloat*)light_space_matrix.elements);
     shader_set_vec3(&shader[0], "view_pos", view_pos);
     //set material properties
@@ -595,39 +598,7 @@ renderer_end_frame(Renderer *rend)
     glBindVertexArray(0);
   }
   renderer_render_scene3D(rend,&rend->shaders[0]);
-    //render filled rects
-    use_shader(&rend->shaders[5]);
-    shader_set_mat4fv(&rend->shaders[5], "view", (GLfloat*)rend->view.elements);
-    glBindVertexArray(rend->filled_rect_vao);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, rend->filled_rect_alloc_pos);
-    glBindVertexArray(0);
-
-
   skybox_render(&rend->skybox, rend->proj, rend->view);
-
-  //at the end we render the skybox
-    //render lines
-    glDisable(GL_DEPTH_TEST);
-    glLineWidth(3);
-    use_shader(&rend->shaders[6]);
-    shader_set_mat4fv(&rend->shaders[6], "view", (GLfloat*)rend->view.elements);
-    glBindVertexArray(rend->line_vao);
-    glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
-    glBindVertexArray(0);
-    glEnable(GL_DEPTH_TEST);
-
-    glDisable(GL_DEPTH_TEST);
-    use_shader(&rend->shaders[7]);
-    shader_set_mat4fv(&rend->shaders[7], "view", (GLfloat*)rend->view.elements);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, rend->bmf.id);
-    shader_set_int(&rend->shaders[7], "bmf_sampler",0);
-    glBindVertexArray(rend->text_vao);
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4,rend->text_alloc_pos);
-    glBindVertexArray(0);
-    glEnable(GL_DEPTH_TEST);
-
-
 
   glBindFramebuffer(GL_FRAMEBUFFER, rend->postproc_fbo.fbo);
   glBindTexture(GL_TEXTURE_2D, rend->main_fbo.color_attachments[0]);
@@ -657,6 +628,37 @@ renderer_end_frame(Renderer *rend)
   glDisable(GL_DEPTH_TEST);
   renderer_display_abuffer(rend);
   glEnable(GL_DEPTH_TEST);
+
+    //render filled rects
+    glDisable(GL_DEPTH_TEST);
+    use_shader(&rend->shaders[5]);
+    shader_set_mat4fv(&rend->shaders[5], "view", (GLfloat*)rend->view.elements);
+    glBindVertexArray(rend->filled_rect_vao);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, rend->filled_rect_alloc_pos);
+    glBindVertexArray(0);
+
+
+
+  //at the end we render the skybox
+    //render lines
+    glLineWidth(3);
+    use_shader(&rend->shaders[6]);
+    shader_set_mat4fv(&rend->shaders[6], "view", (GLfloat*)rend->view.elements);
+    glBindVertexArray(rend->line_vao);
+    glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
+    glBindVertexArray(0);
+
+    use_shader(&rend->shaders[7]);
+    shader_set_mat4fv(&rend->shaders[7], "view", (GLfloat*)rend->view.elements);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, rend->bmf.id);
+    shader_set_int(&rend->shaders[7], "bmf_sampler",0);
+    glBindVertexArray(rend->text_vao);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4,rend->text_alloc_pos);
+    glBindVertexArray(0);
+    glEnable(GL_DEPTH_TEST);
+
+
 
 
   renderer_clear_abuffer(rend, &rend->shaders[9]);

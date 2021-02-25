@@ -6,7 +6,7 @@ in vec3 f_frag_pos;
 in vec3 f_frag_pos_ws;
 in vec3 f_normal;
 in vec4 f_frag_pos_ls;
-in mat4 f_proj;
+uniform mat4 proj;
 struct Material {
     sampler2D diffuse;
     sampler2D specular;
@@ -67,8 +67,8 @@ uniform sampler2D shadow_map;
 
 float linearize_depth(float d)
 {
-	float A = f_proj[2].z;
-    float B = f_proj[3].z;
+	float A = proj[2].z;
+    float B = proj[3].z;
     float zNear = - B / (1.0 - A);
     float zFar  =   B / (1.0 + A);
 	return (2.0 * zNear) / (zFar + zNear - d * (zFar - zNear));	 
@@ -176,7 +176,12 @@ void main()
 		nodes[index].green = color.g;
 		nodes[index].blue = color.b;
 		nodes[index].alpha = color.a;
-		nodes[index].depth = f_frag_pos.z;
+		float A = proj[2].z;
+		float B = proj[3].z;
+		float zNear = - B / (1.0 - A);
+		float zFar  =   B / (1.0 + A);
+		float d = (f_frag_pos_ws.z - view_pos.z + zNear)/(zFar-zNear);
+		nodes[index].depth = (d - 0.5)/2.0;
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		//discard;
 	}

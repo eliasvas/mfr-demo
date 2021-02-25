@@ -52,12 +52,12 @@ render(void)
     light_cube.model = mat4_translate(v3(40*sin(global_platform.current_time),5,40*cos(global_platform.current_time)));
     renderer_push_model(&rend, &light_cube);
     
-    renderer_push_model(&rend, &debug_cube);
-    debug_cube.model = mat4_scale(v3(10,1,10));
+    //renderer_push_model(&rend, &debug_cube);
+    //debug_cube.model = mat4_scale(v3(10,1,10));
 
     renderer_push_model(&rend, &debug_cube);
     debug_cube.model = mat4_translate(v3(0,5,-1));
-sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
+    sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
     renderer_push_model(&rend, &sphere);
 
     //UI bullshit..
@@ -77,7 +77,8 @@ sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f))
             renderer_push_text(&rend, v3(0.05,0.60,0.0), v2(0.015,0.020), "-padding");
 
             char ms[32];
-            sprintf(ms, "%.4f ms", global_platform.dt);
+            f32 msf = global_platform.dt * 100.f;
+            sprintf(ms, "%.4f ms", msf);
             renderer_push_text(&rend, v3(0.82,0.90,0.0), v2(0.015,0.025), ms);
         }
     }

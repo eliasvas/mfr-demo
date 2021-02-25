@@ -123,6 +123,7 @@ typedef struct Renderer
   Texture bmf;
   mat4 view;
   mat4 proj;
+  mat4 ortho;
   
 
     //A-Buffer stuff
