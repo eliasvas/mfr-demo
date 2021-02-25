@@ -56,7 +56,8 @@ render(void)
     //debug_cube.model = mat4_scale(v3(10,1,10));
 
     renderer_push_model(&rend, &debug_cube);
-    debug_cube.model = mat4_translate(v3(0,5,-1));
+    debug_cube.model = mat4_mul(mat4_translate(v3(0,5,-1)),mat4_rotate(40, v3(0,1,1)));
+
     sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
     renderer_push_model(&rend, &sphere);
 
