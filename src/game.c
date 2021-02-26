@@ -8,6 +8,7 @@
 #include "collada_parser.h"
 #include "animation.h"
 #include "entity.h"
+#include "openexr_write.h"
 mat4 view,proj;
 
 global Model debug_cube;
@@ -42,7 +43,8 @@ update(void)
   if (DEEP_WRITE)write_success_timer = 3.f;
   else
       write_success_timer = max(0.f, write_success_timer -= global_platform.dt);
-  renderer_set_deep_write(&rend, DEEP_WRITE); //if deep write 1, sets render mode to deep image screenshot
+  u32 settings = (EXR_RGBA);
+  renderer_set_deep_write(&rend, DEEP_WRITE, settings); //if deep write 1, sets render mode to deep image screenshot
   renderer_begin_frame(&rend);
 }
 

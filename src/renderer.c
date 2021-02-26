@@ -364,7 +364,10 @@ void renderer_display_abuffer(Renderer *rend)
             
             samples_per_pixel[curr_pixel++] = total_samples;
         }
-        deepexr_write_new(global_platform.window_width, global_platform.window_height,pixels,samples_per_pixel, deep_pixels_count,max_samples);
+        if (rend->deep_settings & EXR_PAD)
+            deepexr_write_padding(global_platform.window_width, global_platform.window_height,pixels, samples_per_pixel, max_samples);
+        else
+            deepexr_write(global_platform.window_width, global_platform.window_height,pixels,samples_per_pixel, deep_pixels_count,max_samples);
         //sprintf(&error_log, "Data Written to Disk");
     }
 }
@@ -379,6 +382,26 @@ renderer_begin_frame(Renderer *rend)
   {
       fbo_resize(&rend->postproc_fbo, rend->renderer_settings.render_dim.x, rend->renderer_settings.render_dim.y, FBO_COLOR_0|FBO_DEPTH);
       fbo_resize(&rend->main_fbo, rend->renderer_settings.render_dim.x, rend->renderer_settings.render_dim.y, FBO_COLOR_0|FBO_DEPTH);
+
+      glBindBuffer(GL_SHADER_STORAGE_BUFFER, rend->node_buffer);
+      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 3, NULL, GL_STATIC_DRAW);
+      glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, rend->node_buffer);
+      glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        glBindTexture(GL_TEXTURE_2D, rend->head_list);
+
+        //Set filters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //TODO FIX
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        //Texture creation
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, global_platform.window_width, global_platform.window_height, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
+        glBindImageTexture(0, rend->head_list, 0, GL_FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??        
+
+
+
   }
   fbo_bind(&rend->postproc_fbo);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -756,8 +779,9 @@ void renderer_push_point_light(Renderer *rend, PointLight l)
   rend->point_lights[rend->point_light_count++] = l;
 }
 
-void renderer_set_deep_write(Renderer *rend, b32 dw)
+void renderer_set_deep_write(Renderer *rend, b32 dw, u32 settings)
 {
     rend->deep_write = dw;
+    rend->deep_settings = settings;
 }
 
