@@ -1,7 +1,6 @@
 #include "platform.h"
 #include "tools.h"
 #include "objloader.h"
-#include "camera.h"
 #include "model.h"
 #include "quad.h" 
 #include "fbo.h"
@@ -11,7 +10,6 @@
 #include "entity.h"
 mat4 view,proj;
 
-global Camera cam;
 global Model debug_cube;
 global Model light_cube;
 global Model sphere;
@@ -23,7 +21,6 @@ global f32 trans = 0.f;
 internal void 
 init(void)
 {
-    camera_init(&cam);
     model_init_cube(&debug_cube);
     renderer_init(&rend);
     model_init_cube(&light_cube);
@@ -38,8 +35,6 @@ internal void
 update(void)
 {
   renderer_begin_frame(&rend);
-  camera_update(&cam);
-  rend.view = get_view_mat(&cam);
 }
 
 internal void 

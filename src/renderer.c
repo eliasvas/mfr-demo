@@ -85,6 +85,7 @@ renderer_init(Renderer *rend)
 
     char **faces= cubemap_default();
     skybox_init(&rend->skybox, faces);
+    camera_init(&rend->cam);
     //rend->ortho = orthographic_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,80.f); 
 
     //initialize postproc VAO
@@ -402,10 +403,12 @@ renderer_begin_frame(Renderer *rend)
   rend->point_light_count = 0;
   rend->text_alloc_pos = 0;
 
+  camera_update(&rend->cam);
+  rend->view = get_view_mat(&rend->cam);
   if (global_platform.key_pressed[KEY_Q]) 
-      rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 30.f);
+      rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 20.f);
   else
-      rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,80.f); 
+      rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,20.f); 
 }
 
 internal void
@@ -496,6 +499,7 @@ renderer_render_scene3D(Renderer *rend,Shader *shader)
     shader_set_mat4fv(&shader[0], "ortho", (GLfloat*)rend->ortho.elements);
     shader_set_mat4fv(&shader[0], "light_space_matrix", (GLfloat*)light_space_matrix.elements);
     shader_set_vec3(&shader[0], "view_pos", view_pos);
+    shader_set_vec3(&shader[0], "view_front", rend->cam.front);
     //set material properties
     shader_set_float(&shader[0], "material.shininess", data.material.shininess);
     shader_set_int(&shader[0], "deep_render", global_platform.key_pressed[KEY_Q] > 0);

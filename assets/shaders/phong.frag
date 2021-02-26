@@ -7,7 +7,9 @@ in vec3 f_frag_pos_ws;
 in vec3 f_normal;
 in vec4 f_frag_pos_ls;
 uniform mat4 proj;
+uniform mat4 view;
 uniform int deep_render;
+uniform vec3 view_front;
 struct Material {
     sampler2D diffuse;
     sampler2D specular;
@@ -72,7 +74,8 @@ float linearize_depth(float d)
     float B = proj[3].z;
     float zNear = - B / (1.0 - A);
     float zFar  =   B / (1.0 + A);
-	return (2.0 * zNear) / (zFar + zNear - d * (zFar - zNear));	 
+	float ndc = d * 2.0 - 1.0;
+	return (2.0 * zNear * zFar) / (zFar + zNear - ndc * (zFar - zNear));	 
 }
 float shadow_calc()
 {
@@ -181,10 +184,10 @@ void main()
 		{
 			float A = proj[2].z;
 			float B = proj[3].z;
-			float zNear = - B / (1.0 - A);
-			float zFar  =   B / (1.0 + A);
-			float d = (f_frag_pos_ws.z - view_pos.z + zNear)/(zFar-zNear);
-			nodes[index].depth = (d - 0.5)/2.0;
+			float zNear = (B + 1.0) / A;
+			float zFar  =  (B - 1.0) / A;
+			float t = (gl_FragCoord.z + 1.0) / 2.0;
+			nodes[index].depth = zNear + t * (zFar - zNear)/2.0;
 		}
 		else{
 			nodes[index].depth = f_frag_pos.z;

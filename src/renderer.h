@@ -7,6 +7,7 @@
 #include "model.h"
 #include "fbo.h"
 #include "animation.h"
+#include "camera.h"
 //#include "openexr_write.h"
 
 
@@ -112,6 +113,7 @@ typedef struct Renderer
   RendererAnimatedModelData animated_model_instance_data[RENDERER_MAX_ANIMATED_MODELS];
   u32 animated_model_alloc_pos;
 
+  Camera cam;
   Shader shaders[RENDERER_MAX_SHADERS];
   u32 shaders_count;
   PointLight point_lights[RENDERER_MAX_POINT_LIGHTS];
