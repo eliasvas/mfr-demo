@@ -18,6 +18,10 @@ global Renderer rend;
 global b32 UI_OPEN;
 global f32 trans = 0.f;
 
+
+f32 write_success_timer = 0.f; //activates successful screenshot message rendering!
+b32 DEEP_WRITE = 0; //if 1, take deep screenshot
+
 internal void 
 init(void)
 {
@@ -34,6 +38,11 @@ init(void)
 internal void 
 update(void)
 {
+  DEEP_WRITE = global_platform.key_pressed[KEY_Q];
+  if (DEEP_WRITE)write_success_timer = 3.f;
+  else
+      write_success_timer = max(0.f, write_success_timer -= global_platform.dt);
+  renderer_set_deep_write(&rend, DEEP_WRITE); //if deep write 1, sets render mode to deep image screenshot
   renderer_begin_frame(&rend);
 }
 
@@ -56,6 +65,8 @@ render(void)
     sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
     renderer_push_model(&rend, &sphere);
 
+    if (write_success_timer > 0.f)
+        renderer_push_text(&rend, v3(0.20,0.80,0.0), v2(0.02,0.025), "Data Written Succesfully!");
     //UI bullshit..
     {
         if (global_platform.key_pressed[KEY_TAB])

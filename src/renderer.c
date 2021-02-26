@@ -261,7 +261,7 @@ void renderer_display_abuffer(Renderer *rend)
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
     renderer_draw_fs_quad(rend, &rend->shaders[10]); 
     glMemoryBarrier(GL_ALL_BARRIER_BITS);
-    if (global_platform.key_pressed[KEY_Q]){ 
+    if (rend->deep_write){ 
         //get image-head data 
         //NOTE: we get the image data from the framebuffer because glGetTexImage returns an all-black image
         GLint *image_head= (GLint*)ALLOC(sizeof(u32) *global_platform.window_width * global_platform.window_height * 4);   
@@ -365,7 +365,7 @@ void renderer_display_abuffer(Renderer *rend)
             samples_per_pixel[curr_pixel++] = total_samples;
         }
         deepexr_write_new(global_platform.window_width, global_platform.window_height,pixels,samples_per_pixel, deep_pixels_count,max_samples);
-        sprintf(&error_log, "Data Written to Disk");
+        //sprintf(&error_log, "Data Written to Disk");
     }
 }
 
@@ -405,7 +405,7 @@ renderer_begin_frame(Renderer *rend)
 
   camera_update(&rend->cam);
   rend->view = get_view_mat(&rend->cam);
-  if (global_platform.key_pressed[KEY_Q]) 
+  if (rend->deep_write) 
       rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 20.f);
   else
       rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,20.f); 
@@ -502,7 +502,7 @@ renderer_render_scene3D(Renderer *rend,Shader *shader)
     shader_set_vec3(&shader[0], "view_front", rend->cam.front);
     //set material properties
     shader_set_float(&shader[0], "material.shininess", data.material.shininess);
-    shader_set_int(&shader[0], "deep_render", global_platform.key_pressed[KEY_Q] > 0);
+    shader_set_int(&shader[0], "deep_render", rend->deep_write);
     //light properties
     renderer_set_light_uniforms(rend, shader);
     //abuffer stuff
@@ -754,5 +754,10 @@ void renderer_push_line(Renderer *rend, vec3 start, vec3 end, vec4 color)
 void renderer_push_point_light(Renderer *rend, PointLight l)
 {
   rend->point_lights[rend->point_light_count++] = l;
+}
+
+void renderer_set_deep_write(Renderer *rend, b32 dw)
+{
+    rend->deep_write = dw;
 }
 

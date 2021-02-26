@@ -134,6 +134,7 @@ typedef struct Renderer
     GLuint node_buffer;
     GLuint quad_vao;
     GLuint quad_vbo;
+    b32 deep_write;//if 1, sets render mode to deep image screenshot
 }Renderer;
 
 void
