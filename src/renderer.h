@@ -136,6 +136,8 @@ typedef struct Renderer
     GLuint quad_vbo;
     b32 deep_write;//if 1, sets render mode to deep image screenshot
     u32 deep_settings;
+    ivec2 deep_render_dim;
+    ivec2 prev_render_dim;
 }Renderer;
 
 void

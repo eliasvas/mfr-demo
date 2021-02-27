@@ -264,8 +264,8 @@ void renderer_display_abuffer(Renderer *rend)
     if (rend->deep_write){ 
         //get image-head data 
         //NOTE: we get the image data from the framebuffer because glGetTexImage returns an all-black image
-        GLint *image_head= (GLint*)ALLOC(sizeof(u32) *global_platform.window_width * global_platform.window_height * 4);   
-        for (int i = 0; i < global_platform.window_width * global_platform.window_height; ++i)
+        GLint *image_head= (GLint*)ALLOC(sizeof(u32) *rend->renderer_settings.render_dim.x *rend->renderer_settings.render_dim.y* 4);   
+        for (int i = 0; i < rend->renderer_settings.render_dim.x *rend->renderer_settings.render_dim.y; ++i)
             image_head[i] = 0;
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rend->head_list);
@@ -295,7 +295,7 @@ void renderer_display_abuffer(Renderer *rend)
         u32 max_samples = 0;
         u32 max_samples_i = 0;
         //count max samples per-pixel
-        for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
+        for (u32 i = 0; i <rend->renderer_settings.render_dim.x*rend->renderer_settings.render_dim.y* 4; i+=4)
         {
             u32 local_max_samples = 0;
             if (image_head[i] == 0)continue;
@@ -313,21 +313,21 @@ void renderer_display_abuffer(Renderer *rend)
                 max_samples_i = i / 4;
             }
         }
-        DeepPixel *pixels = malloc(sizeof(DeepPixel) * max_samples * global_platform.window_width * global_platform.window_height);
+        DeepPixel *pixels = malloc(sizeof(DeepPixel) * max_samples *rend->renderer_settings.render_dim.x* rend->renderer_settings.render_dim.y);
         i32 k = 0;
         //first flip so origin is at top left corner!!
         i32 new_i = 0;
-        i32 *image_head_new = ALLOC(sizeof(image_head[0]) * global_platform.window_width * global_platform.window_height * 4);
-        u32 *samples_per_pixel = ALLOC(sizeof(u32) * global_platform.window_width * global_platform.window_height);
-        for(u32 i = 0; i < global_platform.window_width * global_platform.window_height; ++i)
+        i32 *image_head_new = ALLOC(sizeof(image_head[0]) *rend->renderer_settings.render_dim.x* rend->renderer_settings.render_dim.y * 4);
+        u32 *samples_per_pixel = ALLOC(sizeof(u32) * rend->renderer_settings.render_dim.x* rend->renderer_settings.render_dim.y );
+        for(u32 i = 0; i <  rend->renderer_settings.render_dim.x* rend->renderer_settings.render_dim.y ; ++i)
         {
             samples_per_pixel[i] = 0;
         }
-        for (i32 j = global_platform.window_height-1; j >=0; --j)
+        for (i32 j = rend->renderer_settings.render_dim.y -1; j >=0; --j)
         {
-            for (i32 i = 0; i < global_platform.window_width; ++i)
+            for (i32 i = 0; i < rend->renderer_settings.render_dim.x ; ++i)
             {
-                i32 index = global_platform.window_width * j * 4 +  4 * i;
+                i32 index = rend->renderer_settings.render_dim.x  * j * 4 +  4 * i;
                 u8 cmp[3];
                 image_head_new[new_i++]= (i32)(image_head[index]);
                 image_head_new[new_i++]= (i32)(image_head[index+1]);
@@ -336,7 +336,7 @@ void renderer_display_abuffer(Renderer *rend)
             }
         }
         u32 curr_pixel = 0;
-        for (u32 i = 0; i < global_platform.window_width * global_platform.window_height * 4; i+=4)
+        for (u32 i = 0; i <rend->renderer_settings.render_dim.x* rend->renderer_settings.render_dim.y * 4; i+=4)
         {
             u32 total_samples = 0; 
             if (image_head_new[i] == 0)
@@ -365,9 +365,9 @@ void renderer_display_abuffer(Renderer *rend)
             samples_per_pixel[curr_pixel++] = total_samples;
         }
         if (rend->deep_settings & EXR_PAD)
-            deepexr_write_padding(global_platform.window_width, global_platform.window_height,pixels, samples_per_pixel, max_samples);
+            deepexr_write_padding(rend->renderer_settings.render_dim.x,rend->renderer_settings.render_dim.y,pixels, samples_per_pixel, max_samples);
         else
-            deepexr_write(global_platform.window_width, global_platform.window_height,pixels,samples_per_pixel, deep_pixels_count,max_samples);
+            deepexr_write(rend->renderer_settings.render_dim.x,rend->renderer_settings.render_dim.y,pixels,samples_per_pixel, deep_pixels_count,max_samples);
         //sprintf(&error_log, "Data Written to Disk");
     }
 }
@@ -376,15 +376,22 @@ void renderer_display_abuffer(Renderer *rend)
 void
 renderer_begin_frame(Renderer *rend)
 {
+  if (rend->renderer_settings.render_dim.x != global_platform.window_width)
+        global_platform.window_resized = TRUE;
   rend->renderer_settings.render_dim = (ivec2){global_platform.window_width, global_platform.window_height};
-
-  if (global_platform.window_resized)
+  rend->prev_render_dim = rend->renderer_settings.render_dim;
+  if (rend->deep_write)
+  {
+      rend->renderer_settings.render_dim = rend->deep_render_dim;
+      global_platform.window_resized = TRUE;
+  }
+    if (global_platform.window_resized)
   {
       fbo_resize(&rend->postproc_fbo, rend->renderer_settings.render_dim.x, rend->renderer_settings.render_dim.y, FBO_COLOR_0|FBO_DEPTH);
       fbo_resize(&rend->main_fbo, rend->renderer_settings.render_dim.x, rend->renderer_settings.render_dim.y, FBO_COLOR_0|FBO_DEPTH);
 
       glBindBuffer(GL_SHADER_STORAGE_BUFFER, rend->node_buffer);
-      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 3, NULL, GL_STATIC_DRAW);
+      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * rend->renderer_settings.render_dim.y * rend->renderer_settings.render_dim.x * 3, NULL, GL_STATIC_DRAW);
       glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, rend->node_buffer);
       glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -397,7 +404,7 @@ renderer_begin_frame(Renderer *rend)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         //Texture creation
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, global_platform.window_width, global_platform.window_height, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, rend->renderer_settings.render_dim.x, rend->renderer_settings.render_dim.y, 0,  GL_RED_INTEGER, GL_UNSIGNED_INT, 0);
         glBindImageTexture(0, rend->head_list, 0, GL_FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??        
 
 
@@ -783,5 +790,6 @@ void renderer_set_deep_write(Renderer *rend, b32 dw, u32 settings)
 {
     rend->deep_write = dw;
     rend->deep_settings = settings;
+    rend->deep_render_dim = (ivec2){global_platform.window_width, global_platform.window_height};
 }
 
