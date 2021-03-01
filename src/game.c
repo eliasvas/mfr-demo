@@ -27,15 +27,24 @@ i32 RES = 1000;
 b32 RGBA = 1;
 b32 RGB = 0;
 b32 PAD = 0;
+
+
+global Model camera_model;
+mat4 camera_translation_mat;
+mat4 camera_rotation_mat;
 internal void 
 init(void)
 {
     model_init_cube(&debug_cube);
     renderer_init(&rend);
     model_init_cube(&light_cube);
+    model_init_cube(&camera_model);
     light_cube.meshes[0].material.diff = debug_cube.meshes[0].material.spec;
     model_init_sphere(&sphere, 2.f, 20,20);
     dui_default();
+    texture_load(&camera_model.meshes[0].material.diff,"../assets/cam.tga");
+    camera_translation_mat = mat4_translate(v3(0,5,10));
+    camera_rotation_mat = m4d(1.f);
 }
 
 
@@ -50,6 +59,7 @@ update(void)
   rend.cam.can_rotate = !UI_OPEN;
   renderer_set_deep_write(&rend, DEEP_WRITE, PAD,RGB,RES); //if deep write 1, sets render mode to deep image screenshot
   renderer_begin_frame(&rend);
+  rend.deep_alternate_view = look_at(v3(camera_translation_mat.elements[3][0], camera_translation_mat.elements[3][1], camera_translation_mat.elements[3][2]), v3(0,0,-1), v3(0,1,0));
 }
 
 internal void 
@@ -60,7 +70,7 @@ render(void)
 
 
     light_cube.model = mat4_translate(v3(40*sin(global_platform.current_time),5,40*cos(global_platform.current_time)));
-    renderer_push_model(&rend, &light_cube);
+    //renderer_push_model(&rend, &light_cube);
     
     //renderer_push_model(&rend, &debug_cube);
     //debug_cube.model = mat4_scale(v3(10,1,10));
@@ -70,6 +80,11 @@ render(void)
 
     sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
     renderer_push_model(&rend, &sphere);
+
+
+    mat4 camera_model_mat = mat4_mul(camera_translation_mat, camera_rotation_mat);
+    camera_model.model = camera_model_mat;
+    renderer_push_model(&rend, &camera_model);
 
     if (write_success_timer > 0.f)
         renderer_push_text(&rend, v3(0.20,0.80,0.0), v2(0.02,0.02 * (f32)global_platform.window_width/global_platform.window_height), "Data Written Succesfully!");
@@ -93,10 +108,21 @@ render(void)
             char ms[64];
             sprintf(ms, "%.4f ms", global_platform.dt);
             renderer_push_text(&rend, v3(0.82,0.90,0.0), v2(0.015,0.015 * global_platform.window_width/(f32)global_platform.window_height), ms);
+
+            do_slider_float(GEN_ID, 800 ,300, 100.f, &camera_translation_mat.elements[3][0]);
+            do_slider_float(GEN_ID, 800 ,280, 100.f, &camera_translation_mat.elements[3][1]);
+            do_slider_float(GEN_ID, 800 ,260, 100.f, &camera_translation_mat.elements[3][2]);
         }
     }
     do_switch(GEN_ID, (dui_Rect){0,0,100,100}, &UI_OPEN);
+
     dui_frame_end();
+
+    f32 far_plane = 20.f;
+    vec3 camera_pos = v3(camera_translation_mat.elements[3][0],camera_translation_mat.elements[3][1],camera_translation_mat.elements[3][2]);
+    vec3 lower_left_corner = vec3_sub(camera_pos, v3(0.f,1.f,0.f)); 
+    vec3 upper_right_corner = vec3_add(camera_pos, v3(0.f,1.f,-far_plane));
+    //renderer_push_line(&rend, lower_left_corner, upper_right_corner,v4(0.9,0.2,0.2,1.f));
     renderer_end_frame(&rend);
 }
 

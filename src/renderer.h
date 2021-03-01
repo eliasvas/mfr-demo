@@ -135,6 +135,7 @@ typedef struct Renderer
     u32 deep_settings;
     ivec2 deep_render_dim;
     ivec2 prev_render_dim;
+    mat4 deep_alternate_view;
 }Renderer;
 
 void

@@ -122,6 +122,36 @@ b32 do_slider(DUIID id, f32 x, f32 y, f32 max, i32 *value)
     }
     return 0;
 }
+
+b32 do_slider_float(DUIID id, f32 x, f32 y, f32 max, f32 *value)
+{
+    i32 xpos = ((256 - 16) * (*value)) / max;
+
+    if (dui_rect_hit((dui_Rect){x +8,y+8, 255,16}))
+    {
+        ui.hot = id;
+        if (ui.active == 0 && ui.mouse_down)
+            ui.active = id;
+    }
+    //render slider
+    dui_draw_rect(x + 8, y + 8, 255, 16, layout.bg);
+
+    if (ui.active ==id || ui.hot == id)
+        dui_draw_rect(x + 8 + xpos, y + 8, 16, 16, layout.fg);
+    else
+        dui_draw_rect(x + 8 + xpos, y + 8, 16, 16, layout.bg_lite);
+    //update slider value
+    if (ui.active == id)
+    {
+        i32 mouse_pos = ui.mouse_pos.x - (x+8);
+        if (mouse_pos < 0)mouse_pos = 0;
+        if (mouse_pos > 255)mouse_pos = 255;
+        f32 v = (mouse_pos * max) / 255;
+        if (v!=*value){*value = v;return 1;}
+    }
+    return 0;
+}
+
 void dui_draw_string(i32 x, i32 y, char *string)
 {
     while(*string)

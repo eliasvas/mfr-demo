@@ -40,6 +40,7 @@ void dui_draw_char(f32 x, f32 y, char ch);
 b32 do_button(DUIID id, dui_Rect rect);
 b32 do_switch(DUIID id, dui_Rect rect, b32 *value);
 b32 do_slider(DUIID id, f32 x, f32 y, f32 max, i32 *value);
+b32 do_slider_float(DUIID id, f32 x, f32 y, f32 max, f32 *value);
 void dui_default(void);
 
 void dui_frame_begin(void);

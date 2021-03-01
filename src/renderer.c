@@ -439,7 +439,7 @@ renderer_begin_frame(Renderer *rend)
   if (rend->deep_write) 
       rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 20.f);
   else
-      rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,20.f); 
+      rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
 }
 
 internal void
@@ -636,7 +636,16 @@ renderer_end_frame(Renderer *rend)
     //glDrawArrays(GL_LINES,0, 40000);
     glBindVertexArray(0);
   }
-  renderer_render_scene3D(rend,&rend->shaders[0]);
+     //render lines
+    glLineWidth(10);
+    use_shader(&rend->shaders[6]);
+    mat4 mv = mat4_mul(rend->proj, rend->view);
+    shader_set_mat4fv(&rend->shaders[6], "MVP", (GLfloat*)mv.elements);
+    glBindVertexArray(rend->line_vao);
+    glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
+    glBindVertexArray(0);
+
+ renderer_render_scene3D(rend,&rend->shaders[0]);
   skybox_render(&rend->skybox, rend->proj, rend->view);
 
   glBindFramebuffer(GL_FRAMEBUFFER, rend->postproc_fbo.fbo);
@@ -679,14 +688,6 @@ renderer_end_frame(Renderer *rend)
 
 
   //at the end we render the skybox
-    //render lines
-    glLineWidth(3);
-    use_shader(&rend->shaders[6]);
-    shader_set_mat4fv(&rend->shaders[6], "view", (GLfloat*)rend->view.elements);
-    glBindVertexArray(rend->line_vao);
-    glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
-    glBindVertexArray(0);
-
     use_shader(&rend->shaders[7]);
     shader_set_mat4fv(&rend->shaders[7], "view", (GLfloat*)rend->view.elements);
     glActiveTexture(GL_TEXTURE0);
