@@ -368,7 +368,7 @@ void renderer_display_abuffer(Renderer *rend)
         if (rend->deep_settings & EXR_PAD)
             deepexr_write_padding(rend->renderer_settings.render_dim.x,rend->renderer_settings.render_dim.y,pixels, samples_per_pixel, max_samples);
         else
-            deepexr_write(rend->renderer_settings.render_dim.x,rend->renderer_settings.render_dim.y,pixels,samples_per_pixel, deep_pixels_count,max_samples);
+            deepexr_write_rgba(rend->renderer_settings.render_dim.x,rend->renderer_settings.render_dim.y,pixels,samples_per_pixel, deep_pixels_count,max_samples);
         //sprintf(&error_log, "Data Written to Disk");
     }
 }
@@ -773,7 +773,6 @@ void renderer_push_char(Renderer *rend, vec3 pos, vec2 dim, char ch)
         f32 uv_x = (letter % 16) / 16.f;
         f32 uv_y = 1 - (letter / 16) /16.f - 1.f/16.f;
         vec2 uv_down_left = v2(uv_x, uv_y);
-        //for each char in string .. put 'em in the instance data
         pos.x += dim.x;
         RendererChar c = (RendererChar){pos, dim, uv_down_left}; //@Fix
         rend->text_instance_data[rend->text_alloc_pos++] = c;
