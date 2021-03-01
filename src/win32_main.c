@@ -152,7 +152,7 @@ WinMain(HINSTANCE Instance,
     WND = CreateWindow(
             windowClass.lpszClassName, "engine",      // window class, title
             WS_OVERLAPPEDWINDOW, // style
-            CW_USEDEFAULT,CW_USEDEFAULT,1000,900,//CW_USEDEFAULT,CW_USEDEFAULT,
+            CW_USEDEFAULT,CW_USEDEFAULT,1280,720,//CW_USEDEFAULT,CW_USEDEFAULT,
             NULL, NULL,                 // parent window, menu
             Instance, NULL);           // instance, param
      
@@ -161,8 +161,8 @@ WinMain(HINSTANCE Instance,
     //initializing the platform layer
     {
         global_platform.exit = 0;
-        global_platform.window_width = 1000;
-        global_platform.window_height = 900;
+        global_platform.window_width = 1280;
+        global_platform.window_height = 720;
         global_platform.target_fps = 60.f;
         global_platform.current_time = 0.f;
     }

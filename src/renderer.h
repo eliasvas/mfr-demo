@@ -8,8 +8,6 @@
 #include "fbo.h"
 #include "animation.h"
 #include "camera.h"
-//#include "openexr_write.h"
-
 
 typedef struct RendererSettings
 {
@@ -113,7 +111,6 @@ typedef struct Renderer
   RendererAnimatedModelData animated_model_instance_data[RENDERER_MAX_ANIMATED_MODELS];
   u32 animated_model_alloc_pos;
 
-  Camera cam;
   Shader shaders[RENDERER_MAX_SHADERS];
   u32 shaders_count;
   PointLight point_lights[RENDERER_MAX_POINT_LIGHTS];
@@ -126,9 +123,9 @@ typedef struct Renderer
   mat4 view;
   mat4 proj;
   mat4 ortho;
-  
 
-    //A-Buffer stuff
+  Camera cam;
+//A-Buffer stuff
     GLuint head_list;
     GLuint next_address;
     GLuint node_buffer;

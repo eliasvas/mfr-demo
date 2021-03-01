@@ -65,6 +65,7 @@ renderer_init(Renderer *rend)
     rend->depthpeel_count = 1;
     rend->renderer_settings.render_dim = (ivec2){global_platform.window_width, global_platform.window_height};
     rend->renderer_settings.lighting_disabled = FALSE;
+    camera_init(&rend->cam);
 
 
 
@@ -768,9 +769,14 @@ void renderer_push_text(Renderer *rend, vec3 pos, vec2 dim, char *str)
 
 void renderer_push_char(Renderer *rend, vec3 pos, vec2 dim, char ch)
 {
-    //for each char in string .. put 'em in the instance data
-    RendererChar c = (RendererChar){pos, dim, v2(0,0)}; //@Fix
-    rend->text_instance_data[rend->text_alloc_pos++] = c;
+        char letter = ch;
+        f32 uv_x = (letter % 16) / 16.f;
+        f32 uv_y = 1 - (letter / 16) /16.f - 1.f/16.f;
+        vec2 uv_down_left = v2(uv_x, uv_y);
+        //for each char in string .. put 'em in the instance data
+        pos.x += dim.x;
+        RendererChar c = (RendererChar){pos, dim, uv_down_left}; //@Fix
+        rend->text_instance_data[rend->text_alloc_pos++] = c;
 }
 
 
@@ -786,10 +792,12 @@ void renderer_push_point_light(Renderer *rend, PointLight l)
   rend->point_lights[rend->point_light_count++] = l;
 }
 
-void renderer_set_deep_write(Renderer *rend, b32 dw, u32 settings)
+void renderer_set_deep_write(Renderer *rend, b32 dw,b32 PAD, b32 RGB, i32 RES)
 {
     rend->deep_write = dw;
-    rend->deep_settings = settings;
-    rend->deep_render_dim = (ivec2){global_platform.window_width, global_platform.window_height};
+    if (RGB)
+        rend->deep_settings = EXR_RGB;
+    else
+        rend->deep_settings = EXR_RGBA;
+    rend->deep_render_dim = (ivec2){RES,RES};
 }
-

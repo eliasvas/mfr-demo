@@ -18,12 +18,13 @@ typedef struct Camera
     f32 last_x;
     f32 last_y;
     b32 first_mouse;
+    b32 can_rotate;
 }Camera;
 
 internal void 
 camera_init(Camera* cam)
 {
-    cam->pos = v3(0,5,5);
+    cam->pos = v3(0,3,10);
     cam->front = v3(0.0f,0.0f,-1.0f);
     cam->up = v3(0.f,1.f,0.f);
     cam->yaw = -90.0f;
@@ -71,6 +72,7 @@ camera_update(Camera* cam)
     x_offset *= sensitivity;
     y_offset *= sensitivity;
 
+    if (!cam->can_rotate)return;
     cam->yaw   += x_offset;
     cam->pitch += y_offset;
 
