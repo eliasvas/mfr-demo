@@ -435,7 +435,11 @@ renderer_begin_frame(Renderer *rend)
   rend->text_alloc_pos = 0;
 
   camera_update(&rend->cam);
-  rend->view = get_view_mat(&rend->cam);
+  if (rend->deep_write)
+      rend->view = rend->deep_alternate_view;
+  else 
+      rend->view = get_view_mat(&rend->cam);
+
   if (rend->deep_write) 
       rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 20.f);
   else

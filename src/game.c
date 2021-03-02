@@ -59,7 +59,8 @@ update(void)
   rend.cam.can_rotate = !UI_OPEN;
   renderer_set_deep_write(&rend, DEEP_WRITE, PAD,RGB,RES); //if deep write 1, sets render mode to deep image screenshot
   renderer_begin_frame(&rend);
-  rend.deep_alternate_view = look_at(v3(camera_translation_mat.elements[3][0], camera_translation_mat.elements[3][1], camera_translation_mat.elements[3][2]), v3(0,0,-1), v3(0,1,0));
+  vec3 camera_pos = v3(camera_translation_mat.elements[3][0], camera_translation_mat.elements[3][1], camera_translation_mat.elements[3][2]);
+  rend.deep_alternate_view = look_at(camera_pos, vec3_add(camera_pos, v3(0,0,-1)), v3(0,1,0));
 }
 
 internal void 
@@ -100,6 +101,7 @@ render(void)
             do_switch(GEN_ID, (dui_Rect){200,270,20,20}, &PAD);
             if (do_switch(GEN_ID, (dui_Rect){200,240,20,20}, &RGBA))RGB = 0;
             if (do_switch(GEN_ID, (dui_Rect){220,240,20,20}, &RGB))RGBA = 0;
+            if (RGBA == 0 && RGB == 0)RGB = 1;
             DEEP_WRITE = do_button(GEN_ID, (dui_Rect){260,200,150,30});
             dui_draw_string(260, 370, "screenshot");
             dui_draw_string(190, 330, "resolution");
