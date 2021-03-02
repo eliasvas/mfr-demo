@@ -84,7 +84,8 @@ render(void)
 
     mat4 camera_model_mat = mat4_mul(camera_translation_mat, camera_rotation_mat);
     camera_model.model = camera_model_mat;
-    renderer_push_model(&rend, &camera_model);
+    if (!rend.deep_write && UI_OPEN)
+        renderer_push_model(&rend, &camera_model);
 
     if (write_success_timer > 0.f)
         renderer_push_text(&rend, v3(0.20,0.80,0.0), v2(0.02,0.02 * (f32)global_platform.window_width/global_platform.window_height), "Data Written Succesfully!");
@@ -119,10 +120,28 @@ render(void)
     dui_frame_end();
 
     f32 far_plane = 20.f;
+    f32 near_plane = 0.001f;
+    f32 right = 5.f;
+    f32 top = 5.f;
     vec3 camera_pos = v3(camera_translation_mat.elements[3][0],camera_translation_mat.elements[3][1],camera_translation_mat.elements[3][2]);
-    vec3 lower_left_corner = vec3_sub(camera_pos, v3(0.f,1.f,0.f)); 
-    vec3 upper_right_corner = vec3_add(camera_pos, v3(0.f,1.f,-far_plane));
-    //renderer_push_line(&rend, lower_left_corner, upper_right_corner,v4(0.9,0.2,0.2,1.f));
+    if (UI_OPEN)
+    {
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, -top, near_plane)), vec3_add(camera_pos, v3(-right, -top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, top, near_plane)), vec3_add(camera_pos, v3(-right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(right, -top, near_plane)), vec3_add(camera_pos, v3(right, -top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(right, top, near_plane)), vec3_add(camera_pos, v3(right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(right, top, near_plane)), vec3_add(camera_pos, v3(-right, top, near_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, top, near_plane)), vec3_add(camera_pos, v3(-right, -top, near_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, -top, near_plane)), vec3_add(camera_pos, v3(right, -top, near_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(right, -top, near_plane)), vec3_add(camera_pos, v3(right, top, near_plane)),v4(0.9,0.2,0.2,1.f));
+
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(right, top, -far_plane)), vec3_add(camera_pos, v3(-right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, top, -far_plane)), vec3_add(camera_pos, v3(-right, -top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, -top, -far_plane)), vec3_add(camera_pos, v3(right, -top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(camera_pos, v3(right, -top, -far_plane)), vec3_add(camera_pos, v3(right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
+    }
+
     renderer_end_frame(&rend);
 }
 

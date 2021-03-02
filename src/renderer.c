@@ -637,7 +637,7 @@ renderer_end_frame(Renderer *rend)
     glBindVertexArray(0);
   }
      //render lines
-    glLineWidth(10);
+    glLineWidth(5);
     use_shader(&rend->shaders[6]);
     mat4 mv = mat4_mul(rend->proj, rend->view);
     shader_set_mat4fv(&rend->shaders[6], "MVP", (GLfloat*)mv.elements);
