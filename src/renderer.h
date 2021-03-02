@@ -18,6 +18,11 @@ typedef struct RendererSettings
   //depth peeling settings
 }RendererSettings;
 
+typedef struct RendererPointData
+{
+    vec3 pos;
+    vec4 color;
+}RendererPointData;
 typedef struct RendererModelData
 {
   mat4 model;
@@ -107,6 +112,12 @@ typedef struct Renderer
   GLuint text_instance_vbo;
   RendererChar text_instance_data[RENDERER_MAX_TEXT];
   u32 text_alloc_pos;
+
+
+  GLuint point_vao;
+  GLuint point_vbo;
+  RendererPointData point_instance_data[RENDERER_MAX_RECTS];
+  u32 point_alloc_pos;
 
   RendererAnimatedModelData animated_model_instance_data[RENDERER_MAX_ANIMATED_MODELS];
   u32 animated_model_alloc_pos;

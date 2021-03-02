@@ -130,7 +130,7 @@ renderer_init(Renderer *rend)
     }
     //initialize line vao 
     {
-        GLuint vbo; //this shouldnt be here????
+        GLuint vbo;
         glGenVertexArrays(1, &rend->line_vao);
         glGenBuffers(1, &vbo);
         glGenBuffers(1, &rend->line_instance_vbo);
@@ -147,6 +147,23 @@ renderer_init(Renderer *rend)
         glVertexAttribDivisor(1,1);
         glVertexAttribDivisor(2,1);
     }
+    //initialize point vao
+    {
+        GLuint vbo;
+        glGenVertexArrays(1, &rend->point_vao);
+        glGenBuffers(1, &rend->point_vbo);
+        glBindVertexArray(rend->point_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, rend->point_vbo);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)(0 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1,4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)(3 * sizeof(float)));
+        glVertexAttribDivisor(0,1);
+        glVertexAttribDivisor(1,1);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+
     //initialize text vao
     {
         GLuint vbo;
@@ -227,11 +244,13 @@ renderer_init(Renderer *rend)
     shader_load(&rend->shaders[8],"../assets/shaders/render_abuf.vert","../assets/shaders/render_abuf.frag");
     shader_load(&rend->shaders[9],"../assets/shaders/pass_through.vert","../assets/shaders/clear_abuf.frag");
     shader_load(&rend->shaders[10],"../assets/shaders/pass_through.vert","../assets/shaders/disp_abuf.frag");
+    shader_load(&rend->shaders[11],"../assets/shaders/point.vert","../assets/shaders/point.frag");
 
 
     //misc
     texture_load(&rend->white_texture,"../assets/white.tga");
     texture_load(&rend->bmf,"../assets/bmf.tga");
+    rend->point_alloc_pos = 0;
 }
 
 void renderer_draw_fs_quad(Renderer *rend, Shader *shader)
@@ -433,6 +452,7 @@ renderer_begin_frame(Renderer *rend)
   rend->line_alloc_pos = 0;
   rend->point_light_count = 0;
   rend->text_alloc_pos = 0;
+  rend->point_alloc_pos = 0;
 
   camera_update(&rend->cam);
   if (rend->deep_write)
@@ -573,7 +593,9 @@ renderer_end_frame(Renderer *rend)
   //update instance data for text 
   glBindBuffer(GL_ARRAY_BUFFER, rend->text_instance_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(RendererChar) * rend->text_alloc_pos, &rend->text_instance_data[0], GL_DYNAMIC_DRAW);
-
+  //update instance data for points
+  glBindBuffer(GL_ARRAY_BUFFER, rend->point_vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(RendererPointData) * rend->point_alloc_pos, &rend->point_instance_data[0], GL_DYNAMIC_DRAW);
 
 
 
@@ -651,6 +673,15 @@ renderer_end_frame(Renderer *rend)
 
  renderer_render_scene3D(rend,&rend->shaders[0]);
   skybox_render(&rend->skybox, rend->proj, rend->view);
+  //render points
+   use_shader(&rend->shaders[11]);
+    shader_set_mat4fv(&rend->shaders[11], "view", (GLfloat*)rend->view.elements);
+    shader_set_mat4fv(&rend->shaders[11], "proj", (GLfloat*)rend->proj.elements);
+    glBindVertexArray(rend->point_vao);
+    glDrawArraysInstanced(GL_POINTS, 0, 1, rend->point_alloc_pos);
+    glBindVertexArray(0);
+
+
 
   glBindFramebuffer(GL_FRAMEBUFFER, rend->postproc_fbo.fbo);
   glBindTexture(GL_TEXTURE_2D, rend->main_fbo.color_attachments[0]);
@@ -706,6 +737,11 @@ renderer_end_frame(Renderer *rend)
 
 
   renderer_clear_abuffer(rend, &rend->shaders[9]);
+}
+
+void renderer_push_point(Renderer *rend, RendererPointData point)
+{
+    rend->point_instance_data[rend->point_alloc_pos++] = point;
 }
 
 void renderer_push_model(Renderer *rend, Model *m)

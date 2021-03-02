@@ -143,6 +143,8 @@ render(void)
         renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, -top, -far_plane)), vec3_add(camera_pos, v3(right, -top, -far_plane)),v4(0.9,0.2,0.2,1.f));
         renderer_push_line(&rend, vec3_add(camera_pos, v3(right, -top, -far_plane)), vec3_add(camera_pos, v3(right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
     }
+    glPointSize(5);
+    renderer_push_point(&rend, (RendererPointData){v3(10 * sin(global_platform.current_time),0,0), v4(1,0,0,1)});
 
     renderer_end_frame(&rend);
 }

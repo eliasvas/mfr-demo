@@ -193,8 +193,7 @@ void main()
 			nodes[index].depth = f_frag_pos.z;
 		}
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
-		//discard;
 	}
-		
+	discard;
 	}
 }
