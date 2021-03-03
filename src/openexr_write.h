@@ -1229,6 +1229,168 @@ internal u8* openexr_screenshot(void)
             free (exr); 
 }
 
+internal FILE *file_find(FILE *file, const char *str)
+{
+    char current[256];
+    u32 current_index = 0;
+    char ch;
+    while(TRUE) {
+       ch = fgetc(file);
+       if( feof(file) ) {
+          break;
+       }
+       if (str[current_index] == ch)current[current_index++] = ch;
+       if (strcmp(str, current) == 0)
+       {
+           fseek(file, ftell(file) - current_index, SEEK_SET);
+           //sprintf(error_log, "string %s found at position %i",current, ftell(file));
+           return file;
+       }
+    } 
+    return NULL;
+}
+internal FILE *file_forward(FILE *file, u32 offset)
+{
+   fseek(file, ftell(file) + offset , SEEK_SET);
+}
+internal i32 file_read_int(FILE *file)
+{
+    i32 n[4];
+    n[0] = (fgetc(file) & 0xff);
+    n[1] = (fgetc(file) & 0xff);
+    n[2] = (fgetc(file) & 0xff);
+    n[3] = (fgetc(file) & 0xff);
+    n[0] = (n[0]<<0) | (n[1]<<8) | (n[2]<<16) | (n[3]<<24);
+    return n[0];
+}
+internal u32 file_read_uint(FILE *file)
+{
+    u32 n[4];
+    n[0] = (fgetc(file) & 0xff);
+    n[1] = (fgetc(file) & 0xff);
+    n[2] = (fgetc(file) & 0xff);
+    n[3] = (fgetc(file) & 0xff);
+    n[0] = (n[0]<<0) | (n[1]<<8) | (n[2]<<16) | (n[3]<<24);
+    return n[0];
+}
+internal f32 file_read_float(FILE *file)
+{
+    fgetc(file);
+    fgetc(file);
+    fgetc(file);
+    fgetc(file);
+    return 1;
+}
+
+
+internal RendererPointData *deepexr_read(const char * filename)
+{
+    RendererPointData *points = malloc(sizeof(RendererPointData) * 100000000); 
+    u32 point_index = 0;
+    FILE *file = fopen(filename, "rb");
+    file_find(file, "box2i");
+    file_forward(file, str_size("box2i"));
+    file_forward(file, 13);
+    u32 total_row_size = 0;
+    //HEADER -- here we read header attrbutes --
+    int ww = file_read_int(file);
+    int wh = file_read_int(file);
+    //sprintf(error_log, "str_size(box2i) = %i",str_size("box2i"));
+    //sprintf(error_log, "window height = %i",wh); 
+    //rewind(file);
+    file_find(file, "version");
+    file_forward(file, str_size("version"));
+    file_forward(file, 14);
+    //OFFSET TABLE -- here we read the offset table --
+    //offset table = distance of each scanline from start of file!
+    u32 offsets[1000];
+    //sprintf(error_log, "first scanline is %i != 8602 at %i",file_read_int(file), ftell(file));
+    for (u32 i = 0; i < wh; ++i)
+    {
+        offsets[i] = file_read_int(file);
+        file_read_int(file);
+    }
+    //DEEP DATA -- here we read the deep fragments
+    //each scanline is of the type  AA..ABB..BGG..GRR..RZZ..Z
+    DeepPixel *pixels = malloc(1000000*sizeof(DeepPixel));
+    f32 *input = malloc(100000 * sizeof(float));
+    for (u32 i = 0; i < wh; ++i)
+    {
+        //we go where scanline i begins
+        rewind(file);
+        fseek(file, offsets[i], SEEK_SET);
+        //we read y coord (i32)
+        i32 y = file_read_int(file);
+        //we read packed size of pixel offset table (u64)
+        u32 size_of_pixel_table = file_read_uint(file);
+        file_read_uint(file);
+        //we read packed size of sample data (u64)
+        file_read_uint(file);
+        file_read_uint(file);
+        //we read unpacked size of sample data (u64)
+        u32 size_of_sample_data = file_read_uint(file);
+        file_read_uint(file);
+        //we read "compressed" pixel offset table (i32 arr??) 
+        i32 spp[1000];
+        u32 row_size = 0;
+        for (u32 j = 0; j < ww; ++j)
+        {
+            spp[j] = file_read_int(file);
+            //last spp is the row_size
+            row_size = spp[j];
+        }
+        total_row_size += row_size;
+        for (u32 j = ww-1; j > 0; --j)
+        {
+            spp[j] = spp[j] - spp[j-1];
+        }
+        //if (i == 520) sprintf(error_log, "spp[0] = %i", spp[500]);
+        //we read "compressed" sample data (DeepPixel- per component)
+        fread(input, row_size, 1, file);
+        for (u32 j = 0; j < row_size; ++j)
+        {
+            pixels[j].a = input[j];
+        }
+        fread(input, row_size, 1, file);
+        for (u32 j = 0; j < row_size; ++j)
+        {
+            pixels[j].b = input[j];
+        }
+        fread(input, row_size, 1, file);
+        for (u32 j = 0; j < row_size; ++j)
+        {
+            pixels[j].g = input[j];
+        }
+        fread(input, row_size, 1, file);
+        for (u32 j = 0; j < row_size; ++j)
+        {
+            pixels[j].r = input[j];
+        }
+        fread(input, row_size, 1, file);
+        for (u32 j = 0; j < row_size; ++j)
+        {
+            pixels[j].z = input[j];
+        }
+        for (u32 j = 0; j < wh; ++j)
+        {
+            u32 pixel_counter = 0;
+            u32 s = spp[j];
+            for (u32 k = 0; k < s; ++k)
+            {
+                    f32 y = (y/(f32)wh) * 10.f;
+                    f32 x = (j/(f32)ww) * 10.f;
+                    f32 depth = pixels[pixel_counter].z;
+                    points[point_index] = (RendererPointData){v3(x,y,depth), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,1.0)};
+                    point_index++;
+                    pixel_counter++;
+            }
+        }
+    }
+    fclose(file);
+    //sprintf(error_log, "total points: %i, total row_size: %i", point_index, total_row_size);
+    return points;
+}
+
 
 
 

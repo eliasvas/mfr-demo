@@ -32,6 +32,9 @@ b32 PAD = 0;
 global Model camera_model;
 mat4 camera_translation_mat;
 mat4 camera_rotation_mat;
+
+
+RendererPointData *points;
 internal void 
 init(void)
 {
@@ -45,6 +48,7 @@ init(void)
     texture_load(&camera_model.meshes[0].material.diff,"../assets/cam.tga");
     camera_translation_mat = mat4_translate(v3(0,5,10));
     camera_rotation_mat = m4d(1.f);
+    points = deepexr_read("../build/deep_image01.exr");
 }
 
 
@@ -76,11 +80,11 @@ render(void)
     //renderer_push_model(&rend, &debug_cube);
     //debug_cube.model = mat4_scale(v3(10,1,10));
 
-    renderer_push_model(&rend, &debug_cube);
+    //renderer_push_model(&rend, &debug_cube);
     debug_cube.model = mat4_mul(mat4_translate(v3(0,5,-1)),mat4_rotate(40, v3(0,1,1)));
 
     sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
-    renderer_push_model(&rend, &sphere);
+    //renderer_push_model(&rend, &sphere);
 
 
     mat4 camera_model_mat = mat4_mul(camera_translation_mat, camera_rotation_mat);
@@ -144,7 +148,11 @@ render(void)
         renderer_push_line(&rend, vec3_add(camera_pos, v3(right, -top, -far_plane)), vec3_add(camera_pos, v3(right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
     }
     glPointSize(5);
-    renderer_push_point(&rend, (RendererPointData){v3(10 * sin(global_platform.current_time),0,0), v4(1,0,0,1)});
+
+    renderer_push_point(&rend, (RendererPointData){v3(0,0,0), v4(1,1,1,1)});
+    for (u32 i = 0; i < 12000; ++i)
+        renderer_push_point(&rend, points[i]);
+
 
     renderer_end_frame(&rend);
 }

@@ -75,6 +75,7 @@ typedef struct RendererChar
 #define RENDERER_MAX_RECTS 256
 #define RENDERER_MAX_ANIMATED_MODELS 64
 #define RENDERER_MAX_TEXT 1024
+#define RENDERER_MAX_POINTS 200000 
 
 typedef struct Renderer
 {
@@ -116,7 +117,7 @@ typedef struct Renderer
 
   GLuint point_vao;
   GLuint point_vbo;
-  RendererPointData point_instance_data[RENDERER_MAX_RECTS];
+  RendererPointData point_instance_data[RENDERER_MAX_POINTS];
   u32 point_alloc_pos;
 
   RendererAnimatedModelData animated_model_instance_data[RENDERER_MAX_ANIMATED_MODELS];
