@@ -149,7 +149,7 @@ typedef struct Renderer
     f32 deep_far;
     ivec2 deep_render_dim;
     ivec2 prev_render_dim;
-    mat4 deep_alternate_view;
+    Camera deep_cam;
 }Renderer;
 
 void

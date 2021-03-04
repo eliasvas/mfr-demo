@@ -66,6 +66,8 @@ renderer_init(Renderer *rend)
     rend->renderer_settings.render_dim = (ivec2){global_platform.window_width, global_platform.window_height};
     rend->renderer_settings.lighting_disabled = FALSE;
     camera_init(&rend->cam);
+    camera_init(&rend->deep_cam);
+    rend->deep_cam.pos = v3(0,5,10);
 
 
 
@@ -458,7 +460,7 @@ renderer_begin_frame(Renderer *rend)
 
   camera_update(&rend->cam);
   if (rend->deep_write)
-      rend->view = rend->deep_alternate_view;
+      rend->view = get_view_mat(&rend->deep_cam);
   else 
       rend->view = get_view_mat(&rend->cam);
 
