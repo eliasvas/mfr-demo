@@ -147,10 +147,10 @@ render(void)
         renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, -top, -far_plane)), vec3_add(camera_pos, v3(right, -top, -far_plane)),v4(0.9,0.2,0.2,1.f));
         renderer_push_line(&rend, vec3_add(camera_pos, v3(right, -top, -far_plane)), vec3_add(camera_pos, v3(right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
     }
-    glPointSize(5);
+    glPointSize(2);
 
     renderer_push_point(&rend, (RendererPointData){v3(0,0,0), v4(1,1,1,1)});
-    for (u32 i = 0; i < 12000; ++i)
+    for (u32 i = 0; i < 126481; ++i)
         renderer_push_point(&rend, points[i]);
 
 

@@ -1275,17 +1275,22 @@ internal u32 file_read_uint(FILE *file)
 }
 internal f32 file_read_float(FILE *file)
 {
-    fgetc(file);
-    fgetc(file);
-    fgetc(file);
-    fgetc(file);
-    return 1;
+    f32 f;
+    u32 *f_ptr = (u32*)&f;
+    u8 n[4];
+    n[0] = (fgetc(file) & 0xff);
+    n[1] = (fgetc(file) & 0xff);
+    n[2] = (fgetc(file) & 0xff);
+    n[3] = (fgetc(file) & 0xff);
+    *f_ptr = (n[0]<<0) | (n[1]<<8) | (n[2]<<16) | (n[3]<<24);
+    return f;
 }
+
 
 
 internal RendererPointData *deepexr_read(const char * filename)
 {
-    RendererPointData *points = malloc(sizeof(RendererPointData) * 100000000); 
+    RendererPointData *points = ALLOC(sizeof(RendererPointData) * 100000000); 
     u32 point_index = 0;
     FILE *file = fopen(filename, "rb");
     file_find(file, "box2i");
@@ -1293,28 +1298,25 @@ internal RendererPointData *deepexr_read(const char * filename)
     file_forward(file, 13);
     u32 total_row_size = 0;
     //HEADER -- here we read header attrbutes --
-    int ww = file_read_int(file);
-    int wh = file_read_int(file);
-    //sprintf(error_log, "str_size(box2i) = %i",str_size("box2i"));
-    //sprintf(error_log, "window height = %i",wh); 
-    //rewind(file);
+    i32 ww = file_read_int(file);
+    i32 wh = file_read_int(file);
     file_find(file, "version");
     file_forward(file, str_size("version"));
     file_forward(file, 14);
     //OFFSET TABLE -- here we read the offset table --
     //offset table = distance of each scanline from start of file!
-    u32 offsets[1000];
-    //sprintf(error_log, "first scanline is %i != 8602 at %i",file_read_int(file), ftell(file));
-    for (u32 i = 0; i < wh; ++i)
+    u32 *offsets = ALLOC(sizeof(u32) * (wh+1));
+    for (u32 i = 0; i < wh+1; ++i)
     {
-        offsets[i] = file_read_int(file);
+        offsets[i] = file_read_uint(file);
         file_read_int(file);
     }
     //DEEP DATA -- here we read the deep fragments
     //each scanline is of the type  AA..ABB..BGG..GRR..RZZ..Z
-    DeepPixel *pixels = malloc(1000000*sizeof(DeepPixel));
-    f32 *input = malloc(100000 * sizeof(float));
-    for (u32 i = 0; i < wh; ++i)
+    DeepPixel *pixels = ALLOC(1000000*sizeof(DeepPixel));
+    f32 *input = ALLOC(100000 * sizeof(float));
+    i32 *spp = ALLOC(sizeof(i32) * (ww + 1));
+    for (u32 i = 0; i < wh+1; ++i)
     {
         //we go where scanline i begins
         rewind(file);
@@ -1325,69 +1327,64 @@ internal RendererPointData *deepexr_read(const char * filename)
         u32 size_of_pixel_table = file_read_uint(file);
         file_read_uint(file);
         //we read packed size of sample data (u64)
-        file_read_uint(file);
+        u32 unpacked = file_read_uint(file);
         file_read_uint(file);
         //we read unpacked size of sample data (u64)
         u32 size_of_sample_data = file_read_uint(file);
         file_read_uint(file);
         //we read "compressed" pixel offset table (i32 arr??) 
-        i32 spp[1000];
         u32 row_size = 0;
-        for (u32 j = 0; j < ww; ++j)
+        for (u32 j = 0; j < ww + 1; ++j)
         {
             spp[j] = file_read_int(file);
             //last spp is the row_size
             row_size = spp[j];
         }
         total_row_size += row_size;
-        for (u32 j = ww-1; j > 0; --j)
+        for (u32 j = ww; j > 0; --j)
         {
             spp[j] = spp[j] - spp[j-1];
         }
-        //if (i == 520) sprintf(error_log, "spp[0] = %i", spp[500]);
         //we read "compressed" sample data (DeepPixel- per component)
-        fread(input, row_size, 1, file);
         for (u32 j = 0; j < row_size; ++j)
         {
-            pixels[j].a = input[j];
+            pixels[j].a = file_read_float(file);
         }
-        fread(input, row_size, 1, file);
+        for (u32 j =0; j< row_size; ++j)
+        {
+            pixels[j].b = file_read_float(file);
+        }
         for (u32 j = 0; j < row_size; ++j)
         {
-            pixels[j].b = input[j];
+            pixels[j].g = file_read_float(file);
         }
-        fread(input, row_size, 1, file);
         for (u32 j = 0; j < row_size; ++j)
         {
-            pixels[j].g = input[j];
+            pixels[j].r = file_read_float(file);
         }
-        fread(input, row_size, 1, file);
         for (u32 j = 0; j < row_size; ++j)
         {
-            pixels[j].r = input[j];
+            pixels[j].z = file_read_float(file);
         }
-        fread(input, row_size, 1, file);
-        for (u32 j = 0; j < row_size; ++j)
+        u32 pixel_counter = 0;
+        for (u32 j = 0; j < wh+1; ++j)
         {
-            pixels[j].z = input[j];
-        }
-        for (u32 j = 0; j < wh; ++j)
-        {
-            u32 pixel_counter = 0;
-            u32 s = spp[j];
-            for (u32 k = 0; k < s; ++k)
+            for (u32 k = 0; k < spp[j]; ++k)
             {
-                    f32 y = (y/(f32)wh) * 10.f;
-                    f32 x = (j/(f32)ww) * 10.f;
-                    f32 depth = pixels[pixel_counter].z;
-                    points[point_index] = (RendererPointData){v3(x,y,depth), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,1.0)};
+                    f32 yf = ((f32)i/(f32)wh+1) * 5;
+                    f32 xf = ((f32)j/(f32)ww+1) * 5;
+                    f32 depth = -pixels[pixel_counter].z;
+                    points[point_index] = (RendererPointData){v3(xf,yf,depth), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,pixels[pixel_counter].a)};
                     point_index++;
                     pixel_counter++;
             }
         }
     }
     fclose(file);
-    //sprintf(error_log, "total points: %i, total row_size: %i", point_index, total_row_size);
+    FREE(pixels);
+    FREE(input);
+    FREE(offsets);
+    FREE(spp);
     return points;
 }
 

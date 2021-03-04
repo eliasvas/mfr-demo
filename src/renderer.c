@@ -463,7 +463,7 @@ renderer_begin_frame(Renderer *rend)
   if (rend->deep_write) 
       rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 20.f);
   else
-      rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,100.f); 
+      rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,200.f); 
 }
 
 internal void
