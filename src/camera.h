@@ -33,6 +33,27 @@ camera_init(Camera* cam)
     cam->camera_speed = 15.f;
     cam->first_mouse = 0;
 }
+internal void 
+camera_update_3p(Camera* cam)
+{
+    f32 x_offset = global_platform.key_down[KEY_RIGHT] + (-global_platform.key_down[KEY_LEFT]);
+    f32 y_offset = global_platform.key_down[KEY_UP] + (-global_platform.key_down[KEY_DOWN]);
+    cam->yaw   += x_offset;
+    cam->pitch += y_offset;
+
+    //for gimbal lock
+    if(cam->pitch > 89.0f)
+            cam->pitch = 89.0f;
+    if(cam->pitch < -89.0f)
+        cam->pitch = -89.0f;
+    
+    
+    vec3 direction;
+    direction.x = cos(to_radians(cam->yaw)) * cos(to_radians(cam->pitch));
+    direction.y = sin(to_radians(cam->pitch));
+    direction.z = sin(to_radians(cam->yaw)) * cos(to_radians(cam->pitch));
+    cam->front = vec3_normalize(direction);
+}
 
 internal void 
 camera_update(Camera* cam)

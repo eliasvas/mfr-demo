@@ -58,6 +58,7 @@ init(void)
 internal void 
 update(void)
 {
+    camera_update_3p(&rend.deep_cam);
   if (DEEP_WRITE)write_success_timer = 3.f;
   else
       write_success_timer = max(0.f, write_success_timer -= global_platform.dt);
@@ -118,7 +119,8 @@ render(void)
             do_slider_floatsf(GEN_ID, 800 ,300,-100.f, 100.f, &rend.deep_cam.pos.x);
             do_slider_floatsf(GEN_ID, 800 ,280,-100.f, 100.f, &rend.deep_cam.pos.y);
             do_slider_floatsf(GEN_ID, 800 ,260,-100.f, 100.f, &rend.deep_cam.pos.z);
-            do_slider(GEN_ID, 800 ,240, 10, &point_size);
+            do_slider_float(GEN_ID, 800 ,240,50.f, &rend.deep_far);
+            do_slider(GEN_ID, 800 ,220, 10, &point_size);
         }
     }
     do_switch(GEN_ID, (dui_Rect){0,0,100,100}, &UI_OPEN);
@@ -129,20 +131,37 @@ render(void)
     f32 top = 5.f;
     if (UI_OPEN)
     {
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(-right, -top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(-right, -top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(-right, top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(-right, top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(right, -top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(right, -top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(right, top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(right, top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
+        
+        vec3 right = vec3_mulf(vec3_normalize(vec3_cross(rend.deep_cam.front, rend.deep_cam.up)), rend.deep_right);
+        vec3 up = vec3_mulf(vec3_normalize(rend.deep_cam.up), rend.deep_right);
+        vec3 farr = vec3_mulf(vec3_normalize(rend.deep_cam.front), rend.deep_far);
 
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(right, top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(-right, top, rend.deep_near)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(-right, top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(-right, -top, rend.deep_near)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(-right, -top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(right, -top, rend.deep_near)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(right, -top, rend.deep_near)), vec3_add(rend.deep_cam.pos, v3(right, top, rend.deep_near)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(right, up)), 
+                vec3_add(vec3_add(rend.deep_cam.pos, vec3_add(right, up)), farr), v4(0.9,0.2,0.2,1.0));
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), up)), 
+                vec3_add(vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), up)), farr)), v4(0.9,0.2,0.2,1.0);
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(right, vec3_mulf(up, -1.f))), 
+                vec3_add(vec3_add(rend.deep_cam.pos, vec3_add(right, vec3_mulf(up,-1.f))), farr), v4(0.9,0.2,0.2,1.0));
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), vec3_mulf(up, -1.f))), 
+                vec3_add(vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), vec3_mulf(up,-1.f))), farr), v4(0.9,0.2,0.2,1.0));
 
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(right, top, -rend.deep_far)), vec3_add(rend.deep_cam.pos, v3(-right, top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(-right, top, -rend.deep_far)), vec3_add(rend.deep_cam.pos, v3(-right, -top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(-right, -top, -rend.deep_far)), vec3_add(rend.deep_cam.pos, v3(right, -top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
-        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, v3(right, -top, -rend.deep_far)), vec3_add(rend.deep_cam.pos, v3(right, top, -rend.deep_far)),v4(0.9,0.2,0.2,1.f));
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), vec3_mulf(up, -1.f))), 
+                vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,1.f), vec3_mulf(up, -1.f))), v4(0.9,0.2,0.2,1));
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(right, vec3_mulf(up, -1.f))), 
+                vec3_add(rend.deep_cam.pos, vec3_add(right, up)), v4(0.9,0.2,0.2,1));
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(right, up)), 
+                vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), up))), v4(0.9,0.2,0.2,1.0);
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), up)), 
+                vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), vec3_mulf(up, -1.f))),v4(0.9,0.2,0.2,1)); 
+
+        renderer_push_line(&rend, vec3_add(farr,vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), vec3_mulf(up, -1.f)))), 
+                vec3_add(farr,vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,1.f), vec3_mulf(up, -1.f)))), v4(0.9,0.2,0.2,1));
+        renderer_push_line(&rend, vec3_add(farr,vec3_add(rend.deep_cam.pos, vec3_add(right, vec3_mulf(up, -1.f)))), 
+                vec3_add(rend.deep_cam.pos, vec3_add(right, vec3_add(up,farr))), v4(0.9,0.2,0.2,1));
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(vec3_add(right,farr), up)), 
+                vec3_add(rend.deep_cam.pos, vec3_add(vec3_mulf(right,-1.f), vec3_add(up,farr)))), v4(0.9,0.2,0.2,1.0);
+        renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(vec3_add(vec3_mulf(right,-1.f), up),farr)), 
+                vec3_add(rend.deep_cam.pos, vec3_add(vec3_add(vec3_mulf(right,-1.f), vec3_mulf(up, -1.f)),farr)),v4(0.9,0.2,0.2,1)); 
     }
     glPointSize(point_size);
 

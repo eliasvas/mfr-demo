@@ -147,6 +147,7 @@ typedef struct Renderer
     u32 deep_settings;
     f32 deep_near;
     f32 deep_far;
+    f32 deep_right;
     ivec2 deep_render_dim;
     ivec2 prev_render_dim;
     Camera deep_cam;

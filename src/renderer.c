@@ -91,6 +91,7 @@ renderer_init(Renderer *rend)
     camera_init(&rend->cam);
     rend->deep_near = 0.01f;
     rend->deep_far = 20.f;
+    rend->deep_right = 5.f;
     //rend->ortho = orthographic_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,80.f); 
 
     //initialize postproc VAO
@@ -465,7 +466,7 @@ renderer_begin_frame(Renderer *rend)
       rend->view = get_view_mat(&rend->cam);
 
   if (rend->deep_write) 
-      rend->proj = orthographic_proj(-5, 5, -5, 5, rend->deep_near, rend->deep_far);
+      rend->proj = orthographic_proj(-rend->deep_right, rend->deep_right, -rend->deep_right, rend->deep_right, rend->deep_near, rend->deep_far);
   else
       rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,200.f); 
 }
