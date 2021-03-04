@@ -87,6 +87,8 @@ renderer_init(Renderer *rend)
     char **faces= cubemap_default();
     skybox_init(&rend->skybox, faces);
     camera_init(&rend->cam);
+    rend->deep_near = 0.01f;
+    rend->deep_far = 20.f;
     //rend->ortho = orthographic_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,80.f); 
 
     //initialize postproc VAO
@@ -461,7 +463,7 @@ renderer_begin_frame(Renderer *rend)
       rend->view = get_view_mat(&rend->cam);
 
   if (rend->deep_write) 
-      rend->proj = orthographic_proj(-5, 5, -5, 5, 0.001f, 20.f);
+      rend->proj = orthographic_proj(-5, 5, -5, 5, rend->deep_near, rend->deep_far);
   else
       rend->proj = perspective_proj(45.f,global_platform.window_width / (f32)global_platform.window_height, 0.1f,200.f); 
 }

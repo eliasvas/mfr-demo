@@ -34,7 +34,9 @@ mat4 camera_translation_mat;
 mat4 camera_rotation_mat;
 
 
-RendererPointData *points;
+global RendererPointData *points;
+global u32 points_count;
+
 internal void 
 init(void)
 {
@@ -48,7 +50,7 @@ init(void)
     texture_load(&camera_model.meshes[0].material.diff,"../assets/cam.tga");
     camera_translation_mat = mat4_translate(v3(0,5,10));
     camera_rotation_mat = m4d(1.f);
-    points = deepexr_read("../build/deep_image01.exr");
+    points = deepexr_read("../build/deep_image01.exr", &points_count);
 }
 
 
@@ -77,14 +79,14 @@ render(void)
     light_cube.model = mat4_translate(v3(40*sin(global_platform.current_time),5,40*cos(global_platform.current_time)));
     //renderer_push_model(&rend, &light_cube);
     
-    //renderer_push_model(&rend, &debug_cube);
+    renderer_push_model(&rend, &debug_cube);
     //debug_cube.model = mat4_scale(v3(10,1,10));
 
     //renderer_push_model(&rend, &debug_cube);
     debug_cube.model = mat4_mul(mat4_translate(v3(0,5,-1)),mat4_rotate(40, v3(0,1,1)));
 
     sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
-    //renderer_push_model(&rend, &sphere);
+    renderer_push_model(&rend, &sphere);
 
 
     mat4 camera_model_mat = mat4_mul(camera_translation_mat, camera_rotation_mat);
@@ -116,9 +118,9 @@ render(void)
             sprintf(ms, "%.4f ms", global_platform.dt);
             renderer_push_text(&rend, v3(0.82,0.90,0.0), v2(0.015,0.015 * global_platform.window_width/(f32)global_platform.window_height), ms);
 
-            do_slider_float(GEN_ID, 800 ,300, 100.f, &camera_translation_mat.elements[3][0]);
-            do_slider_float(GEN_ID, 800 ,280, 100.f, &camera_translation_mat.elements[3][1]);
-            do_slider_float(GEN_ID, 800 ,260, 100.f, &camera_translation_mat.elements[3][2]);
+            do_slider_floatsf(GEN_ID, 800 ,300,-100.f, 100.f, &camera_translation_mat.elements[3][0]);
+            do_slider_floatsf(GEN_ID, 800 ,280,-100.f, 100.f, &camera_translation_mat.elements[3][1]);
+            do_slider_floatsf(GEN_ID, 800 ,260,-100.f, 100.f, &camera_translation_mat.elements[3][2]);
         }
     }
     do_switch(GEN_ID, (dui_Rect){0,0,100,100}, &UI_OPEN);
@@ -147,10 +149,9 @@ render(void)
         renderer_push_line(&rend, vec3_add(camera_pos, v3(-right, -top, -far_plane)), vec3_add(camera_pos, v3(right, -top, -far_plane)),v4(0.9,0.2,0.2,1.f));
         renderer_push_line(&rend, vec3_add(camera_pos, v3(right, -top, -far_plane)), vec3_add(camera_pos, v3(right, top, -far_plane)),v4(0.9,0.2,0.2,1.f));
     }
-    glPointSize(2);
+    glPointSize(3);
 
-    renderer_push_point(&rend, (RendererPointData){v3(0,0,0), v4(1,1,1,1)});
-    for (u32 i = 0; i < 126481; ++i)
+    for (u32 i = 0; i < points_count; ++i)
         renderer_push_point(&rend, points[i]);
 
 

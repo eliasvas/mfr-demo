@@ -1288,7 +1288,7 @@ internal f32 file_read_float(FILE *file)
 
 
 
-internal RendererPointData *deepexr_read(const char * filename)
+internal RendererPointData *deepexr_read(const char * filename, u32 *point_count)
 {
     RendererPointData *points = ALLOC(sizeof(RendererPointData) * 100000000); 
     u32 point_index = 0;
@@ -1313,8 +1313,8 @@ internal RendererPointData *deepexr_read(const char * filename)
     }
     //DEEP DATA -- here we read the deep fragments
     //each scanline is of the type  AA..ABB..BGG..GRR..RZZ..Z
-    DeepPixel *pixels = ALLOC(1000000*sizeof(DeepPixel));
-    f32 *input = ALLOC(100000 * sizeof(float));
+    DeepPixel *pixels = ALLOC(ww * wh *10*sizeof(DeepPixel));
+    f32 *input = ALLOC(ww * 10 * sizeof(float));
     i32 *spp = ALLOC(sizeof(i32) * (ww + 1));
     for (u32 i = 0; i < wh+1; ++i)
     {
@@ -1371,10 +1371,10 @@ internal RendererPointData *deepexr_read(const char * filename)
         {
             for (u32 k = 0; k < spp[j]; ++k)
             {
-                    f32 yf = ((f32)i/(f32)wh+1) * 5;
+                    f32 yf = (1.f - ((f32)i/(f32)wh+1)) * 5;
                     f32 xf = ((f32)j/(f32)ww+1) * 5;
                     f32 depth = -pixels[pixel_counter].z;
-                    points[point_index] = (RendererPointData){v3(xf,yf,depth), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,pixels[pixel_counter].a)};
+                    points[point_index] = (RendererPointData){v3(xf,yf,depth), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,1.f)};//pixels[pixel_counter].a)};
                     point_index++;
                     pixel_counter++;
             }
@@ -1385,6 +1385,7 @@ internal RendererPointData *deepexr_read(const char * filename)
     FREE(input);
     FREE(offsets);
     FREE(spp);
+    *point_count = point_index;
     return points;
 }
 

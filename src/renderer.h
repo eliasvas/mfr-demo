@@ -75,7 +75,7 @@ typedef struct RendererChar
 #define RENDERER_MAX_RECTS 256
 #define RENDERER_MAX_ANIMATED_MODELS 64
 #define RENDERER_MAX_TEXT 1024
-#define RENDERER_MAX_POINTS 200000 
+#define RENDERER_MAX_POINTS 2000000 
 
 typedef struct Renderer
 {
@@ -145,6 +145,8 @@ typedef struct Renderer
     GLuint quad_vbo;
     b32 deep_write;//if 1, sets render mode to deep image screenshot
     u32 deep_settings;
+    f32 deep_near;
+    f32 deep_far;
     ivec2 deep_render_dim;
     ivec2 prev_render_dim;
     mat4 deep_alternate_view;
