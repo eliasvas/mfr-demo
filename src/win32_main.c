@@ -33,6 +33,7 @@ internal LRESULT Win32WindowProc(HWND hWnd, UINT message, WPARAM w_param, LPARAM
         i8 was_down = ((l_param & (1 << 30)) != 0);
         i8 is_down = ((l_param & (1UL << 31)) == 0);
 
+        
         u64 key_input =0;
 
         if ((vkey_code >= 'A' && vkey_code <= 'Z') || (vkey_code >='0' && vkey_code <= '9')){
@@ -73,7 +74,17 @@ internal LRESULT Win32WindowProc(HWND hWnd, UINT message, WPARAM w_param, LPARAM
             {
                 key_input = KEY_LSHIFT;
             }
-
+            else if (vkey_code == VK_BACK)
+            {
+                key_input = KEY_BACKSPACE;
+            }
+            //this is for all keys that DONT have a virtual key code
+            BYTE keyboard_state[256];
+             GetKeyboardState(&keyboard_state);
+            u8 c; 
+            ToAscii(vkey_code, MapVirtualKeyA(vkey_code, 1), keyboard_state, &c, 0);
+            if (c == '.')key_input = KEY_DOT;
+            else if (c == '/')key_input = KEY_SLASH;
            //handle more keys
         }
         if (is_down){

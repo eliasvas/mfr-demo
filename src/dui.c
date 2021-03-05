@@ -36,7 +36,10 @@ void dui_frame_begin(void)
 
     for (int i = 0; i < 50; ++i)
         if (global_platform.key_pressed[i])
-            ui.key_entered = i + 'A' - 1;
+            ui.key_entered = i + 'a' - 1;
+    if (global_platform.key_pressed[KEY_DOT])ui.key_entered = '.';
+    if (global_platform.key_pressed[KEY_SLASH])ui.key_entered = '/';
+    if (global_platform.key_pressed[KEY_BACKSPACE])ui.key_entered = 8;
 }
 
 void dui_frame_end(void)
@@ -205,7 +208,10 @@ b32 do_textfield(DUIID id, f32 x, f32 y, char *buffer)
     }
     if (ui.active == id)
     {
-        buffer[str_size(buffer)] = ui.key_entered; //if key_entered == 0, nothing happens!
+        if (ui.key_entered == 8 && (str_size(buffer) > 0))
+            buffer[str_size(buffer)-1] = 0;
+        else 
+            buffer[str_size(buffer)] = ui.key_entered; //if key_entered == 0, nothing happens!
     }
     if (ui.hot == id)
         dui_draw_rect(x + 8, y + 8, 255, 16, layout.bg_lite);
