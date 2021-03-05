@@ -69,6 +69,10 @@ internal LRESULT Win32WindowProc(HWND hWnd, UINT message, WPARAM w_param, LPARAM
             {
                 key_input = KEY_CTRL;
             }
+            else if (vkey_code == VK_SHIFT)
+            {
+                key_input = KEY_LSHIFT;
+            }
 
            //handle more keys
         }

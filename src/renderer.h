@@ -6,7 +6,6 @@
 #include "skybox.h"
 #include "model.h"
 #include "fbo.h"
-#include "animation.h"
 #include "camera.h"
 
 typedef struct RendererSettings
@@ -48,17 +47,6 @@ typedef struct RendererLine
 }RendererLine;
 
 
-typedef struct RendererAnimatedModelData
-{
-    GLuint vao;
-    Texture diff;
-    Texture spec;
-    
-    u32 joint_count;
-    Joint *joints;
-    u32 vertices_count;
-    mat4 model;
-}RendererAnimatedModelData;
 
 typedef struct RendererChar
 {
@@ -119,9 +107,6 @@ typedef struct Renderer
   GLuint point_vbo;
   RendererPointData point_instance_data[RENDERER_MAX_POINTS];
   u32 point_alloc_pos;
-
-  RendererAnimatedModelData animated_model_instance_data[RENDERER_MAX_ANIMATED_MODELS];
-  u32 animated_model_alloc_pos;
 
   Shader shaders[RENDERER_MAX_SHADERS];
   u32 shaders_count;

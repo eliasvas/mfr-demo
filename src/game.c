@@ -6,8 +6,6 @@
 #include "fbo.h"
 #include "renderer.h"
 #include "dui.h"
-#include "collada_parser.h"
-#include "animation.h"
 #include "entity.h"
 #include "openexr_write.h"
 mat4 view,proj;
@@ -23,6 +21,7 @@ global f32 trans = 0.f;
 
 f32 write_success_timer = 0.f; //activates successful screenshot message rendering!
 b32 DEEP_WRITE = 0; //if 1, take deep screenshot
+b32 DEEP_READ = 0;
 i32 RES = 1000;
 b32 RGBA = 1;
 b32 RGB = 0;
@@ -38,6 +37,7 @@ global RendererPointData *points;
 global u32 points_count;
 global u32 point_size;
 
+global char path[256];
 internal void 
 init(void)
 {
@@ -62,10 +62,15 @@ update(void)
   if (DEEP_WRITE)write_success_timer = 3.f;
   else
       write_success_timer = max(0.f, write_success_timer -= global_platform.dt);
+  if (global_platform.key_pressed[KEY_Q])
+      rend.deep_cam = rend.cam;
   u32 settings = (EXR_RGBA);
   rend.cam.can_rotate = !UI_OPEN;
   renderer_set_deep_write(&rend, DEEP_WRITE, PAD,RGB,RES); //if deep write 1, sets render mode to deep image screenshot
   renderer_begin_frame(&rend);
+
+  if(DEEP_READ) 
+      points = deepexr_read(path, &points_count);
 }
 
 internal void 
@@ -112,13 +117,13 @@ render(void)
             dui_draw_string(215, 275, "padding");
             dui_draw_string(230, 240, "RGB/RGBA");
             dui_draw_string(280, 210, "CAPTURE");
+            do_textfield(GEN_ID, 400, 10, path);
+            DEEP_READ = do_button(GEN_ID, (dui_Rect){408,0,50,20});
+
             char ms[64];
             sprintf(ms, "%.4f ms", global_platform.dt);
             renderer_push_text(&rend, v3(0.82,0.90,0.0), v2(0.015,0.015 * global_platform.window_width/(f32)global_platform.window_height), ms);
 
-            do_slider_floatsf(GEN_ID, 800 ,300,-100.f, 100.f, &rend.deep_cam.pos.x);
-            do_slider_floatsf(GEN_ID, 800 ,280,-100.f, 100.f, &rend.deep_cam.pos.y);
-            do_slider_floatsf(GEN_ID, 800 ,260,-100.f, 100.f, &rend.deep_cam.pos.z);
             do_slider_float(GEN_ID, 800 ,240,50.f, &rend.deep_far);
             do_slider(GEN_ID, 800 ,220, 10, &point_size);
         }
@@ -135,6 +140,7 @@ render(void)
         vec3 right = vec3_mulf(vec3_normalize(vec3_cross(rend.deep_cam.front, rend.deep_cam.up)), rend.deep_right);
         vec3 up = vec3_mulf(vec3_normalize(rend.deep_cam.up), rend.deep_right);
         vec3 farr = vec3_mulf(vec3_normalize(rend.deep_cam.front), rend.deep_far);
+        up = vec3_cross(right, rend.deep_cam.front);
 
         renderer_push_line(&rend, vec3_add(rend.deep_cam.pos, vec3_add(right, up)), 
                 vec3_add(vec3_add(rend.deep_cam.pos, vec3_add(right, up)), farr), v4(0.9,0.2,0.2,1.0));

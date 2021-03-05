@@ -36,12 +36,26 @@ camera_init(Camera* cam)
 internal void 
 camera_update_3p(Camera* cam)
 {
-    f32 x_offset = global_platform.key_down[KEY_RIGHT] + (-global_platform.key_down[KEY_LEFT]);
-    f32 y_offset = global_platform.key_down[KEY_UP] + (-global_platform.key_down[KEY_DOWN]);
-    cam->yaw   += x_offset;
-    cam->pitch += y_offset;
+  if (global_platform.key_down[KEY_LSHIFT])
+    {
+        f32 x_offset = global_platform.key_down[KEY_RIGHT] + (-global_platform.key_down[KEY_LEFT]);
+        f32 y_offset = global_platform.key_down[KEY_UP] + (-global_platform.key_down[KEY_DOWN]);
+        cam->yaw   += x_offset;
+        cam->pitch += y_offset;
+    }
+  else{
 
-    //for gimbal lock
+
+    if (global_platform.key_down[KEY_LEFT])
+        cam->pos = vec3_sub(cam->pos, vec3_mulf(vec3_cross(cam->front, cam->up), cam->camera_speed * global_platform.dt));
+    if (global_platform.key_down[KEY_RIGHT])
+        cam->pos = vec3_add(cam->pos, vec3_mulf(vec3_cross(cam->front, cam->up), cam->camera_speed * global_platform.dt));
+    if (global_platform.key_down[KEY_UP])
+        cam->pos = vec3_add(cam->pos, vec3_mulf(cam->front,cam->camera_speed* global_platform.dt));
+    if (global_platform.key_down[KEY_DOWN])
+        cam->pos = vec3_sub(cam->pos, vec3_mulf(cam->front,cam->camera_speed* global_platform.dt));
+  }
+      //for gimbal lock
     if(cam->pitch > 89.0f)
             cam->pitch = 89.0f;
     if(cam->pitch < -89.0f)

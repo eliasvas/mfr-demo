@@ -33,16 +33,22 @@ void dui_frame_begin(void)
     ui.hot = 0;
     ui.mouse_pos = v2(global_platform.mouse_x, global_platform.window_height - global_platform.mouse_y);
     ui.mouse_down = global_platform.left_mouse_down;
+
+    for (int i = 0; i < 50; ++i)
+        if (global_platform.key_pressed[i])
+            ui.key_entered = i + 'A' - 1;
 }
 
 void dui_frame_end(void)
 {
 
+    ui.last_widget = ui.active;
     if (ui.mouse_down == 0)
         ui.active = 0;
     else 
         if (ui.active == 0)
             ui.active = -1;
+    ui.key_entered = 0;
 }
 b32 do_button(DUIID id, dui_Rect rect)
 {
@@ -189,6 +195,24 @@ void dui_draw_string(i32 x, i32 y, char *string)
         ++string;
     }
 }
+
+b32 do_textfield(DUIID id, f32 x, f32 y, char *buffer)
+{
+    if (dui_rect_hit((dui_Rect){x +8,y+8, 255,16}))
+    {
+        ui.hot = id;
+        ui.active = id;
+    }
+    if (ui.active == id)
+    {
+        buffer[str_size(buffer)] = ui.key_entered; //if key_entered == 0, nothing happens!
+    }
+    if (ui.hot == id)
+        dui_draw_rect(x + 8, y + 8, 255, 16, layout.bg_lite);
+    else
+        dui_draw_rect(x + 8, y + 8, 255, 16, layout.bg);
+    dui_draw_string(x + 8, y + 8, buffer);
+}
 void dui_default(void)
 {
     layout.fg = v4(0.8,0.2,0.2,0.9f);
@@ -199,3 +223,4 @@ void dui_default(void)
     layout.cx = 0;
     layout.cy = 0;
 }
+

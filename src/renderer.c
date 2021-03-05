@@ -452,7 +452,6 @@ renderer_begin_frame(Renderer *rend)
   //fbo_resize(&rend->depthpeel_fbo, rend->renderer_settings.render_dim.x*2, rend->renderer_settings.render_dim.y*2, FBO_COLOR_0|FBO_DEPTH);
   rend->current_fbo = &rend->main_fbo;
   rend->model_alloc_pos = 0;
-  rend->animated_model_alloc_pos = 0;
   rend->filled_rect_alloc_pos = 0;
   rend->line_alloc_pos = 0;
   rend->point_light_count = 0;
@@ -609,64 +608,6 @@ renderer_end_frame(Renderer *rend)
   renderer_render_scene3D(rend,&rend->shaders[3]);
   //then we render to the main fbo
   fbo_bind(&rend->main_fbo);
-  for (u32 i = 0; i < rend->animated_model_alloc_pos; ++i)
-  {
-      use_shader(&rend->shaders[4]);
-    
-    shader_set_mat4fv(&rend->shaders[4], "proj", (GLfloat*)rend->proj.elements);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, rend->animated_model_instance_data[i].diff.id);
-    shader_set_int(&rend->shaders[4], "material.diffuse", 0); //we should really make the texture manager global or something(per Scene?)... sigh
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, rend->animated_model_instance_data[i].spec.id);
-    shader_set_int(&rend->shaders[4], "material.specular", 1);
-    glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, rend->shadowmap_fbo.depth_attachment);
-    shader_set_int(&rend->shaders[4], "shadow_map", 4);
-
-    if (0){
-        mat4 identity = m4d(1.f);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[0]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[1]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[2]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[3]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[4]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[5]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[6]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[7]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[8]", (GLfloat*)identity.elements);
-        shader_set_mat4fv(&rend->shaders[4], "joint_transforms[9]", (GLfloat*)identity.elements);
-        //@memleak
-        char str[32] = "joint_transforms[xx]";
-
-        for (i32 i = 10; i < rend->animated_model_instance_data[i].joint_count; ++i)
-        {
-            str[17] = '0' + (i/10);
-            str[18] = '0' + (i -(((int)(i/10)) * 10));
-            shader_set_mat4fv(&rend->shaders[4], str, (GLfloat*)identity.elements);
-        }
-    }
-    for (u32 j = 0; j < rend->animated_model_instance_data[i].joint_count; ++j)
-        set_joint_transform_uniforms(&rend->shaders[4], &rend->animated_model_instance_data[i].joints[j]);
-    shader_set_mat4fv(&rend->shaders[4], "view", (GLfloat*)rend->view.elements);
-    shader_set_mat4fv(&rend->shaders[4], "model", (GLfloat*)rend->animated_model_instance_data[i].model.elements);
-    shader_set_vec3(&rend->shaders[4], "lightdir", rend->directional_light.direction); 
-    renderer_set_light_uniforms(rend, &rend->shaders[4]);
-    mat4 inv_view = mat4_inv(rend->view);
-    vec3 view_pos = v3(inv_view.elements[3][0],inv_view.elements[3][1],inv_view.elements[3][2]);
-    shader_set_vec3(&rend->shaders[4], "view_pos", view_pos); 
-    mat4 ortho_proj = orthographic_proj(-200.f, 200.f, -200.f, 200.f, 0.01f, 200.f);
-    mat4 light_space_matrix = mat4_mul(ortho_proj,look_at(v3(0,100,0), v3(10,0,0), v3(0,1,0)));
-    shader_set_mat4fv(&rend->shaders[4], "light_space_matrix", (GLfloat*)light_space_matrix.elements);
-
-
-
-
-    glBindVertexArray(rend->animated_model_instance_data[i].vao);
-    glDrawArrays(GL_TRIANGLES,0, rend->animated_model_instance_data[i].vertices_count);
-    //glDrawArrays(GL_LINES,0, 40000);
-    glBindVertexArray(0);
-  }
      //render lines
     glLineWidth(5);
     use_shader(&rend->shaders[6]);
@@ -763,32 +704,6 @@ void renderer_push_model(Renderer *rend, Model *m)
     rend->model_instance_data[rend->model_alloc_pos++] = data;
   }
 
-}
-/*
-typedef struct RendererAnimatedModelData
-{
-    GLuint vao;
-    Texture diff_tex;
-    Texture spec_tex;
-    
-    u32 joint_count;
-    Joint *joints;
-    u32 vertices_count;
-}RendererAnimatedModelData;
-*/
-
-void renderer_push_animated_model(Renderer *rend, AnimatedModel *m)
-{
-  RendererAnimatedModelData data = {0};
-  data.vao = m->vao;
-  data.diff = *m->diff_tex;
-  data.spec = rend->white_texture; //declare a white texture for such cases (in renderer)
-  data.joint_count = m->joint_count;
-  data.joints = m->joints;
-  data.vertices_count = m->vertices_count; 
-  //data.model = mat4_translate(v3(0,2,0));
-  data.model = mat4_translate(v3(0,0.5f,0));
-  rend->animated_model_instance_data[rend->animated_model_alloc_pos++] = data;
 }
 
 void renderer_push_filled_rect(Renderer *rend, vec3 pos, vec2 dim, vec4 color)

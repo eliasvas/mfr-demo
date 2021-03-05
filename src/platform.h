@@ -99,6 +99,8 @@ enum keyboard_keys
     KEY_PAUSE,
     KEY_NUMLOCK,
     KEY_PRINTSCREEN,
+    KEY_SLASH,
+    KEY_DOT,
 
     KEY_F1,
     KEY_F2,
