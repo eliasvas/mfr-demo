@@ -88,22 +88,120 @@ position_manager_init(PositionManager *manager)
     manager->next_index = 0;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+typedef struct Model ModelComponent;
+
+
+typedef struct ModelManager
+{
+    ModelComponent models[MAX_COMPONENTS];
+    Entity entities[MAX_ENTITY];
+    u32 next_index;
+    EntityHashMap table;
+}ModelManager;
+
+internal ModelComponent*
+entity_add_model(ModelManager *manager, Entity entity)
+{
+  assert(entity != INVALID_ENTITY);
+  hashmap_insert(&manager->table, entity, manager->next_index);
+  manager->models[manager->next_index] = (ModelComponent){0}; 
+  manager->entities[manager->next_index] = entity;
+  return &manager->models[manager->next_index++];
+}
+
+internal void 
+entity_remove_model(ModelManager* manager, Entity entity)
+{
+  u32 index = hashmap_lookup(&manager->table, entity);
+  if (index != -1)
+  {
+    Entity entity = manager->entities[index];
+    if (index < manager->next_index)
+    {
+      manager->models[index] = manager->models[manager->next_index-1];// try to use move
+      manager->entities[index] = manager->entities[manager->next_index-1];
+      hashmap_remove(&manager->table,entity);
+      hashmap_remove(&manager->table,manager->entities[index]);
+      hashmap_insert(&manager->table,manager->entities[index], index); 
+    }
+    manager->next_index--;
+  }
+}
+
+internal ModelComponent* 
+entity_get_model(ModelManager *manager, Entity entity)
+{
+    i32 index = hashmap_lookup(&manager->table, entity);
+    if (index != -1)
+    {
+        return &manager->models[index];
+    }
+    return NULL;
+}
+internal void
+model_manager_init(ModelManager *manager)
+{
+    manager->table = hashmap_create(20);
+    manager->next_index = 0;
+}
+
 typedef struct EntityManager
 {
     Entity next_entity;
     PositionManager position_manager;
+    ModelManager model_manager;
 }EntityManager;
+
 
 internal void 
 entity_manager_init(EntityManager *manager)
 {
     manager->next_entity = 0;
     position_manager_init(&manager->position_manager);
+    model_manager_init(&manager->model_manager);
 }
 internal Entity 
 entity_create(EntityManager *manager)
 {
    return ++manager->next_entity; 
+}
+
+internal void 
+entity_manager_update(EntityManager *manager, Renderer *rend)
+{
+    Ray r = (Ray){v3(0,0,0), 1, v3(0,0,-1)};
+    i32 collision = intersect_ray_sphere_simple(r, (Sphere){v3(0,0,0), 5});
+    if (collision)sprintf(error_log, "collision detected!!");
+}
+internal void 
+entity_manager_render(EntityManager *manager, Renderer *rend)
+{
+    for (u32 i = 0; i < manager->model_manager.next_index; ++i)
+    {
+        renderer_push_model(rend, manager->model_manager.models[i]);
+    }
 }
 
 #endif

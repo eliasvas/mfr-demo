@@ -633,7 +633,7 @@ internal u8 *deepexr_write_padding(u32 width, u32 height,DeepPixel *pixels, u32 
 
 		src += width * stride * num_of_deep_samples_per_pixel;
 	}
-  FILE* f = fopen ("deep_image01.exr", "wb");
+  FILE* f = fopen ("deep.exr", "wb");
   fwrite (buf, 1, buf_size, f);
   //fwrite (buf, 1, buf_size, f);
   fclose (f);
@@ -913,7 +913,7 @@ internal u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels,u32 *samples_
 
 		src += sizeof(DeepPixel) * row_sizes[y];
 	}
-  FILE* f = fopen ("deep_image01.exr", "wb");
+  FILE* f = fopen ("deep.exr", "wb");
   fwrite (buf, 1, buf_size, f);
   //fwrite (buf, 1, buf_size, f);
   fclose (f);
@@ -1204,7 +1204,7 @@ internal u8 *deepexr_write_rgba(u32 width, u32 height,DeepPixel *pixels,u32 *sam
 
 		src += sizeof(DeepPixel) * row_sizes[y];
 	}
-  FILE* f = fopen ("deep_image01.exr", "wb");
+  FILE* f = fopen ("deep.exr", "wb");
   fwrite (buf, 1, buf_size, f);
   //fwrite (buf, 1, buf_size, f);
   fclose (f);
@@ -1293,6 +1293,7 @@ internal RendererPointData *deepexr_read(const char * filename, u32 *point_count
     RendererPointData *points = ALLOC(sizeof(RendererPointData) * 100000000); 
     u32 point_index = 0;
     FILE *file = fopen(filename, "rb");
+    if (!file) return NULL;
     file_find(file, "box2i");
     file_forward(file, str_size("box2i"));
     file_forward(file, 13);

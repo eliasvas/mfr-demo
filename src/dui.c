@@ -40,12 +40,12 @@ void dui_frame_begin(void)
     if (global_platform.key_pressed[KEY_DOT])ui.key_entered = '.';
     if (global_platform.key_pressed[KEY_SLASH])ui.key_entered = '/';
     if (global_platform.key_pressed[KEY_BACKSPACE])ui.key_entered = 8;
+    if (global_platform.key_pressed[KEY_RETURN])ui.key_entered = 126;
 }
 
 void dui_frame_end(void)
 {
-
-    ui.last_widget = ui.active;
+    ui.last_widget = ui.hot;
     if (ui.mouse_down == 0)
         ui.active = 0;
     else 
@@ -208,6 +208,7 @@ b32 do_textfield(DUIID id, f32 x, f32 y, char *buffer)
     }
     if (ui.active == id)
     {
+        if (ui.key_entered == 126)return 1;
         if (ui.key_entered == 8 && (str_size(buffer) > 0))
             buffer[str_size(buffer)-1] = 0;
         else 
@@ -218,6 +219,7 @@ b32 do_textfield(DUIID id, f32 x, f32 y, char *buffer)
     else
         dui_draw_rect(x + 8, y + 8, 255, 16, layout.bg);
     dui_draw_string(x + 8, y + 8, buffer);
+    return 0;
 }
 void dui_default(void)
 {

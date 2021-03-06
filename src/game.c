@@ -10,9 +10,6 @@
 #include "openexr_write.h"
 mat4 view,proj;
 
-global Model debug_cube;
-global Model light_cube;
-global Model sphere;
 Renderer rend;
 
 global b32 UI_OPEN;
@@ -37,19 +34,26 @@ global RendererPointData *points;
 global u32 points_count;
 global u32 point_size;
 
+global EntityManager entity_manager;
+
 global char path[256];
 internal void 
 init(void)
 {
-    model_init_cube(&debug_cube);
+    entity_manager_init(&entity_manager);
     renderer_init(&rend);
-    model_init_cube(&light_cube);
-    model_init_cube(&camera_model);
-    light_cube.meshes[0].material.diff = debug_cube.meshes[0].material.spec;
-    model_init_sphere(&sphere, 2.f, 20,20);
+    Model *m = entity_add_model(&entity_manager.model_manager,entity_create(&entity_manager));
+    model_init_sphere(m, 2.f, 20,20);
+    m->model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
+
+    m = entity_add_model(&entity_manager.model_manager,entity_create(&entity_manager));
+    model_init_cube(m);
+    m->model = mat4_mul(mat4_translate(v3(0,5,-1)),mat4_rotate(40, v3(0,1,1)));
+
     dui_default();
+    model_init_cube(&camera_model);
     texture_load(&camera_model.meshes[0].material.diff,"../assets/cam.tga");
-    points = deepexr_read("../build/deep_image01.exr", &points_count);
+    points = deepexr_read("../build/image.exr", &points_count);
     point_size = 0;
 }
 
@@ -58,6 +62,7 @@ init(void)
 internal void 
 update(void)
 {
+    entity_manager_update(&entity_manager, &rend);
     camera_update_3p(&rend.deep_cam);
   if (DEEP_WRITE)write_success_timer = 3.f;
   else
@@ -71,26 +76,26 @@ update(void)
 
   if(DEEP_READ) 
       points = deepexr_read(path, &points_count);
+
+    if (!points) points_count = 0;
 }
 
 internal void 
 render(void)
 {
+
+    entity_manager_render(&entity_manager, &rend);
     renderer_push_point_light(&rend,(PointLight){v3(40*sin(global_platform.current_time),5,40*cos(global_platform.current_time)),
         1.f,0.09f,0.0032f,v3(6,5,7),v3(9,8,8),v3(9,8,8),256.f});
 
 
-    light_cube.model = mat4_translate(v3(40*sin(global_platform.current_time),5,40*cos(global_platform.current_time)));
-    //renderer_push_model(&rend, &light_cube);
     
-    renderer_push_model(&rend, &debug_cube);
+    //renderer_push_model(&rend, &debug_cube);
     //debug_cube.model = mat4_scale(v3(10,1,10));
 
     //renderer_push_model(&rend, &debug_cube);
-    debug_cube.model = mat4_mul(mat4_translate(v3(0,5,-1)),mat4_rotate(40, v3(0,1,1)));
 
-    sphere.model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
-    renderer_push_model(&rend, &sphere);
+    //renderer_push_model(&rend, &sphere);
 
 
     camera_model.model = mat4_inv(get_view_mat(&rend.deep_cam));
@@ -117,15 +122,14 @@ render(void)
             dui_draw_string(215, 275, "padding");
             dui_draw_string(230, 240, "RGB/RGBA");
             dui_draw_string(280, 210, "CAPTURE");
-            do_textfield(GEN_ID, 400, 10, path);
-            DEEP_READ = do_button(GEN_ID, (dui_Rect){408,0,50,20});
+            do_slider_float(GEN_ID, 800 ,240,50.f, &rend.deep_far);
+            do_slider(GEN_ID, 800 ,220, 10, &point_size);
+            DEEP_READ = do_button(GEN_ID, (dui_Rect){508,400,50,20})
+                        || do_textfield(GEN_ID, 500, 410, path);
 
             char ms[64];
             sprintf(ms, "%.4f ms", global_platform.dt);
             renderer_push_text(&rend, v3(0.82,0.90,0.0), v2(0.015,0.015 * global_platform.window_width/(f32)global_platform.window_height), ms);
-
-            do_slider_float(GEN_ID, 800 ,240,50.f, &rend.deep_far);
-            do_slider(GEN_ID, 800 ,220, 10, &point_size);
         }
     }
     do_switch(GEN_ID, (dui_Rect){0,0,100,100}, &UI_OPEN);

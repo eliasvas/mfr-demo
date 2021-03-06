@@ -2128,7 +2128,7 @@ hashmap_lookup(IntHashMap* table, u32 key)
     return -1;
 }
 
-static u32 
+internal u32 
 hashmap_remove(IntHashMap *table, u32 key)
 {
     u32 pos = hash_code(table, key);
@@ -2143,13 +2143,12 @@ hashmap_remove(IntHashMap *table, u32 key)
           {
               table->data[pos] = iter->next;
               free(iter);
-              return 1;
           }else
           {
             prev->next = iter->next;
             free(iter);
-            return 1;
           }
+          return 1;
        }
        prev = iter;
        iter = iter->next;
@@ -2172,9 +2171,32 @@ internal void hashmap_destroy(IntHashMap *table)
     }
 }
 
+typedef struct Ray
+{
+    vec3 o;
+    f32 t;
+    vec3 d;
+}Ray;
+
+typedef struct Sphere
+{
+    vec3 pos;
+    f32 radius;
+}Sphere;
 
 
-
+//this test doesnt find _the_ solution, just if there is one!
+internal i32 
+intersect_ray_sphere_simple(Ray ray, Sphere s)
+{
+    vec3 m = vec3_sub(ray.o, s.pos);
+    f32 b = vec3_dot(m,ray.d);
+    f32 c = vec3_dot(m,m) - (s.radius * s.radius);
+    if (c > 0.f && b > 0.f)return 0;
+    f32 disc = b*b - c;
+    if (disc < 0.f)return 0;
+    return 1;
+}
 
 
 

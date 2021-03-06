@@ -78,6 +78,10 @@ internal LRESULT Win32WindowProc(HWND hWnd, UINT message, WPARAM w_param, LPARAM
             {
                 key_input = KEY_BACKSPACE;
             }
+            else if (vkey_code == VK_RETURN)
+            {
+                key_input = KEY_RETURN;
+            }
             //this is for all keys that DONT have a virtual key code
             BYTE keyboard_state[256];
              GetKeyboardState(&keyboard_state);
