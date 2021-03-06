@@ -219,4 +219,40 @@ entity_manager_render(EntityManager *manager, Renderer *rend)
     }
 }
 
+#include "stdio.h"
+void scene_init(char *filepath, EntityManager * manager)
+{
+    FILE *file = fopen(filepath, "r");
+    if (!file)return;
+    Model *m;
+    char str[256];
+    vec3 pos;
+    vec3 scale;
+    while(TRUE)
+    {
+        i32 res = fscanf(file, "%s", str);
+        if (res == EOF){fclose(file);return;}
+        fscanf(file,"%f %f %f", &pos.x, &pos.y, &pos.z);
+        fscanf(file,"%f %f %f", &scale.x, &scale.y, &scale.z);
+        if (strcmp("CUBE", str) == 0)
+        {
+            m = entity_add_model(&manager->model_manager,entity_create(manager));
+            model_init_cube(m);
+            m->model = mat4_mul(mat4_translate(pos), mat4_mul(mat4_rotate(40, v3(1,1,0)), mat4_scale(scale)));
+        }
+        else if (strcmp("SPHERE", str) == 0)
+        {
+            m = entity_add_model(&manager->model_manager,entity_create(manager));
+            model_init_sphere(m, 1, 20, 20);
+            m->model = mat4_translate(pos);
+        }
+        else //load an actual model
+        {
+            
+        }
+
+    }
+
+    fclose(file);
+}
 #endif

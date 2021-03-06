@@ -42,6 +42,7 @@ init(void)
 {
     entity_manager_init(&entity_manager);
     renderer_init(&rend);
+    /*
     Model *m = entity_add_model(&entity_manager.model_manager,entity_create(&entity_manager));
     model_init_sphere(m, 2.f, 20,20);
     m->model = mat4_mul(mat4_translate(v3(0,5,0)),mat4_scale(v3(0.2f,0.2f,0.2f)));
@@ -49,6 +50,9 @@ init(void)
     m = entity_add_model(&entity_manager.model_manager,entity_create(&entity_manager));
     model_init_cube(m);
     m->model = mat4_mul(mat4_translate(v3(0,5,-1)),mat4_rotate(40, v3(0,1,1)));
+    */
+
+    scene_init("../assets/scene.txt", &entity_manager);
 
     dui_default();
     model_init_cube(&camera_model);
