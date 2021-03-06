@@ -90,26 +90,6 @@ position_manager_init(PositionManager *manager)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 typedef struct Model ModelComponent;
 
 
@@ -187,7 +167,10 @@ entity_create(EntityManager *manager)
 {
    return ++manager->next_entity; 
 }
+/*
+*/
 
+internal i32 last_entity_pressed = -1;
 internal void 
 entity_manager_update(EntityManager *manager, Renderer *rend)
 {
@@ -198,21 +181,34 @@ entity_manager_update(EntityManager *manager, Renderer *rend)
         mat4 model = manager->model_manager.models[i].model;
         vec3 pos = v3(model.elements[3][0], model.elements[3][1], model.elements[3][2]);
         i32 collision = intersect_ray_sphere_simple(r, (Sphere){pos, 0.5});
-        if (collision && global_platform.right_mouse_down)
+        if (collision && global_platform.right_mouse_down || last_entity_pressed == i)
         {
+            last_entity_pressed = i;
             vec3 right = vec3_normalize(vec3_cross(rend->cam.front, rend->cam.up));
             vec3 up = vec3_normalize(rend->cam.up);
-            manager->model_manager.models[i].model.elements[3][0] += vec3_mulf(right, (-(f32)global_platform.mouse_dt.x / global_platform.window_width)).x;
-            manager->model_manager.models[i].model.elements[3][1] += vec3_mulf(up,((f32)global_platform.mouse_dt.y / global_platform.window_height)).y;
-
+            manager->model_manager.models[i].model.elements[3][0] += vec3_mulf(right, (-10.f *(f32)global_platform.mouse_dt.x / global_platform.window_width)).x;
+            manager->model_manager.models[i].model.elements[3][1] += vec3_mulf(up,((f32)10.f * global_platform.mouse_dt.y / global_platform.window_height)).y;
             //sprintf(error_log, "collision detected!!");
         }
+        else if (global_platform.right_mouse_down && last_entity_pressed == i)
+        {
+            last_entity_pressed = i;
+            //sprintf(error_log, "collision detected!!");
+        }
+        else if (!global_platform.right_mouse_down)
+            last_entity_pressed = -1;
     }
 
 }
 internal void 
 entity_manager_render(EntityManager *manager, Renderer *rend)
 {
+    if (last_entity_pressed > 0)
+    {
+        mat4 model = manager->model_manager.models[last_entity_pressed].model;
+        vec3 pos = v3(model.elements[3][0], model.elements[3][1], model.elements[3][2]);
+        renderer_push_compass(rend, pos);
+    }
     for (u32 i = 0; i < manager->model_manager.next_index; ++i)
     {
         renderer_push_model(rend, manager->model_manager.models[i]);

@@ -761,3 +761,9 @@ void renderer_set_deep_write(Renderer *rend, b32 dw,b32 PAD, b32 RGB, i32 RES)
         rend->deep_settings = EXR_RGBA;
     rend->deep_render_dim = (ivec2){RES,RES};
 }
+void renderer_push_compass(Renderer *rend, vec3 position)
+{
+    renderer_push_line(rend, position, vec3_add(position, v3(0,2,0)), v4(0.2,0.2,0.9, 1.0));
+    renderer_push_line(rend, position, vec3_add(position, v3(2,0,0)), v4(0.9,0.2,0.2, 1.0));
+    renderer_push_line(rend, position, vec3_add(position, v3(0,0,-2)), v4(0.2,0.9,0.2, 1.0));
+}
