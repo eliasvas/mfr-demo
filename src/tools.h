@@ -2198,6 +2198,24 @@ intersect_ray_sphere_simple(Ray ray, Sphere s)
     return 1;
 }
 
+//@TODO Make this fast.. so many variable declarations.....
+internal vec3
+get_ray_dir(vec2 screen_coords,f32 ww, f32 wh, mat4 view, mat4 proj)
+{
+    //SCREEN -> 3D NDC
+    f32 x = (2.f * screen_coords.x) / (f32)ww - 1.f;
+    f32 y = 1.f - (2.f * screen_coords.y) / (f32)wh;
+    f32 z = 1.f;
+    vec3 ray_ndc = v3(x,y,z);
+    //NDC -> HOMOGENEOUS CLIP
+    vec4 ray_clip = v4(ray_ndc.x, ray_ndc.y,-1.f,0.f);
+    //CLIP -> EYE
+    vec4 ray_eye = mat4_mulv(mat4_inv(proj), ray_clip); 
+    ray_eye = v4(ray_eye.x, ray_eye.y, -1.f,0.f);
+    //EYE -> WORLD
+    vec4 ray_world = mat4_mulv(mat4_inv(view), ray_eye);
+    vec3 dir = vec3_normalize(v3(ray_world.x,ray_world.y,ray_world.z));
+} 
 
 
 

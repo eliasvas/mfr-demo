@@ -191,9 +191,16 @@ entity_create(EntityManager *manager)
 internal void 
 entity_manager_update(EntityManager *manager, Renderer *rend)
 {
-    Ray r = (Ray){v3(0,0,0), 1, v3(0,0,-1)};
-    i32 collision = intersect_ray_sphere_simple(r, (Sphere){v3(0,0,0), 5});
-    if (collision)sprintf(error_log, "collision detected!!");
+    Ray r =  (Ray){rend->cam.pos, 1, v3(0,0,0)};
+    r.d = get_ray_dir(v2(global_platform.mouse_x, global_platform.mouse_y),global_platform.window_width, global_platform.window_height, rend->view, rend->proj);//(Ray){v3(0,0,0), 1, v3(0,0,-1)};
+    for (u32 i = 0; i < manager->model_manager.next_index; ++i)
+    {
+        mat4 model = manager->model_manager.models[i].model;
+        vec3 pos = v3(model.elements[3][0], model.elements[3][1], model.elements[3][2]);
+        i32 collision = intersect_ray_sphere_simple(r, (Sphere){pos, 2});
+        if (collision && global_platform.right_mouse_down)sprintf(error_log, "collision detected!!");
+    }
+
 }
 internal void 
 entity_manager_render(EntityManager *manager, Renderer *rend)
