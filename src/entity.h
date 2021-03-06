@@ -197,8 +197,16 @@ entity_manager_update(EntityManager *manager, Renderer *rend)
     {
         mat4 model = manager->model_manager.models[i].model;
         vec3 pos = v3(model.elements[3][0], model.elements[3][1], model.elements[3][2]);
-        i32 collision = intersect_ray_sphere_simple(r, (Sphere){pos, 2});
-        if (collision && global_platform.right_mouse_down)sprintf(error_log, "collision detected!!");
+        i32 collision = intersect_ray_sphere_simple(r, (Sphere){pos, 0.5});
+        if (collision && global_platform.right_mouse_down)
+        {
+            vec3 right = vec3_normalize(vec3_cross(rend->cam.front, rend->cam.up));
+            vec3 up = vec3_normalize(rend->cam.up);
+            manager->model_manager.models[i].model.elements[3][0] += vec3_mulf(right, (-(f32)global_platform.mouse_dt.x / global_platform.window_width)).x;
+            manager->model_manager.models[i].model.elements[3][1] += vec3_mulf(up,((f32)global_platform.mouse_dt.y / global_platform.window_height)).y;
+
+            //sprintf(error_log, "collision detected!!");
+        }
     }
 
 }
