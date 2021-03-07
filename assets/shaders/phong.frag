@@ -187,7 +187,7 @@ void main()
 			float zNear = (B + 1.0) / A;
 			float zFar  =  (B - 1.0) / A;
 			float t = (gl_FragCoord.z + 1.0) / 2.0;
-			nodes[index].depth = zNear + t * (zFar - zNear)/2.0;
+			nodes[index].depth = zNear + t * (zFar - zNear);
 		}
 		else{
 			nodes[index].depth = f_frag_pos.z;

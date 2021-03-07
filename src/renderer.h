@@ -63,7 +63,7 @@ typedef struct RendererChar
 #define RENDERER_MAX_RECTS 256
 #define RENDERER_MAX_ANIMATED_MODELS 64
 #define RENDERER_MAX_TEXT 1024
-#define RENDERER_MAX_POINTS 2000000 
+#define RENDERER_MAX_POINTS 5000000 
 
 typedef struct Renderer
 {
@@ -136,6 +136,8 @@ typedef struct Renderer
     ivec2 deep_render_dim;
     ivec2 prev_render_dim;
     Camera deep_cam;
+
+    b32 points_updated;
 }Renderer;
 
 void

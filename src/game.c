@@ -79,7 +79,10 @@ update(void)
   renderer_begin_frame(&rend);
 
   if(DEEP_READ) 
+    {
       points = deepexr_read(path, &points_count);
+      //update_renderer_points(points, points_count);
+    }
 
     if (!points) points_count = 0;
 }
@@ -179,8 +182,15 @@ render(void)
     }
     glPointSize(point_size);
 
-    for (u32 i = 0; i < points_count; ++i)
-        renderer_push_point(&rend, points[i]);
+    if (points_count != rend.point_alloc_pos)
+    {
+        rend.points_updated = TRUE;
+        rend.point_alloc_pos = 0;
+        for (u32 i = 0; i < points_count; ++i)
+            renderer_push_point(&rend, points[i]);
+    }
+    else
+        rend.points_updated = FALSE;
 
 
     renderer_end_frame(&rend);

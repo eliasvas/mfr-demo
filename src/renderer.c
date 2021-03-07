@@ -456,7 +456,7 @@ renderer_begin_frame(Renderer *rend)
   rend->line_alloc_pos = 0;
   rend->point_light_count = 0;
   rend->text_alloc_pos = 0;
-  rend->point_alloc_pos = 0;
+  //rend->point_alloc_pos = 0;
 
   camera_update(&rend->cam);
   if (rend->deep_write)
@@ -598,8 +598,11 @@ renderer_end_frame(Renderer *rend)
   glBindBuffer(GL_ARRAY_BUFFER, rend->text_instance_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(RendererChar) * rend->text_alloc_pos, &rend->text_instance_data[0], GL_DYNAMIC_DRAW);
   //update instance data for points
-  glBindBuffer(GL_ARRAY_BUFFER, rend->point_vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(RendererPointData) * rend->point_alloc_pos, &rend->point_instance_data[0], GL_DYNAMIC_DRAW);
+  if (rend->points_updated)
+  {
+      glBindBuffer(GL_ARRAY_BUFFER, rend->point_vbo);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(RendererPointData) * rend->point_alloc_pos, &rend->point_instance_data[0], GL_DYNAMIC_DRAW);
+  }
 
 
 
@@ -608,6 +611,7 @@ renderer_end_frame(Renderer *rend)
   renderer_render_scene3D(rend,&rend->shaders[3]);
   //then we render to the main fbo
   fbo_bind(&rend->main_fbo);
+ renderer_render_scene3D(rend,&rend->shaders[0]);
      //render lines
     glLineWidth(5);
     use_shader(&rend->shaders[6]);
@@ -617,7 +621,7 @@ renderer_end_frame(Renderer *rend)
     glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
     glBindVertexArray(0);
 
- renderer_render_scene3D(rend,&rend->shaders[0]);
+
   skybox_render(&rend->skybox, rend->proj, rend->view);
   //render points
    use_shader(&rend->shaders[11]);
