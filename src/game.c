@@ -118,8 +118,8 @@ render(void)
         if (UI_OPEN)
         {
             dui_draw_rect(200, 200, 270, 200, v4(0.1,0.1,0.1,0.9));
-            do_slider(GEN_ID, 200 ,300, 4000.f, &RES);
-            do_switch(GEN_ID, (dui_Rect){200,270,20,20}, &PAD);
+            do_slider(GEN_ID, 200 ,300, 2000.f, &RES);
+            do_switch(GEN_ID, (dui_Rect){200,270,20,20}, &rend.renderer_settings.render_mode);
             if (do_switch(GEN_ID, (dui_Rect){200,240,20,20}, &RGBA))RGB = 0;
             if (do_switch(GEN_ID, (dui_Rect){220,240,20,20}, &RGB))RGBA = 0;
             if (RGBA == 0 && RGB == 0)RGB = 1;
@@ -130,6 +130,7 @@ render(void)
             dui_draw_string(230, 240, "RGB/RGBA");
             dui_draw_string(280, 210, "CAPTURE");
             do_slider_float(GEN_ID, 800 ,240,50.f, &rend.deep_far);
+            do_slider_float(GEN_ID, 800 ,260,50.f, &rend.deep_right);
             do_slider(GEN_ID, 800 ,220, 10, &point_size);
             DEEP_READ = do_button(GEN_ID, (dui_Rect){508,400,50,20})
                         || do_textfield(GEN_ID, 500, 410, path);

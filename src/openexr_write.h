@@ -365,14 +365,16 @@ internal u8* openexr_write_half(u32 width, u32 height, u32 channels,void* rgba16
 }
 
 extern mat4 view, proj;
+extern Renderer rend;
 internal u8 *deepexr_write_padding(u32 width, u32 height,DeepPixel *pixels, u32 pixels_count, u32 num_of_deep_samples_per_pixel)
 {
   //width = global_platform.window_width;
   //height = global_platform.window_height;
 	u32 ww = width-1;
 	u32 hh = height-1;
-  u32 *v = &view;
-  u32 *p = &proj;
+    mat4 view_mat = get_view_mat(&rend.deep_cam);
+    u32 *v = &view_mat;
+    u32 *p = &rend.proj;
 	u8 hdr_data[] = {
 		0x76, 0x2f, 0x31, 0x01, // magic
 		0x02, 0x08, 0, 0, // version, DEEP scanline
@@ -647,8 +649,9 @@ internal u8 *deepexr_write(u32 width, u32 height,DeepPixel *pixels,u32 *samples_
     //height = global_platform.window_height;
     u32 ww = width-1;
     u32 hh = height-1;
-    u32 *v = &view;
-    u32 *p = &proj;
+    mat4 view_mat = get_view_mat(&rend.deep_cam);
+    u32 *v = &view_mat;
+    u32 *p = &rend.proj;
 	u8 hdr_data[] = {
 		0x76, 0x2f, 0x31, 0x01, // magic
 		0x02, 0x08, 0, 0, // version, DEEP scanline
@@ -927,8 +930,9 @@ internal u8 *deepexr_write_rgba(u32 width, u32 height,DeepPixel *pixels,u32 *sam
     //height = global_platform.window_height;
     u32 ww = width-1;
     u32 hh = height-1;
-    u32 *v = &view;
-    u32 *p = &proj;
+    mat4 view_mat = get_view_mat(&rend.deep_cam);
+    u32 *v = &view_mat;
+    u32 *p = &rend.proj;
 	u8 hdr_data[] = {
 		0x76, 0x2f, 0x31, 0x01, // magic
 		0x02, 0x08, 0, 0, // version, DEEP scanline
@@ -1163,7 +1167,7 @@ internal u8 *deepexr_write_rgba(u32 width, u32 height,DeepPixel *pixels,u32 *sam
 
 			chsrc += stride;
 		}
-    chsrc = src + 4; //ok
+    chsrc = src + 4;
 		for (i32 x = 0; x < row_sizes[y]; ++x)
 		{
 			*ptr++ = chsrc[0];
@@ -1292,6 +1296,8 @@ internal RendererPointData *deepexr_read(const char * filename, u32 *point_count
 {
     RendererPointData *points = ALLOC(sizeof(RendererPointData) * 100000000); 
     u32 point_index = 0;
+    mat4 view;
+    mat4 proj;
     FILE *file = fopen(filename, "rb");
     if (!file) return NULL;
     file_find(file, "box2i");
@@ -1301,6 +1307,19 @@ internal RendererPointData *deepexr_read(const char * filename, u32 *point_count
     //HEADER -- here we read header attrbutes --
     i32 ww = file_read_int(file);
     i32 wh = file_read_int(file);
+    //find the view matrix
+    file_find(file, "viewMatrix");
+    file_forward(file, str_size("viewMatrix"));
+    file_forward(file, 10); //@TODO put _actual_ value here
+    for (u32 i = 0; i < 16; ++i)
+        view.raw[i] = file_read_float(file);
+    //sprintf(error_log, "view = %f %f %f %f", view.raw[0], view.raw[1],view.raw[2],view.raw[3]);
+    //find the projection matrix
+    file_find(file, "projectionMatrix");
+    file_forward(file, str_size("projectionMatrix"));
+    file_forward(file, 10); //@TODO put _actual_ value here
+    for (u32 i = 0; i < 16; ++i)
+        proj.raw[i] = file_read_float(file);
     file_find(file, "version");
     file_forward(file, str_size("version"));
     file_forward(file, 14);

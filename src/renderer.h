@@ -11,6 +11,7 @@
 typedef struct RendererSettings
 {
   ivec2 render_dim;
+  u32 render_mode;
   b32 lighting_disabled;
   b32 no_mips;
   //multisampling settings
@@ -47,6 +48,11 @@ typedef struct RendererLine
 }RendererLine;
 
 
+enum
+{
+  GOOCH,
+  PHONG  
+}RENDERER_MODE;
 
 typedef struct RendererChar
 {
@@ -63,7 +69,7 @@ typedef struct RendererChar
 #define RENDERER_MAX_RECTS 256
 #define RENDERER_MAX_ANIMATED_MODELS 64
 #define RENDERER_MAX_TEXT 1024
-#define RENDERER_MAX_POINTS 5000000 
+#define RENDERER_MAX_POINTS 6000000 
 
 typedef struct Renderer
 {

@@ -65,6 +65,7 @@ renderer_init(Renderer *rend)
     rend->depthpeel_count = 1;
     rend->renderer_settings.render_dim = (ivec2){global_platform.window_width, global_platform.window_height};
     rend->renderer_settings.lighting_disabled = FALSE;
+    rend->renderer_settings.render_mode = PHONG;
     camera_init(&rend->cam);
     camera_init(&rend->deep_cam);
     rend->deep_cam.pos = v3(0,5,10);
@@ -238,7 +239,7 @@ renderer_init(Renderer *rend)
     }
 
 
-    shader_load(&rend->shaders[0],"../assets/shaders/phong.vert","../assets/shaders/phong.frag");
+    shader_load(&rend->shaders[0],"../assets/shaders/gooch.vert","../assets/shaders/gooch.frag");
     shader_load(&rend->shaders[1],"../assets/shaders/skybox_reflect.vert","../assets/shaders/skybox_reflect.frag");
     shader_load(&rend->shaders[2],"../assets/shaders/postproc.vert","../assets/shaders/postproc.frag");
     shader_load(&rend->shaders[3],"../assets/shaders/shadowmap.vert","../assets/shaders/shadowmap.frag");
@@ -250,6 +251,7 @@ renderer_init(Renderer *rend)
     shader_load(&rend->shaders[9],"../assets/shaders/pass_through.vert","../assets/shaders/clear_abuf.frag");
     shader_load(&rend->shaders[10],"../assets/shaders/pass_through.vert","../assets/shaders/disp_abuf.frag");
     shader_load(&rend->shaders[11],"../assets/shaders/point.vert","../assets/shaders/point.frag");
+    shader_load(&rend->shaders[12],"../assets/shaders/phong.vert","../assets/shaders/phong.frag");
 
 
     //misc
@@ -611,15 +613,18 @@ renderer_end_frame(Renderer *rend)
   renderer_render_scene3D(rend,&rend->shaders[3]);
   //then we render to the main fbo
   fbo_bind(&rend->main_fbo);
- renderer_render_scene3D(rend,&rend->shaders[0]);
-     //render lines
-    glLineWidth(5);
-    use_shader(&rend->shaders[6]);
-    mat4 mv = mat4_mul(rend->proj, rend->view);
-    shader_set_mat4fv(&rend->shaders[6], "MVP", (GLfloat*)mv.elements);
-    glBindVertexArray(rend->line_vao);
-    glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
-    glBindVertexArray(0);
+  if (rend->renderer_settings.render_mode == PHONG)
+     renderer_render_scene3D(rend,&rend->shaders[12]);
+  else if (rend->renderer_settings.render_mode == GOOCH)
+     renderer_render_scene3D(rend,&rend->shaders[0]);
+   //render lines
+   glLineWidth(5);
+   use_shader(&rend->shaders[6]);
+   mat4 mv = mat4_mul(rend->proj, rend->view);
+   shader_set_mat4fv(&rend->shaders[6], "MVP", (GLfloat*)mv.elements);
+   glBindVertexArray(rend->line_vao);
+   glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
+   glBindVertexArray(0);
 
 
   skybox_render(&rend->skybox, rend->proj, rend->view);
