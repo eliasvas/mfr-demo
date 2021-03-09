@@ -997,42 +997,42 @@ internal u8 *deepexr_write_rgba(u32 width, u32 height,DeepPixel *pixels,u32 *sam
     'v','i','e','w','M','a','t','r','i','x',0,
     'm','4','4','f',0,
      64, 0, 0,0,
-     (v[0] >>0)& 0xFF,(v[0] >>4)& 0xFF,(v[0] >>8)& 0xFF,(v[0] >>12)& 0xFF,
-     (v[1] >>0)& 0xFF,(v[1] >>4)& 0xFF,(v[1] >>8)& 0xFF,(v[1] >>12)& 0xFF,
-     (v[2] >>0)& 0xFF,(v[2] >>4)& 0xFF,(v[2] >>8)& 0xFF,(v[2] >>12)& 0xFF,
-     (v[3] >>0)& 0xFF,(v[3] >>4)& 0xFF,(v[3] >>8)& 0xFF,(v[3] >>12)& 0xFF,
-     (v[4] >>0)& 0xFF,(v[4] >>4)& 0xFF,(v[4] >>8)& 0xFF,(v[4] >>12)& 0xFF,
-     (v[5] >>0)& 0xFF,(v[5] >>4)& 0xFF,(v[5] >>8)& 0xFF,(v[5] >>12)& 0xFF,
-     (v[6] >>0)& 0xFF,(v[6] >>4)& 0xFF,(v[6] >>8)& 0xFF,(v[6] >>12)& 0xFF,
-     (v[7] >>0)& 0xFF,(v[7] >>4)& 0xFF,(v[7] >>8)& 0xFF,(v[7] >>12)& 0xFF,
-     (v[8] >>0)& 0xFF,(v[8] >>4)& 0xFF,(v[8] >>8)& 0xFF,(v[8] >>12)& 0xFF,
-     (v[9] >>0)& 0xFF,(v[9] >>4)& 0xFF,(v[9] >>8)& 0xFF,(v[9] >>12)& 0xFF,
-     (v[10] >>0)& 0xFF,(v[10] >>4)& 0xFF,(v[10] >>8)& 0xFF,(v[10] >>12)& 0xFF,
-     (v[11] >>0)& 0xFF,(v[11] >>4)& 0xFF,(v[11] >>8)& 0xFF,(v[11] >>12)& 0xFF,
-     (v[12] >>0)& 0xFF,(v[12] >>4)& 0xFF,(v[12] >>8)& 0xFF,(v[12] >>12)& 0xFF,
-     (v[13] >>0)& 0xFF,(v[13] >>4)& 0xFF,(v[13] >>8)& 0xFF,(v[13] >>12)& 0xFF,
-     (v[14] >>0)& 0xFF,(v[14] >>4)& 0xFF,(v[14] >>8)& 0xFF,(v[14] >>12)& 0xFF,
-     (v[15] >>0)& 0xFF,(v[15] >>4)& 0xFF,(v[15] >>8)& 0xFF,(v[15] >>12)& 0xFF,
+     (v[0] >>0)& 0xFF,(v[0] >>8)& 0xFF,(v[0] >>16)& 0xFF,(v[0] >>24)& 0xFF,
+     (v[1] >>0)& 0xFF,(v[1] >>8)& 0xFF,(v[1] >>16)& 0xFF,(v[1] >>24)& 0xFF,
+     (v[2] >>0)& 0xFF,(v[2] >>8)& 0xFF,(v[2] >>16)& 0xFF,(v[2] >>24)& 0xFF,
+     (v[3] >>0)& 0xFF,(v[3] >>8)& 0xFF,(v[3] >>16)& 0xFF,(v[3] >>24)& 0xFF,
+     (v[4] >>0)& 0xFF,(v[4] >>8)& 0xFF,(v[4] >>16)& 0xFF,(v[4] >>24)& 0xFF,
+     (v[5] >>0)& 0xFF,(v[5] >>8)& 0xFF,(v[5] >>16)& 0xFF,(v[5] >>24)& 0xFF,
+     (v[6] >>0)& 0xFF,(v[6] >>8)& 0xFF,(v[6] >>16)& 0xFF,(v[6] >>24)& 0xFF,
+     (v[7] >>0)& 0xFF,(v[7] >>8)& 0xFF,(v[7] >>16)& 0xFF,(v[7] >>24)& 0xFF,
+     (v[8] >>0)& 0xFF,(v[8] >>8)& 0xFF,(v[8] >>16)& 0xFF,(v[8] >>24)& 0xFF,
+     (v[9] >>0)& 0xFF,(v[9] >>8)& 0xFF,(v[9] >>16)& 0xFF,(v[9] >>24)& 0xFF,
+     (v[10] >>0)& 0xFF,(v[10] >>8)& 0xFF,(v[10] >>16)& 0xFF,(v[10] >>24)& 0xFF,
+     (v[11] >>0)& 0xFF,(v[11] >>8)& 0xFF,(v[11] >>16)& 0xFF,(v[11] >>24)& 0xFF,
+     (v[12] >>0)& 0xFF,(v[12] >>8)& 0xFF,(v[12] >>16)& 0xFF,(v[12] >>24)& 0xFF,
+     (v[13] >>0)& 0xFF,(v[13] >>8)& 0xFF,(v[13] >>16)& 0xFF,(v[13] >>24)& 0xFF,
+     (v[14] >>0)& 0xFF,(v[14] >>8)& 0xFF,(v[14] >>16)& 0xFF,(v[14] >>24)& 0xFF,
+     (v[15] >>0)& 0xFF,(v[15] >>8)& 0xFF,(v[15] >>16)& 0xFF,(v[15] >>24)& 0xFF,
 
     'p','r','o','j','e','c','t','i','o','n','M','a','t','r','i','x',0,
     'm','4','4','f',0,
      64, 0, 0,0,
-     (p[0] >>0)& 0xFF,(p[0] >>4)& 0xFF,(p[0] >>8)& 0xFF,(p[0] >>12)& 0xFF,
-     (p[1] >>0)& 0xFF,(p[1] >>4)& 0xFF,(p[1] >>8)& 0xFF,(p[1] >>12)& 0xFF,
-     (p[2] >>0)& 0xFF,(p[2] >>4)& 0xFF,(p[2] >>8)& 0xFF,(p[2] >>12)& 0xFF,
-     (p[3] >>0)& 0xFF,(p[3] >>4)& 0xFF,(p[3] >>8)& 0xFF,(p[3] >>12)& 0xFF,
-     (p[4] >>0)& 0xFF,(p[4] >>4)& 0xFF,(p[4] >>8)& 0xFF,(p[4] >>12)& 0xFF,
-     (p[5] >>0)& 0xFF,(p[5] >>4)& 0xFF,(p[5] >>8)& 0xFF,(p[5] >>12)& 0xFF,
-     (p[6] >>0)& 0xFF,(p[6] >>4)& 0xFF,(p[6] >>8)& 0xFF,(p[6] >>12)& 0xFF,
-     (p[7] >>0)& 0xFF,(p[7] >>4)& 0xFF,(p[7] >>8)& 0xFF,(p[7] >>12)& 0xFF,
-     (p[8] >>0)& 0xFF,(p[8] >>4)& 0xFF,(p[8] >>8)& 0xFF,(p[8] >>12)& 0xFF,
-     (p[9] >>0)& 0xFF,(p[9] >>4)& 0xFF,(p[9] >>8)& 0xFF,(p[9] >>12)& 0xFF,
-     (p[10] >>0)& 0xFF,(p[10] >>4)& 0xFF,(p[10] >>8)& 0xFF,(p[10] >>12)& 0xFF,
-     (p[11] >>0)& 0xFF,(p[11] >>4)& 0xFF,(p[11] >>8)& 0xFF,(p[11] >>12)& 0xFF,
-     (p[12] >>0)& 0xFF,(p[12] >>4)& 0xFF,(p[12] >>8)& 0xFF,(p[12] >>12)& 0xFF,
-     (p[13] >>0)& 0xFF,(p[13] >>4)& 0xFF,(p[13] >>8)& 0xFF,(p[13] >>12)& 0xFF,
-     (p[14] >>0)& 0xFF,(p[14] >>4)& 0xFF,(p[14] >>8)& 0xFF,(p[14] >>12)& 0xFF,
-     (p[15] >>0)& 0xFF,(p[15] >>4)& 0xFF,(p[15] >>8)& 0xFF,(p[15] >>12)& 0xFF,
+     (p[0] >>0)& 0xFF,(p[0] >>8)& 0xFF,(p[0] >>16)& 0xFF,(p[0] >>24)& 0xFF,
+     (p[1] >>0)& 0xFF,(p[1] >>8)& 0xFF,(p[1] >>16)& 0xFF,(p[1] >>24)& 0xFF,
+     (p[2] >>0)& 0xFF,(p[2] >>8)& 0xFF,(p[2] >>16)& 0xFF,(p[2] >>24)& 0xFF,
+     (p[3] >>0)& 0xFF,(p[3] >>8)& 0xFF,(p[3] >>16)& 0xFF,(p[3] >>24)& 0xFF,
+     (p[4] >>0)& 0xFF,(p[4] >>8)& 0xFF,(p[4] >>16)& 0xFF,(p[4] >>24)& 0xFF,
+     (p[5] >>0)& 0xFF,(p[5] >>8)& 0xFF,(p[5] >>16)& 0xFF,(p[5] >>24)& 0xFF,
+     (p[6] >>0)& 0xFF,(p[6] >>8)& 0xFF,(p[6] >>16)& 0xFF,(p[6] >>24)& 0xFF,
+     (p[7] >>0)& 0xFF,(p[7] >>8)& 0xFF,(p[7] >>16)& 0xFF,(p[7] >>24)& 0xFF,
+     (p[8] >>0)& 0xFF,(p[8] >>8)& 0xFF,(p[8] >>16)& 0xFF,(p[8] >>24)& 0xFF,
+     (p[9] >>0)& 0xFF,(p[9] >>8)& 0xFF,(p[9] >>16)& 0xFF,(p[9] >>24)& 0xFF,
+     (p[10] >>0)& 0xFF,(p[10] >>8)& 0xFF,(p[10] >>16)& 0xFF,(p[10] >>24)& 0xFF,
+     (p[11] >>0)& 0xFF,(p[11] >>8)& 0xFF,(p[11] >>16)& 0xFF,(p[11] >>24)& 0xFF,
+     (p[12] >>0)& 0xFF,(p[12] >>8)& 0xFF,(p[12] >>16)& 0xFF,(p[12] >>24)& 0xFF,
+     (p[13] >>0)& 0xFF,(p[13] >>8)& 0xFF,(p[13] >>16)& 0xFF,(p[13] >>24)& 0xFF,
+     (p[14] >>0)& 0xFF,(p[14] >>8)& 0xFF,(p[14] >>16)& 0xFF,(p[14] >>24)& 0xFF,
+     (p[15] >>0)& 0xFF,(p[15] >>8)& 0xFF,(p[15] >>16)& 0xFF,(p[15] >>24)& 0xFF,
 
 
    	't','y','p','e',0,
@@ -1298,6 +1298,8 @@ internal RendererPointData *deepexr_read(const char * filename, u32 *point_count
     u32 point_index = 0;
     mat4 view;
     mat4 proj;
+    f32 right;
+    vec3 offset;
     FILE *file = fopen(filename, "rb");
     if (!file) return NULL;
     file_find(file, "box2i");
@@ -1323,6 +1325,12 @@ internal RendererPointData *deepexr_read(const char * filename, u32 *point_count
     file_find(file, "version");
     file_forward(file, str_size("version"));
     file_forward(file, 14);
+    {
+       f32 A = proj.elements[0][0]; 
+       f32 B = proj.elements[3][0];
+       right = (1.f - B) / A;
+       offset = v3(-view.elements[3][0],-view.elements[3][1],-view.elements[3][2]);
+    }
     //OFFSET TABLE -- here we read the offset table --
     //offset table = distance of each scanline from start of file!
     u32 *offsets = ALLOC(sizeof(u32) * (wh+1));
@@ -1391,11 +1399,12 @@ internal RendererPointData *deepexr_read(const char * filename, u32 *point_count
         {
             for (u32 k = 0; k < spp[j]; ++k)
             {
-                    f32 yf = (1.f - ((f32)i/(f32)wh+1)) * 5;
-                    f32 xf = ((f32)j/(f32)ww+1) * 5;
-                    f32 depth = -pixels[pixel_counter].z;
-                    points[point_index] = (RendererPointData){v3(xf,yf,depth), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,1.f)};//pixels[pixel_counter].a)};
+                    f32 yf = (1.f - ((f32)i/(f32)wh+1)) * right * 2;
+                    f32 xf = ((f32)j/(f32)ww+1) * right * 2;
+                    f32 depth = -pixels[pixel_counter].z*2;
+                    points[point_index] = (RendererPointData){vec3_add(v3(xf,yf,depth), offset), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,1.f)};//pixels[pixel_counter].a)};
                     point_index++;
+
                     pixel_counter++;
             }
         }

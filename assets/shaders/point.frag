@@ -37,7 +37,7 @@ void main(){
 	
 	ivec2 coords = ivec2(gl_FragCoord.xy);
 
-/* //ENABLE FOR A-BUFFER WRITES
+ /*//ENABLE FOR A-BUFFER WRITES
 	// get next available location in global buffer
 	uint index = atomicCounterIncrement(in_next_address) + 1U;
 	if(index < nodes.length())
@@ -57,7 +57,7 @@ void main(){
 			nodes[index].depth = zNear + t * (zFar - zNear);
 		}
 		else{
-			nodes[index].depth = f_frag_pos.z;
+			nodes[index].depth = gl_FragCoord.z;
 		}
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 	}

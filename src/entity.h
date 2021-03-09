@@ -186,12 +186,11 @@ entity_manager_update(EntityManager *manager, Renderer *rend)
             last_entity_pressed = i;
             vec3 right = vec3_normalize(vec3_cross(rend->cam.front, rend->cam.up));
             vec3 up = vec3_normalize(rend->cam.up);
-            manager->model_manager.models[i].model.elements[3][0] += vec3_mulf(right, (-10.f *(f32)global_platform.mouse_dt.x / global_platform.window_width)).x;
-            manager->model_manager.models[i].model.elements[3][1] += vec3_mulf(up,((f32)10.f * global_platform.mouse_dt.y / global_platform.window_height)).y;
+            manager->model_manager.models[i].model.elements[3][0] += vec3_mulf(right, (-20.f *(f32)global_platform.mouse_dt.x / global_platform.window_width)).x;
+            manager->model_manager.models[i].model.elements[3][1] += vec3_mulf(up,((f32)20.f * global_platform.mouse_dt.y / global_platform.window_height)).y;
             //sprintf(error_log, "collision detected!!");
         }
-        else if (global_platform.right_mouse_down && last_entity_pressed == i)
-        {
+        else if (global_platform.right_mouse_down && last_entity_pressed == i) {
             last_entity_pressed = i;
             //sprintf(error_log, "collision detected!!");
         }

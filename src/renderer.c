@@ -632,6 +632,7 @@ renderer_end_frame(Renderer *rend)
    use_shader(&rend->shaders[11]);
     shader_set_mat4fv(&rend->shaders[11], "view", (GLfloat*)rend->view.elements);
     shader_set_mat4fv(&rend->shaders[11], "proj", (GLfloat*)rend->proj.elements);
+    shader_set_int(&rend->shaders[11], "deep_render", rend->deep_write);
     glBindVertexArray(rend->point_vao);
     glDrawArraysInstanced(GL_POINTS, 0, 1, rend->point_alloc_pos);
     glBindVertexArray(0);

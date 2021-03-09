@@ -8,7 +8,7 @@ uniform mat4 view;
 uniform mat4 proj;
 out vec3 f_frag_pos;
 void main(){
-	f_frag_pos = vec3(proj * view * vec4(position, 1.0));
+	//f_frag_pos = vec3(proj * view * vec4(position, 1.0));
 	gl_Position = proj * view * vec4(position,1.0);
 	f_color = color;
 
