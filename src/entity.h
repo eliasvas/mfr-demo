@@ -243,7 +243,7 @@ void scene_init(char *filepath, EntityManager * manager)
             model_init_sphere(m, 1, 20, 20);
             m->model = mat4_translate(pos);
         }
-        else //load an actual model
+        else
         {
             fscanf(file,"%f", &angle);
             fscanf(file,"%f %f %f", &axis.x, &axis.y, &axis.z);

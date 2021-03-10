@@ -28,6 +28,7 @@ uniform atomic_uint   in_next_address;
 
 
 in vec3 f_frag_pos;
+in vec3 f_frag_pos_ws;
 uniform mat4 proj;
 uniform mat4 view;
 uniform int deep_render;
@@ -37,16 +38,16 @@ void main(){
 	
 	ivec2 coords = ivec2(gl_FragCoord.xy);
 
- /*//ENABLE FOR A-BUFFER WRITES
+///*
+//ENABLE FOR A-BUFFER WRITES
 	// get next available location in global buffer
 	uint index = atomicCounterIncrement(in_next_address) + 1U;
 	if(index < nodes.length())
 	{
-		
 		nodes[index].red = color.r;
 		nodes[index].green = color.g;
 		nodes[index].blue = color.b;
-		nodes[index].alpha = 0.2;//color.a;
+		nodes[index].alpha = color.a;
 		if (deep_render > 0)
 		{
 			float A = proj[2].z;
@@ -62,5 +63,5 @@ void main(){
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 	}
 	discard;
-*/
+//*/
 }

@@ -198,7 +198,7 @@ renderer_init(Renderer *rend)
         //node ssbo
         glGenBuffers(1, &rend->node_buffer);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, rend->node_buffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 10, NULL, GL_STATIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 30, NULL, GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, rend->node_buffer);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -418,7 +418,7 @@ renderer_begin_frame(Renderer *rend)
       fbo_resize(&rend->main_fbo, rend->renderer_settings.render_dim.x, rend->renderer_settings.render_dim.y, FBO_COLOR_0|FBO_DEPTH);
 
       glBindBuffer(GL_SHADER_STORAGE_BUFFER, rend->node_buffer);
-      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * rend->renderer_settings.render_dim.y * rend->renderer_settings.render_dim.x * 10, NULL, GL_STATIC_DRAW);
+      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * rend->renderer_settings.render_dim.y * rend->renderer_settings.render_dim.x * 30, NULL, GL_STATIC_DRAW);
       glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, rend->node_buffer);
       glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -625,19 +625,19 @@ renderer_end_frame(Renderer *rend)
    glBindVertexArray(rend->line_vao);
    glDrawArraysInstanced(GL_LINES, 0, 2, rend->line_alloc_pos);
    glBindVertexArray(0);
+   //render points
+   use_shader(&rend->shaders[11]);
+   shader_set_mat4fv(&rend->shaders[11], "view", (GLfloat*)rend->view.elements);
+   shader_set_mat4fv(&rend->shaders[11], "proj", (GLfloat*)rend->proj.elements);
+   shader_set_int(&rend->shaders[11], "deep_render", rend->deep_write);
+   glBindVertexArray(rend->point_vao);
+   glDrawArraysInstanced(GL_POINTS, 0, 1, rend->point_alloc_pos);
+   glBindVertexArray(0);
+
+
 
 
   skybox_render(&rend->skybox, rend->proj, rend->view);
-  //render points
-   use_shader(&rend->shaders[11]);
-    shader_set_mat4fv(&rend->shaders[11], "view", (GLfloat*)rend->view.elements);
-    shader_set_mat4fv(&rend->shaders[11], "proj", (GLfloat*)rend->proj.elements);
-    shader_set_int(&rend->shaders[11], "deep_render", rend->deep_write);
-    glBindVertexArray(rend->point_vao);
-    glDrawArraysInstanced(GL_POINTS, 0, 1, rend->point_alloc_pos);
-    glBindVertexArray(0);
-
-
 
   glBindFramebuffer(GL_FRAMEBUFFER, rend->postproc_fbo.fbo);
   glBindTexture(GL_TEXTURE_2D, rend->main_fbo.color_attachments[0]);
