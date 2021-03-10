@@ -243,7 +243,9 @@ void scene_init(char *filepath, EntityManager * manager)
         }
         else //load an actual model
         {
-            
+            m = entity_add_model(&manager->model_manager,entity_create(manager));
+            (*m) = model_info_init(str);
+            (*m).model = mat4_mul(mat4_translate(pos), mat4_scale(scale));
         }
 
     }

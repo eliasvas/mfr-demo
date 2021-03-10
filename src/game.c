@@ -129,11 +129,13 @@ render(void)
             dui_draw_string(215, 275, "padding");
             dui_draw_string(230, 240, "RGB/RGBA");
             dui_draw_string(280, 210, "CAPTURE");
+
+            dui_draw_rect(800, 200, 270, 200, v4(0.1,0.1,0.1,0.9));
             do_slider_float(GEN_ID, 800 ,240,50.f, &rend.deep_far);
             do_slider_float(GEN_ID, 800 ,260,50.f, &rend.deep_right);
             do_slider(GEN_ID, 800 ,220, 10, &point_size);
-            DEEP_READ = do_button(GEN_ID, (dui_Rect){508,400,50,20})
-                        || do_textfield(GEN_ID, 500, 410, path);
+            DEEP_READ = do_button(GEN_ID, (dui_Rect){808,350,50,20})
+                        || do_textfield(GEN_ID, 800, 360, path);
 
             char ms[64];
             sprintf(ms, "%.4f ms", global_platform.dt);

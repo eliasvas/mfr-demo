@@ -198,7 +198,7 @@ renderer_init(Renderer *rend)
         //node ssbo
         glGenBuffers(1, &rend->node_buffer);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, rend->node_buffer);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 3, NULL, GL_STATIC_DRAW);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * global_platform.window_width * global_platform.window_height * 10, NULL, GL_STATIC_DRAW);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, rend->node_buffer);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -418,7 +418,7 @@ renderer_begin_frame(Renderer *rend)
       fbo_resize(&rend->main_fbo, rend->renderer_settings.render_dim.x, rend->renderer_settings.render_dim.y, FBO_COLOR_0|FBO_DEPTH);
 
       glBindBuffer(GL_SHADER_STORAGE_BUFFER, rend->node_buffer);
-      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * rend->renderer_settings.render_dim.y * rend->renderer_settings.render_dim.x * 3, NULL, GL_STATIC_DRAW);
+      glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(NodeTypeLL) * rend->renderer_settings.render_dim.y * rend->renderer_settings.render_dim.x * 10, NULL, GL_STATIC_DRAW);
       glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, rend->node_buffer);
       glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 

@@ -62,5 +62,5 @@ void main(){
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 	}
 	discard;
-	*/
+*/
 }
