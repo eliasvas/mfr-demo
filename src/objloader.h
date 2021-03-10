@@ -49,7 +49,7 @@ static u32 count_vertices(char *filename)
     FILE* file = fopen(filename, "r");
 	if (file == NULL)
 	{
-        memcpy(error_log, "Cant Find OBJ!!", 17);
+        sprintf(error_log, "cant find obj: %s", filename);
         return 0;
 	}
 	
@@ -69,7 +69,7 @@ static u32 count_different_materials(char *filename)
     FILE* file = fopen(filename, "r");
 	if (file == NULL)
 	{
-        memcpy(error_log, "Cant Find OBJ!!", 17);
+        sprintf(error_log, "cant find obj: %s", filename);
         return 0;
 	}
 	
@@ -233,7 +233,7 @@ internal MeshInfo *obj_read(char *objpath, MeshMaterial *materials)
 	FILE *file = fopen(objpath, "r");
 	if (file == NULL)
 	{
-        memcpy(error_log, "Cant Find OBJ!!!", 17);
+        sprintf(error_log, "cant find obj: %s", objpath);
         return NULL;
 	}
 	

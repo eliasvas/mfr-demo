@@ -223,10 +223,12 @@ void scene_init(char *filepath, EntityManager * manager)
     char str[256];
     vec3 pos;
     vec3 scale;
+    f32 angle;
+    vec3 axis;
     while(TRUE)
     {
         i32 res = fscanf(file, "%s", str);
-        if (res == EOF){fclose(file);return;}
+        if (res == EOF || res == 0){fclose(file);return;}
         fscanf(file,"%f %f %f", &pos.x, &pos.y, &pos.z);
         fscanf(file,"%f %f %f", &scale.x, &scale.y, &scale.z);
         if (strcmp("CUBE", str) == 0)
@@ -243,9 +245,11 @@ void scene_init(char *filepath, EntityManager * manager)
         }
         else //load an actual model
         {
+            fscanf(file,"%f", &angle);
+            fscanf(file,"%f %f %f", &axis.x, &axis.y, &axis.z);
             m = entity_add_model(&manager->model_manager,entity_create(manager));
             (*m) = model_info_init(str);
-            (*m).model = mat4_mul(mat4_translate(pos), mat4_scale(scale));
+            (*m).model = mat4_mul(mat4_translate(pos),mat4_mul(mat4_rotate(angle, axis), mat4_scale(scale)));
         }
 
     }
