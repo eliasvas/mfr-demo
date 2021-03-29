@@ -38,7 +38,7 @@ void main(){
 	
 	ivec2 coords = ivec2(gl_FragCoord.xy);
 
-///*
+/*
 //ENABLE FOR A-BUFFER WRITES
 	// get next available location in global buffer
 	uint index = atomicCounterIncrement(in_next_address) + 1U;
@@ -63,5 +63,5 @@ void main(){
 		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 	}
 	discard;
-//*/
+*/
 }
