@@ -141,6 +141,7 @@ typedef struct Renderer
     f32 deep_right;
     ivec2 deep_render_dim;
     ivec2 prev_render_dim;
+    i32 max_fragments;
     Camera deep_cam;
 
     b32 points_updated;

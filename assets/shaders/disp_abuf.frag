@@ -18,7 +18,7 @@ vec4 fragments [LOCAL_SIZE];
 float fragments_z [LOCAL_SIZE];
 const vec3 cool = vec3(0.2,0.1,0.5);
 const vec3 warm = vec3(0.9,0.2,0.1);
-
+uniform int max_fragments;
 
 
 float fragment_alpha = 0.5;
@@ -67,7 +67,7 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 	vec4 final_color=vec4(0.0f);
 
 	final_color=vec4(0.0f);
-	for(int i=0; i<ab_num_frag; i++){
+	for(int i=0; i<min(ab_num_frag, max_fragments); i++){
 		vec4 frag= vec4(fragments[i].r, fragments[i].g,fragments[i].b,fragments[i].a);
 		
 		vec4 col;
@@ -79,7 +79,7 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 
 		final_color=final_color+col*(1.0f-final_color.a);
 	}
-
+	final_color.a = 1.0;
 	//final_color=final_color+background_color*(1.0f-final_color.a);
 
 	return final_color;

@@ -66,6 +66,7 @@ renderer_init(Renderer *rend)
     rend->renderer_settings.render_dim = (ivec2){global_platform.window_width, global_platform.window_height};
     rend->renderer_settings.lighting_disabled = FALSE;
     rend->renderer_settings.render_mode = PHONG;
+    rend->max_fragments = 16; //max fragments to be alpha resolved in A-Buffer
     camera_init(&rend->cam);
     camera_init(&rend->deep_cam);
     rend->deep_cam.pos = v3(0,5,10);
@@ -267,6 +268,7 @@ void renderer_draw_fs_quad(Renderer *rend, Shader *shader)
    glBindVertexArray(rend->quad_vao);
    shader_set_int(shader, "screen_width", global_platform.window_width);
    shader_set_int(shader, "screen_height", global_platform.window_height);
+   shader_set_int(shader, "max_fragments", rend->max_fragments);
    glBindImageTexture(0, rend->head_list, 0, FALSE, 0,  GL_READ_WRITE, GL_R32UI); //maybe its GL_R32F??
    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, rend->next_address);
    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 2, rend->next_address);
