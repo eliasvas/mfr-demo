@@ -211,6 +211,7 @@ render(void)
             point_accum[2] += p.pos.z;
             renderer_push_point(&rend, p);
         }
+        if (global_platform.current_time > 1.f)sprintf(info_log, "point_accum: %f", point_accum);
         point_accum[0] /= points_count;
         point_accum[1] /= points_count;
         point_accum[2] /= points_count;

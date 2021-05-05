@@ -12,7 +12,6 @@ typedef u32 Entity;
 extern vec3 middle;
 extern vec3 points_position;
 extern u32 points_count;
-b32 points_collided_prev_frame;
 
 typedef IntHashMap EntityHashMap;
 typedef struct PositionComponent
@@ -207,22 +206,20 @@ entity_manager_update(EntityManager *manager, Renderer *rend)
         //for points position, so we can compose
         vec3 pos = middle;
         i32 collision = intersect_ray_sphere_simple(r, (Sphere){pos, 1.f});
-        if ((collision||points_collided_prev_frame) && global_platform.right_mouse_down)
+        if (collision && global_platform.right_mouse_down)
         {
             vec3 right = vec3_normalize(vec3_cross(rend->cam.front, rend->cam.up));
             vec3 up = vec3_normalize(rend->cam.up);
             points_position.x += vec3_mulf(right, (-20.f *(f32)global_platform.mouse_dt.x / global_platform.window_width)).x;
             points_position.y += vec3_mulf(up,((f32)20.f * global_platform.mouse_dt.y / global_platform.window_height)).y;
             rend->point_alloc_pos = 0;
-            points_collided_prev_frame = TRUE;
             //sprintf(error_log, "collision detected!!");
-        }else
-            points_collided_prev_frame = FALSE;
+        }
 }
 internal void 
 entity_manager_render(EntityManager *manager, Renderer *rend)
 {
-    if (rend->point_alloc_pos == 0)
+    if (rend.point_alloc_pos == 0)
         renderer_push_compass(rend, middle);
     if (last_entity_pressed > 0)
     {
