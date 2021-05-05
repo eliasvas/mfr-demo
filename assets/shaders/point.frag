@@ -38,30 +38,30 @@ void main(){
 	
 	ivec2 coords = ivec2(gl_FragCoord.xy);
 
-/*
-//ENABLE FOR A-BUFFER WRITES
-	// get next available location in global buffer
-	uint index = atomicCounterIncrement(in_next_address) + 1U;
-	if(index < nodes.length())
+	if (deep_render)
 	{
-		nodes[index].red = color.r;
-		nodes[index].green = color.g;
-		nodes[index].blue = color.b;
-		nodes[index].alpha = color.a;
-		if (deep_render > 0)
+		// get next available location in global buffer
+		uint index = atomicCounterIncrement(in_next_address) + 1U;
+		if(index < nodes.length())
 		{
-			float A = proj[2].z;
-			float B = proj[3].z;
-			float zNear = (B + 1.0) / A;
-			float zFar  =  (B - 1.0) / A;
-			float t = (gl_FragCoord.z + 1.0) / 2.0;
-			nodes[index].depth = zNear + t * (zFar - zNear);
+			nodes[index].red = color.r;
+			nodes[index].green = color.g;
+			nodes[index].blue = color.b;
+			nodes[index].alpha = color.a;
+			if (deep_render > 0)
+			{
+				float A = proj[2].z;
+				float B = proj[3].z;
+				float zNear = (B + 1.0) / A;
+				float zFar  =  (B - 1.0) / A;
+				float t = (gl_FragCoord.z + 1.0) / 2.0;
+				nodes[index].depth = zNear + t * (zFar - zNear);
+			}
+			else{
+				nodes[index].depth = gl_FragCoord.z;
+			}
+			nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
 		}
-		else{
-			nodes[index].depth = gl_FragCoord.z;
-		}
-		nodes[index].next  = imageAtomicExchange(in_image_head, ivec2(gl_FragCoord.xy), index);
+		discard;
 	}
-	discard;
-*/
 }

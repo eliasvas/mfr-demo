@@ -170,6 +170,7 @@ entity_create(EntityManager *manager)
 /*
 */
 
+extern vec3 points_position;
 internal i32 last_entity_pressed = -1;
 internal void 
 entity_manager_update(EntityManager *manager, Renderer *rend)
@@ -198,6 +199,17 @@ entity_manager_update(EntityManager *manager, Renderer *rend)
             last_entity_pressed = -1;
     }
 
+    //for points position, so we can compose
+        vec3 pos = points_position;
+        i32 collision = intersect_ray_sphere_simple(r, (Sphere){pos, 0.5});
+        if (collision && global_platform.right_mouse_down)
+        {
+            vec3 right = vec3_normalize(vec3_cross(rend->cam.front, rend->cam.up));
+            vec3 up = vec3_normalize(rend->cam.up);
+            points_position.x += vec3_mulf(right, (-20.f *(f32)global_platform.mouse_dt.x / global_platform.window_width)).x;
+            points_position.y += vec3_mulf(up,((f32)20.f * global_platform.mouse_dt.y / global_platform.window_height)).y;
+            //sprintf(error_log, "collision detected!!");
+        }
 }
 internal void 
 entity_manager_render(EntityManager *manager, Renderer *rend)

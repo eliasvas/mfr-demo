@@ -31,6 +31,7 @@ mat4 camera_rotation_mat;
 
 
 global RendererPointData *points;
+vec3 points_position;
 global u32 points_count;
 global u32 point_size;
 
@@ -189,8 +190,13 @@ render(void)
     {
         rend.points_updated = TRUE;
         rend.point_alloc_pos = 0;
+        RendererPointData p;
         for (u32 i = 0; i < points_count; ++i)
+        {
+            p = points[i];
+            p.pos = vec3_add(p.pos, points_position);
             renderer_push_point(&rend, points[i]);
+        }
     }
     else
         rend.points_updated = FALSE;
