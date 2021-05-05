@@ -31,13 +31,20 @@ mat4 camera_rotation_mat;
 
 
 global RendererPointData *points;
+vec3 middle;
 vec3 points_position;
-global u32 points_count;
+u32 points_count;
 global u32 point_size;
 
 global EntityManager entity_manager;
 
 global char path[256];
+
+
+/*TODO:
+ * lines are occluded, lines should be rendered last????
+ * make renderer_points moving better
+ * */
 internal void 
 init(void)
 {
@@ -60,6 +67,7 @@ init(void)
     texture_load(&camera_model.meshes[0].material.diff,"../assets/cam.tga");
     points = deepexr_read("../build/image.exr", &points_count);
     point_size = 0;
+    points_position = v3(0,0,0);
 }
 
 
@@ -186,21 +194,33 @@ render(void)
     }
     glPointSize(point_size);
 
+    //points_position.y += sin(global_platform.current_time) * global_platform.dt;
+    //rend.point_alloc_pos = 0;
     if (points_count != rend.point_alloc_pos)
     {
         rend.points_updated = TRUE;
         rend.point_alloc_pos = 0;
         RendererPointData p;
+        f64 point_accum[3] = {0,0,0};
         for (u32 i = 0; i < points_count; ++i)
         {
             p = points[i];
             p.pos = vec3_add(p.pos, points_position);
-            renderer_push_point(&rend, points[i]);
+            point_accum[0] += p.pos.x;
+            point_accum[1] += p.pos.y;
+            point_accum[2] += p.pos.z;
+            renderer_push_point(&rend, p);
         }
+        point_accum[0] /= points_count;
+        point_accum[1] /= points_count;
+        point_accum[2] /= points_count;
+
+        middle = v3(point_accum[0], point_accum[1], point_accum[2]);
     }
     else
         rend.points_updated = FALSE;
 
+    //renderer_push_compass(&rend, middle);
 
     renderer_end_frame(&rend);
 }
