@@ -80,21 +80,59 @@
 	
 @H1(OpenEXR) @COM(talk about the OpenEXR file format specifically for deep images, fluff with historical stuff and images :) )
 	@H2(Overview)
+		Έχουμε δεί πώς δουέυουν τα Deep Images, τώρα ας δούμε πώς γίνονται implemented. Για να αποθηκέυσουμε Deep Images, χρειαζόμαστε ενα File Format το οποίο θα μπορεί να
+		εικόνες οι οποίες έχουν extra attributes (πχ samples per pixel) και extra channels πέρα απο channels σχετιζόμενα με το χρώμα (πχ RGB@BL(Z)). Θα μας άρεσε επίσης αν υπήρχε 
+		native support για Deep Images, δηλαδή να μπορούμε εκτός απο το να ορίσουμε απλώς πως θέλουμε ενα extra attribute per-pixel, να μπρούμε explicitly να πούμε οτι έχουμε να 
+		κάνουμε με Deep Image. Τέλος, μιας και τα Deep Images είναι πρακτικά πολυδιάστατες εικόνες. Ως αποτέλεσμα είναι τεράστιες σε μέγεθος, πολλες φορές μάλιστα χρησιμοποιόντας
+		δεκάδες με εκατοντάδες GigaBytes για την αποθήκευση τους @REF(NULL), γιαυτό θέλουμε το Format μας να μας δείνει την δυνατότητα να απθηκεύουμε εικόνες αφότου τους έχουμε κάνει 
+		συμπίεση είτε με απολεστικές είτε με μη-απολεστικές μεθόδους συμπίεσης. 
+		
+		Αυτές μας τις απαιτήσεις καθώς και πολλές άλλες καλύπτει το OpenEXR File Format. Επιγραμματικά, μας δείνει High 
+		Dynamic Range στις εικόνες μας έτσι ώστε να μπορούμε να κωδικοποιήσουμε τα Deep Images στο color accuracy και μέγεθος που θέλουμε, πολλές μεθόδους compression για τα κανάλια 
+		που κωδικοποιούμε, απολεστικές και μή. Μας δείνει την δυνατότητα να αποθηκεύουμε δικά μας κανάλια δεδομένων και δικά μας header attributes για τις ανάγκες της εικόνας που 
+		εξάγουμε. Τέλος, απο την έκδοση του OpenEXR 2.0 και έπειτα, που εκδόθηκε το 2013 απο την Weta Digital και την ILM έχουμε native support για Deep Images και για Multi-Part 
+		Images, έτσι όχι μόνο μπορούμε να κωδικοποιούμε Deep Images με όλα τα features του OpenEXR File Format αλλα μέσω των Multi-Part Images μπορούμε να συνδιάζουμε δυνατότητες 
+		του OpenEXR. Για παράδειγμα μπορούμε να χρησειμποιήσουμε διαφορετικό τύπο compression για μέρη τις εικόνας οπου δέν μας νοιάζει και τόσο η ποιότητα (κανοντας lossy 
+		compression) ή μπορούμε σε σημεία της εικόνας οπου υπάρχει πολύ σημαντική πληροφορία να αυξήσουμε το Dynamic Range των τιμών των καναλιών μας, αποθηκεύοντας περισσότερα byte 
+		per sample αλλα διατηρόντας καλύτερη την ποιότητα των χρωμάτων στην τελική οπτικοποίηση.
+		
 	@H2(DeepEXR Format)
+		Ας δούμε τωρα λίγο ποιό αναλυτικά το DeepEXR File Format, δηλαδή τα Deep Images του OpenEXR File Format. Συγκεκριμένα, ας εξετάσουμε το File Layout των DeepScanLine εικόνων, 
+		οι οποίες είναι σαν κανονικές scanline εικόνες, δηλαδή αποθηκεύονται γραμμή-γραμμή (για καθε διαφορετικό y) απο τα αριστερά προς τα δεξιά όλα τα δεδομένα τους, με μόνη 
+		διαφορά οτι αντί να αποθηκεύονται στις κανονικές εικόνες αποθηκεύονται μονο color δεδομένα ενώ στις DeepScanLine αποθηκέυονται και ολα τα deep image specific data (δηλαδή 
+		το Depth, ο αριθμός απο Deep Samples για καθε pixel κλπ). Κάθε τέτοια συστηχεία δεδομένων λέγεται @IT(Chunk). 
+		
+		Κάθε OpenEXR αρχείο (και το DeepEXR) αρχικά περιέχει ενα @IT(Header) ο οποίος λέει τα βασικά πράγματα 
+		σχετικά με την εικόνα, όπως τον τύπο της (πχ DeepScanLine), τις διαστάσεις της και την σειρά με την οποία δείνονται τα δεδομένα. Για Deep Images, επειδή οπτικοποιούνται στον 
+		χώρο, θέλουμε πληροφορία σχετικά με το που βρίσκεται η κάμερα κατα τη στιγμή του render ή τί είδους projection χρεισημοποιήθηκε για το render. Για τέτοιου είδους δεδομένα 
+		χρεισημοποιούμε attributes, δομές οι οποίες μπαίνουν στον Header και μπορούμε να αποθηκεύσουμε arbitrary, export specific πληροφορία (όπως ενα matrix). 
+		
+		Αφότου διαβαστεί το header, ο επόμενο component ενός DeepScanLine αρχείου είναι το @IT(Offset Table). Το Offset Table είναι ενας πίνακας ο οποίος επιτρέπει τυχαία προσπέλαση 
+		στα pixel data chunks. Είναι ενας πίνακας ο οποίος περιέχει την απόσταστη (σε Bytes) απο κάθε chunk δεδομένων του αρχείου, που δηλαδή αρχίζουν τα δεδομένα απο καθε chunk. 
+		
+		Τέλος, έχοντας δαβάσει τα δεδομένα του Offset Table, το μόνο που έμεινε να διαβάσουμε είναι τα δεδομένα του κάθε chunk, τα @IT(Deep Data). Τα Deep Images αποθηκεύουν λίστες 
+		απεριόριστων deep samples σε κάθε pixel location. Κάθε Sample περιέχει ενα σταθερό πλήθος απο κανάλια τα οποία προσδιορίζονται στο Header. Καθε chunk απο DeepScanLine 
+		δεδομένα, είναι ένα ScanLine απο λίστες απο Deep Samples, με μία λίστα ανα pixel location. Συγκεκριμένα καθε scanline έχει την εξής μορφή:
+		@IMG(DeepScanlineLayout.png)
+		οπου packed size, είναι το μέγεθος μετά την συμπίεση, compressed data είναι τα συμπιεσμένα δεδομένα, οπου σε περίπτωση που δεν έχουμε συμπίεση (NO_COMPRESSION στον header) 
+		περιέχονται τα κανονικά δεδομένα, και τα unpacked και packed μεγέθοι των sample δεδομένων είναι ίδια, το pixel offset table είναι ένας πίνακας που μας λέει για κάθε scanline, 
+		σε ποιο μέρος αρχίζει η κάθε λίστα απο deep samples για καθε pixel,και το y coordinate, το οποίο μας λέει το συγκεκριμένο scanline σε ποιά 
+		θέση βρίσκεται στην τελική εικόνα.
+		
+@H1(The A-Buffer)
+
+
 @H1(Deep Image Compositing)
 
 	@H2 Sample Splitting @COM(what happens when we retrieve less samples len n = n', ref theorydeepixels, p.4)
 	
-
-abuffer
-
-
 @H1(REFERENCES:)
     @IT([1]: The Theory of OpenEXR Deep Samples, Weta Digital, 2013)
     @IT([2]: OpenEXR File Layout, Industrial Light and Magic, 2013)
     @IT([3]: Interpreting OpenEXR Deep Pixels, Industrial Light and Magic, 2013)
 	@IT([4]: The A-buffer, an Antialiased Hidden Surface Method, Loren Carpenter, Lucasfilm Ltd, 1984)
 	@IT([5]: Deep Image Compositing in a Modern Visual Effects Pipeline, Patrick Heinen, 2013)
+	@IT([6]: Real-Time Concurrent Linked List Construction on the GPU, Jay McKee, AMD Fusion Developer Summit, 2011)
 	
 GRAMMAR:
     @REF(n): reference paper n via hyperlink
