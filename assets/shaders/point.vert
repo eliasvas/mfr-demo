@@ -14,6 +14,5 @@ void main(){
 	f_frag_pos_ws = position;
 	gl_Position = proj * view * vec4(position,1.0);
 	f_color = color;
-
 }
 
