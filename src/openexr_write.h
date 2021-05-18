@@ -1401,7 +1401,7 @@ internal RendererPointData *deepexr_read(const char * filename, u32 *point_count
             {
                     f32 yf = (1.f - ((f32)i/(f32)wh+1)) * right * 2;
                     f32 xf = ((f32)j/(f32)ww+1) * right * 2;
-                    f32 depth = -pixels[pixel_counter].z*2;
+                    f32 depth = -pixels[pixel_counter].z*4;
                     points[point_index] = (RendererPointData){vec3_add(v3(xf,yf,depth), offset), v4(pixels[pixel_counter].r,pixels[pixel_counter].g,pixels[pixel_counter].b,1.f)};//pixels[pixel_counter].a)};
                     point_index++;
 

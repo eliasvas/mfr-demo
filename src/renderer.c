@@ -383,7 +383,7 @@ void renderer_display_abuffer(Renderer *rend)
                 to_add.b = curr->blue;
                 to_add.g = curr->green;
                 to_add.r = curr->red;
-                to_add.z = curr->depth;
+                to_add.z = curr->depth/2;
                 pixels[k++] = to_add;
                 total_samples++;
                 //curr->next = 0;

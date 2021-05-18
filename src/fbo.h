@@ -34,6 +34,8 @@ typedef struct OpenGLFBO
 static OpenGLFBO 
 fbo_init(u32 width, u32 height, i32 flags)
 {
+
+glEnable(GL_FRAMEBUFFER_SRGB); 
     OpenGLFBO fbo = {0};
     fbo.flags = flags;
     fbo.width = width + 1;
