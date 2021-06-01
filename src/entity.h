@@ -257,7 +257,7 @@ void scene_init(char *filepath, EntityManager * manager)
         {
             m = entity_add_model(&manager->model_manager,entity_create(manager));
             model_init_cube(m);
-            m->model = mat4_mul(mat4_translate(pos), mat4_mul(mat4_rotate(40, v3(1,1,0)), mat4_scale(scale)));
+            m->model = mat4_mul(mat4_translate(pos), mat4_mul(mat4_rotate(0, v3(1,1,0)), mat4_scale(scale)));
         }
         else if (strcmp("SPHERE", str) == 0)
         {

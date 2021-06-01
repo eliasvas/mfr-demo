@@ -277,7 +277,7 @@ model_info_init(char *mtl_filepath)
   materials = ALLOC(sizeof(MeshMaterial) * materials_count);
   mtl_read(mtl_filepath, materials);
   //2. read all different meshes AND their materials and initialize the MeshInfo **mesh
-  char objpath[32];
+  char objpath[64];
   u32 filepath_size = str_size(mtl_filepath);
   memcpy(objpath, mtl_filepath, str_size(mtl_filepath));
   objpath[filepath_size] = '\0';
