@@ -80,8 +80,11 @@ update(void)
   if (DEEP_WRITE)write_success_timer = 3.f;
   else
       write_success_timer = max(0.f, write_success_timer -= global_platform.dt);
-  if (global_platform.key_pressed[KEY_Q])
-      rend.deep_cam = rend.cam;
+  for (int i = 0; i < 9; ++i)
+  {
+      if (global_platform.key_down[KEY_0 + (char)i]) 
+          rend.max_fragments = (int)pow(2,i);
+  }
   u32 settings = (EXR_RGBA);
   rend.cam.can_rotate = !UI_OPEN;
   renderer_set_deep_write(&rend, DEEP_WRITE, PAD,RGB,RES); //if deep write 1, sets render mode to deep image screenshot

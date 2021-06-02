@@ -126,7 +126,7 @@ void main()
 	float shadow = shadow_calc();
 	
 	vec3 color = (shadow*(specular + diffuse) + ambient)/2;
-
+	
 	//maybe have them per-light but I dont see the reason tbh..
 	float constant = 1.f;
 	float linear = 0.09;

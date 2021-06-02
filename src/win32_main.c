@@ -169,7 +169,7 @@ WinMain(HINSTANCE Instance,
     }
     RegisterClass(&windowClass);
     WND = CreateWindow(
-            windowClass.lpszClassName, "engine",      // window class, title
+            windowClass.lpszClassName, "compositor",      // window class, title
             WS_OVERLAPPEDWINDOW, // style
             CW_USEDEFAULT,CW_USEDEFAULT,1280,720,//CW_USEDEFAULT,CW_USEDEFAULT,
             NULL, NULL,                 // parent window, menu

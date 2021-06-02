@@ -38,7 +38,6 @@ smooth in vec3 f_frag_pos_ws;
 flat in int f_shadowmap_on;
 
 float e = 0.0001;
-
 float ShadowCalculation(vec4 fragPosLightSpace)
 {
 	//perspective devide so we go to clip-space [-1,1]
