@@ -79,7 +79,7 @@ float linearize_depth(float d)
 }
 float shadow_calc()
 {
-	float bias = 0.001;
+	float bias = 0.003;
 	// perform perspective divide
     vec3 proj_coords = f_frag_pos_ls.xyz / f_frag_pos_ls.w;
     // transform to [0,1] range

@@ -154,7 +154,7 @@ render(void)
             renderer_push_text(&rend, v3(0.82,0.90,0.0), v2(0.015,0.015 * global_platform.window_width/(f32)global_platform.window_height), ms);
         }
     }
-    do_switch(GEN_ID, (dui_Rect){0,0,100,100}, &UI_OPEN);
+    //do_switch(GEN_ID, (dui_Rect){0,0,100,100}, &UI_OPEN);
 
     dui_frame_end();
 

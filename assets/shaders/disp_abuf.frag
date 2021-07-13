@@ -80,7 +80,6 @@ vec4 resolve_alpha_blend(ivec2 coords, int ab_num_frag){
 		final_color=final_color+col*(1.0f-final_color.a);
 	}
 	final_color.a = 1.0;
-	//final_color=final_color+background_color*(1.0f-final_color.a);
 
 	return final_color;
 
